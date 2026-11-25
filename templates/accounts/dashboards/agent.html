@@ -1,9 +1,10 @@
 {% extends "accounts/dashboards/base.html" %}
 {% load i18n %}
 {% block dash_main %}
-{% include "accounts/dashboards/_listings_table.html" with listings=user.listings.all %}
+{% include "accounts/dashboards/_listing_manager.html" %}
 {% endblock %}
 {% block dash_aside %}
+{% include "listings/_capacity.html" %}
 {% if agent_profile %}
 <section class="panel p-6">
   <h2 class="font-display text-lg">{% translate "Agent profile" %}</h2>

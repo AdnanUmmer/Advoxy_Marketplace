@@ -128,6 +128,10 @@ def dashboard(request):
         "agency": getattr(user, "owned_agency", None) if user.is_agency else None,
         "agent_profile": getattr(user, "agent_profile", None) if user.is_agent else None,
     }
+    if role in (Role.SELLER, Role.LANDLORD, Role.AGENT):
+        from apps.listings.views import owner_dashboard_context
+
+        context.update(owner_dashboard_context(request, user))
     return render(request, DASHBOARD_TEMPLATES[role], context)
 
 

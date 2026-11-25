@@ -26,8 +26,20 @@ The seed creates 64 listings across Nairobi, Lagos, Accra, Cape Town, Kigali, Ad
 3. **Sign in** as each demo account (`/accounts/login/`). Each role lands on its own dashboard. The seller account holds two roles and can switch between the Seller and Buyer dashboards.
 4. **Password reset** (`/accounts/password/reset/`): the reset link prints in the console.
 5. **Staff sign-in** (`/accounts/staff/login/`): only staff accounts get in. Non-staff accounts are refused.
-6. **Search stub** (`/search/?city=Nairobi&purpose=rent`) and a **listing page** (click any card). Both are simple placeholders until milestones 2 and 3.
+6. **Search stub** (`/search/?city=Nairobi&purpose=rent`): a simple grid until milestone 3.
 7. **Design system** (`/styleguide/`, only when `DEBUG=True`).
+
+## What to try (milestone 2: listings core)
+
+1. **Listing page**: click any card. You'll see the photo gallery (click a photo, then use the arrow keys and Esc), price, key facts, description, amenities, location, the agent/owner card and similar homes.
+2. **Listing limits**: sign in as the **landlord**. The dashboard shows 2 / 2 active slots. Click **Submit for review** on the Kigali draft and you'll be refused because all slots are used. Click **Mark as rented** on a live listing, then submit the draft again: it goes into review.
+3. **The seller** has 1 free slot (1 / 1 used) and a draft that can't be submitted until the live one is marked sold.
+4. **Create a listing**: on the dashboard, choose **New listing**. Fill it in, optionally add photos, and save it as a draft. On the edit page you can upload more photos, drag to reorder them, make one the cover, or delete one. The sidebar lists what's still missing before you can submit.
+5. **Editing a live listing** sends it back to review (see QUESTIONS.md Q11).
+6. **Preview**: owners can open their own drafts. Everyone else gets a 404 until the listing is published.
+7. **Agents** can prepare drafts but can't submit until subscriptions arrive in milestone 6 (QUESTIONS.md Q12).
+
+The map pin picker and the map on the listing page appear once `MAPBOX_TOKEN` holds a real public token. Until then, the form takes latitude and longitude as numbers.
 
 ## Recorded walkthrough
 

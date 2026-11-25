@@ -2,25 +2,159 @@
 {% load i18n ui %}
 {% block title %}{{ listing.title }}{% endblock %}
 {% block meta_description %}{{ listing.description|truncatewords:30 }}{% endblock %}
+{% block head %}{% include "partials/mapbox_assets.html" %}{% endblock %}
+
 {% block content %}
-<article class="container-page pt-10">
-  <p class="eyebrow">{{ listing.get_purpose_display }} · {{ listing.get_property_type_display }}</p>
-  <h1 class="display-lg mt-3 max-w-3xl">{{ listing.title }}</h1>
-  <p class="mt-2 text-muted">{% if listing.neighborhood %}{{ listing.neighborhood }}, {% endif %}{{ listing.city }}, {{ listing.country }}</p>
-  {% with cover=listing.cover %}{% if cover %}
-    <img src="{{ cover.image.url }}" alt="{{ cover.alt_text|default:listing.title }}" class="mt-8 aspect-[16/8] w-full rounded-brand object-cover" width="1600" height="800">
-  {% endif %}{% endwith %}
-  <div class="mt-8 grid gap-10 lg:grid-cols-[1fr_320px]">
-    <div class="prose-calm">{{ listing.description|linebreaks }}</div>
-    <aside class="panel panel-pad h-fit">
-      <p class="font-display text-3xl">{{ listing.price|money }} <span class="font-sans text-base text-muted">{{ listing|price_suffix }}</span></p>
-      <dl class="mt-5 grid grid-cols-2 gap-3 text-sm">
-        <div><dt class="text-muted">{% translate "Bedrooms" %}</dt><dd class="font-medium">{{ listing.bedrooms }}</dd></div>
-        <div><dt class="text-muted">{% translate "Bathrooms" %}</dt><dd class="font-medium">{{ listing.bathrooms }}</dd></div>
-        {% if listing.area_sqm %}<div><dt class="text-muted">{% translate "Area" %}</dt><dd class="font-medium">{{ listing.area_sqm }} m²</dd></div>{% endif %}
-        <div><dt class="text-muted">{% translate "Furnished" %}</dt><dd class="font-medium">{{ listing.furnished|yesno:_("Yes,No") }}</dd></div>
-      </dl>
+{% if preview %}
+<div class="border-b hairline bg-accent-soft/60">
+  <div class="container-page flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm">
+    <p class="flex items-center gap-2">{% translate "Preview. This listing is not public." %} {% include "partials/status_badge.html" with status=listing.status label=listing.get_status_display %}</p>
+    {% if is_owner %}<a class="btn-link text-sm" href="{% url 'listings:edit' listing.pk %}">{% translate "Back to editing" %}</a>{% endif %}
+  </div>
+</div>
+{% endif %}
+
+<article class="container-page pt-8" x-data="gallery({{ photos|length }})" @keydown.escape.window="close()"
+         @keydown.arrow-right.window="open && next()" @keydown.arrow-left.window="open && prev()">
+
+  {# Header ------------------------------------------------------------ #}
+  <div class="flex flex-wrap items-end justify-between gap-6">
+    <div class="max-w-3xl">
+      <p class="eyebrow">{{ listing.get_purpose_display }} · {{ listing.get_property_type_display }}{% if listing.is_featured %} · {% translate "Featured" %}{% endif %}</p>
+      <h1 class="display-lg mt-3">{{ listing.title }}</h1>
+      <p class="mt-2 text-muted">{% if listing.address %}{{ listing.address }}, {% endif %}{% if listing.neighborhood %}{{ listing.neighborhood }}, {% endif %}{{ listing.city }}, {{ listing.country }}</p>
+    </div>
+    <p class="font-display text-[2.2rem] leading-none">{{ listing.price|money }} <span class="font-sans text-base text-muted">{{ listing|price_suffix }}</span></p>
+  </div>
+
+  {# Gallery ----------------------------------------------------------- #}
+  {% if photos %}
+  <div class="mt-8 grid gap-2 sm:grid-cols-4 sm:grid-rows-2 sm:h-[520px]">
+    {% for photo, layout in tiles %}
+    <button type="button" @click="show({{ forloop.counter0 }})"
+            class="group relative overflow-hidden bg-sand {{ layout }} {% if forloop.first %}aspect-[4/3] rounded-brand sm:aspect-auto{% else %}hidden rounded-brand-sm sm:block{% endif %}"
+            aria-label="{% blocktranslate with n=forloop.counter total=photos|length %}Open photo {{ n }} of {{ total }}{% endblocktranslate %}">
+      <img src="{{ photo.image.url }}" alt="{{ photo.alt_text|default:listing.title }}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+           {% if not forloop.first %}loading="lazy"{% endif %} width="1200" height="900">
+      {% if forloop.counter == 5 and photos|length > 5 %}
+        <span class="absolute inset-0 grid place-items-center bg-ink/45 font-medium text-paper">+{{ photos|length|add:"-5" }} {% translate "photos" %}</span>
+      {% endif %}
+    </button>
+    {% endfor %}
+  </div>
+  {% if photos|length > 1 %}<button type="button" class="btn btn-quiet mt-3 sm:hidden" @click="show(0)">{% blocktranslate count n=photos|length %}View {{ n }} photo{% plural %}View all {{ n }} photos{% endblocktranslate %}</button>{% endif %}
+
+  {# Lightbox #}
+  <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 z-50 flex flex-col bg-ink/95 text-paper" role="dialog" aria-modal="true" aria-label="{% translate 'Photo gallery' %}">
+    <div class="flex items-center justify-between px-5 py-4 text-sm">
+      <span x-text="(index + 1) + ' / ' + count"></span>
+      <button type="button" class="btn btn-quiet border-paper/30 text-paper hover:bg-paper/10" @click="close()" x-ref="closeBtn">{% translate "Close" %}</button>
+    </div>
+    <div class="relative flex flex-1 items-center justify-center px-4 pb-8">
+      {% for photo in photos %}
+      <img x-show="index === {{ forloop.counter0 }}" src="{{ photo.image.url }}" alt="{{ photo.alt_text|default:listing.title }}" class="max-h-[80vh] max-w-full rounded-brand-sm object-contain" loading="lazy">
+      {% endfor %}
+      <button type="button" class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-paper/10 px-4 py-3 text-xl hover:bg-paper/20" @click="prev()"><span aria-hidden="true">←</span><span class="sr-only">{% translate "Previous photo" %}</span></button>
+      <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-paper/10 px-4 py-3 text-xl hover:bg-paper/20" @click="next()"><span aria-hidden="true">→</span><span class="sr-only">{% translate "Next photo" %}</span></button>
+    </div>
+  </div>
+  {% endif %}
+
+  {# Body -------------------------------------------------------------- #}
+  <div class="mt-10 grid gap-12 lg:grid-cols-[1fr_360px]">
+    <div class="min-w-0 space-y-12">
+      <section aria-labelledby="facts-h">
+        <h2 id="facts-h" class="sr-only">{% translate "Key facts" %}</h2>
+        <dl class="grid grid-cols-2 gap-px overflow-hidden rounded-brand border hairline bg-sand sm:grid-cols-4">
+          <div class="bg-surface p-5"><dt class="text-xs uppercase tracking-[0.14em] text-muted">{% translate "Bedrooms" %}</dt><dd class="mt-1 font-display text-2xl">{{ listing.bedrooms }}</dd></div>
+          <div class="bg-surface p-5"><dt class="text-xs uppercase tracking-[0.14em] text-muted">{% translate "Bathrooms" %}</dt><dd class="mt-1 font-display text-2xl">{{ listing.bathrooms }}</dd></div>
+          <div class="bg-surface p-5"><dt class="text-xs uppercase tracking-[0.14em] text-muted">{% translate "Area" %}</dt><dd class="mt-1 font-display text-2xl">{% if listing.area_sqm %}{{ listing.area_sqm }} m²{% else %}–{% endif %}</dd></div>
+          <div class="bg-surface p-5"><dt class="text-xs uppercase tracking-[0.14em] text-muted">{% translate "Furnished" %}</dt><dd class="mt-1 font-display text-2xl">{% if listing.furnished %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</dd></div>
+        </dl>
+      </section>
+
+      <section aria-labelledby="desc-h">
+        <h2 id="desc-h" class="display-md">{% translate "About this home" %}</h2>
+        <div class="prose-calm mt-5 max-w-2xl text-[1.05rem]">{{ listing.description|linebreaks }}</div>
+      </section>
+
+      {% if listing.amenities.all %}
+      <section aria-labelledby="amen-h">
+        <h2 id="amen-h" class="display-md">{% translate "Amenities" %}</h2>
+        <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+          {% for a in listing.amenities.all %}
+          <li class="flex items-center gap-3 border-b hairline pb-3"><span class="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true"></span>{{ a.name }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
+
+      <section aria-labelledby="map-h">
+        <h2 id="map-h" class="display-md">{% translate "Location" %}</h2>
+        <p class="mt-2 text-muted">{% if listing.neighborhood %}{{ listing.neighborhood }}, {% endif %}{{ listing.city }}</p>
+        {% if listing.location %}
+          {% if mapbox_token %}
+            <div class="map-frame mt-5 h-[360px]" data-map-view data-lat="{{ listing.location.latitude|stringformat:'.6f' }}" data-lng="{{ listing.location.longitude|stringformat:'.6f' }}"
+                 role="img" aria-label="{% blocktranslate with city=listing.city %}Map showing the property in {{ city }}{% endblocktranslate %}"></div>
+          {% else %}
+            <p class="mt-5 text-sm text-muted">{% translate "Coordinates" %}: {{ listing.location.latitude|floatformat:5 }}, {{ listing.location.longitude|floatformat:5 }}</p>
+          {% endif %}
+        {% endif %}
+      </section>
+    </div>
+
+    {# Contact card --------------------------------------------------- #}
+    <aside class="lg:sticky lg:top-24 lg:self-start">
+      <section class="panel panel-pad" aria-labelledby="contact-h">
+        <div class="flex items-center gap-4">
+          {% if listing.owner.profile.avatar %}
+            <img src="{{ listing.owner.profile.avatar.url }}" alt="" class="h-14 w-14 rounded-full object-cover">
+          {% else %}
+            <span class="grid h-14 w-14 place-items-center rounded-full bg-primary font-semibold text-on-primary" aria-hidden="true">{{ listing.owner.initials }}</span>
+          {% endif %}
+          <div>
+            <h2 id="contact-h" class="font-display text-xl">{{ listing.owner.full_name }}</h2>
+            <p class="flex flex-wrap items-center gap-1.5 text-sm text-muted">
+              {% if agent_profile %}{% translate "Agent" %}{% if listing.agency %} · {{ listing.agency.name }}{% endif %}
+                {% if agent_profile.is_verified %}<span class="badge badge-success">✓ {% translate "Verified" %}</span>{% endif %}
+              {% elif listing.purpose == "rent" %}{% translate "Landlord" %}{% else %}{% translate "Owner" %}{% endif %}
+            </p>
+          </div>
+        </div>
+        <div class="mt-6 border-t hairline pt-6">
+          {% block inquiry %}
+          <p class="text-sm text-muted">{% translate "Inquiries and messaging open in milestone 4." %}</p>
+          {% endblock %}
+        </div>
+      </section>
+      {% if is_owner %}<a class="btn btn-quiet mt-4 w-full" href="{% url 'listings:edit' listing.pk %}">{% translate "Edit this listing" %}</a>{% endif %}
     </aside>
   </div>
+
+  {% if similar %}
+  <section class="mt-20" aria-labelledby="similar-h">
+    <div class="mb-8 border-b hairline pb-5">
+      <p class="eyebrow">{% translate "You might also like" %}</p>
+      <h2 id="similar-h" class="display-md mt-2">{% translate "Similar homes" %}</h2>
+    </div>
+    <div class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+      {% for s in similar %}{% include "partials/listing_card.html" with listing=s %}{% endfor %}
+    </div>
+  </section>
+  {% endif %}
 </article>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("alpine:init", () => {
+    Alpine.data("gallery", (count) => ({
+      count, index: 0, open: false, opener: null,
+      show(i) { this.opener = document.activeElement; this.index = i; this.open = true; document.body.style.overflow = "hidden"; this.$nextTick(() => this.$refs.closeBtn && this.$refs.closeBtn.focus()); },
+      close() { if (!this.open) return; this.open = false; document.body.style.overflow = ""; this.opener && this.opener.focus(); },
+      next() { this.index = (this.index + 1) % this.count; },
+      prev() { this.index = (this.index - 1 + this.count) % this.count; },
+    }));
+  });
+</script>
 {% endblock %}

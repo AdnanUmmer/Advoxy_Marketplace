@@ -1,0 +1,8 @@
+{% load static %}
+{# Include inside {% block head %} on pages with maps. Renders nothing without a token. #}
+{% if mapbox_token %}
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.css">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.js" defer></script>
+<script src="{% static 'js/maps.js' %}" defer></script>
+<meta data-mapbox-token="{{ mapbox_token }}">
+{% endif %}

@@ -38,3 +38,15 @@ The owner turned off Smart App Control, so development runs natively on Windows:
 ## Q10. Data export and account deletion
 SPEC section 1 asks for consent, data export, deletion, and minimal data collection, but section 13 has no task for export/deletion.
 **Default:** consent (terms + privacy acceptance, optional marketing opt-in, timestamped) ships in milestone 1 signup. Self-service data export (JSON download) and account deletion ship in milestone 8 alongside the polish tasks.
+
+## Q11. Editing a live listing
+SPEC says moderation gates publishing but not what happens when an owner edits a published listing.
+**Default:** content edits to a published listing send it back to "pending review"; it stays hidden until approved again. Saving without changes keeps it live. Photo changes do not trigger re-review.
+
+## Q12. Agents and agencies before billing (milestone 6)
+Agents and agencies need an active subscription to list. Plans and subscriptions arrive in milestone 6.
+**Default:** until then their capacity is 0: they can create and edit drafts, but cannot submit for review. Seeded agent listings stay published.
+
+## Q13. Mapbox token needed
+`MAPBOX_TOKEN` in `.env` is still the placeholder. Without a real public token (starts with `pk.`), the listing form asks for coordinates as numbers and the detail page shows coordinates instead of a map. Milestone 3 (search and map) needs a real token. Please create a free Mapbox account and put the public token in `.env`. **Blocked item:** the map views in milestone 3.
+

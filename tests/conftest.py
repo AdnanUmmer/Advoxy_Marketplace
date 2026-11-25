@@ -51,7 +51,7 @@ def make_listing(db):
         listing = Listing.objects.create(
             owner=owner,
             title=fields.pop("title", "Test home"),
-            description="A home for tests.",
+            description=fields.pop("description", "A home for tests."),
             property_type=fields.pop("property_type", "apartment"),
             purpose=fields.pop("purpose", "sale"),
             price=fields.pop("price", Decimal("150000")),

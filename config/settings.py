@@ -160,6 +160,14 @@ CELERY_RESULT_BACKEND = None
 CELERY_TASK_ALWAYS_EAGER = env("CELERY_TASK_ALWAYS_EAGER")
 CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    "expire-listings-daily": {"task": "apps.listings.tasks.expire_listings", "schedule": 60 * 60 * 24},
+}
+
+# Listings
+LISTING_LIFETIME_DAYS = env.int("LISTING_LIFETIME_DAYS", default=90)
+LISTING_PHOTO_MAX_MB = 10
+LISTING_PHOTO_MAX_EDGE = 2000  # px; larger uploads are downscaled
 
 # ---------------------------------------------------------------------------
 # Third-party keys (used in later milestones; always from the environment)

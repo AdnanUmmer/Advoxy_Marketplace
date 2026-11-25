@@ -1,6 +1,6 @@
 # Advoxy build progress
 
-**Overall: 17% complete** (9 of 51 items)
+**Overall: 31% complete** (16 of 51 items)
 
 Percentage = completed items / total items, rounded down. Items are every milestone and every task from SPEC.md section 13. A milestone is checked only when all its tasks work, its tests pass, and the seeded demo runs.
 
@@ -16,13 +16,13 @@ Percentage = completed items / total items, rounded down. Items are every milest
 - [x] Seed command
 
 ## Milestone 2: Listings core
-- [ ] **Milestone 2 complete**
-- [ ] Create listing
-- [ ] Edit listing
-- [ ] Photos
-- [ ] Listing limits
-- [ ] Detail page
-- [ ] Owner dashboard
+- [x] **Milestone 2 complete** (101 tests passing, seed verified, create/edit/photos/detail/dashboard checked in browser)
+- [x] Create listing
+- [x] Edit listing
+- [x] Photos
+- [x] Listing limits
+- [x] Detail page
+- [x] Owner dashboard
 
 ## Milestone 3: Search and map
 - [ ] **Milestone 3 complete**

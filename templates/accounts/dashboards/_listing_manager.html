@@ -1,0 +1,52 @@
+{% load i18n ui %}
+{# Listing management for owners and agents. Context from listings.views.owner_dashboard_context. #}
+<section class="panel overflow-hidden" aria-labelledby="mylist-h">
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b hairline px-6 py-4">
+    <h2 id="mylist-h" class="font-display text-lg">{% translate "Your listings" %}</h2>
+    <a class="btn btn-primary" href="{% url 'listings:create' %}">{% translate "New listing" %}</a>
+  </div>
+
+  <nav class="flex gap-1 overflow-x-auto border-b hairline px-4 py-2" aria-label="{% translate 'Filter by status' %}">
+    {% for key, label, count in tabs %}
+    <a href="?as={{ dashboard_role.value }}&amp;tab={{ key }}"
+       class="whitespace-nowrap rounded-full px-3 py-1.5 text-sm {% if key == active_tab %}bg-ink text-paper{% else %}text-muted hover:text-ink{% endif %}"
+       {% if key == active_tab %}aria-current="page"{% endif %}>{{ label }} <span class="{% if key == active_tab %}text-paper/70{% else %}text-muted/70{% endif %}">{{ count }}</span></a>
+    {% endfor %}
+  </nav>
+
+  {% if rows %}
+  <ul class="divide-y divide-sand">
+    {% for listing, actions in rows %}
+    <li class="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center">
+      <a href="{% url 'listings:edit' listing.pk %}" class="flex min-w-0 flex-1 items-center gap-4 group">
+        <span class="h-16 w-20 shrink-0 overflow-hidden rounded-brand-sm bg-sand">
+          {% with cover=listing.cover %}{% if cover %}<img src="{{ cover.image.url }}" alt="" class="h-full w-full object-cover" loading="lazy" width="80" height="64">{% endif %}{% endwith %}
+        </span>
+        <span class="min-w-0">
+          <span class="block truncate font-medium group-hover:underline">{{ listing.title }}</span>
+          <span class="block text-sm text-muted">{{ listing.price|money }} {{ listing|price_suffix }} · {{ listing.city }}</span>
+          {% if listing.moderation_note %}<span class="mt-1 block text-sm text-warning">{% translate "Changes requested" %}: {{ listing.moderation_note|truncatechars:80 }}</span>{% endif %}
+        </span>
+      </a>
+      <div class="flex flex-wrap items-center gap-2 sm:justify-end">
+        {% include "partials/status_badge.html" with status=listing.status label=listing.get_status_display %}
+        {% for action, label in actions %}{% if action != "remove" %}
+        <form method="post" action="{% url 'listings:transition' listing.pk action %}">{% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button class="btn {% if action == 'submit' %}btn-primary{% else %}btn-quiet{% endif %} px-3.5 py-1.5 text-sm" type="submit">{{ label }}</button>
+        </form>
+        {% endif %}{% endfor %}
+        {% if listing.status != "sold" and listing.status != "rented" and listing.status != "removed" %}
+        <a class="btn btn-quiet px-3.5 py-1.5 text-sm" href="{% url 'listings:edit' listing.pk %}">{% translate "Edit" %}</a>
+        {% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="px-6 py-14 text-center">
+    <p class="font-display text-xl">{% translate "Nothing here yet" %}</p>
+    <p class="mt-2 text-sm text-muted">{% translate "Create a listing to get started. Drafts are private until you submit them." %}</p>
+  </div>
+  {% endif %}
+</section>

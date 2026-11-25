@@ -132,4 +132,24 @@
   .flash-info, .flash-debug { @apply border-info/30 bg-info/8 text-info; }
   .flash-warning { @apply border-warning/30 bg-warning/8 text-warning; }
   .flash-error { @apply border-danger/30 bg-danger/8 text-danger; }
+
+  /* Map pin (Mapbox marker element) ------------------------------------ */
+  .map-pin {
+    width: 26px; height: 26px; margin-bottom: 6px; cursor: grab;
+    background: var(--brand-primary);
+    border: 4px solid var(--brand-paper);
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    box-shadow: 0 6px 14px -4px rgb(0 0 0 / 0.45);
+  }
+  .map-frame { @apply overflow-hidden rounded-brand border border-sand bg-sand; }
+
+  /* Form sections ------------------------------------------------------ */
+  .form-section { @apply grid gap-6 border-t border-sand py-8 md:grid-cols-[220px_1fr]; }
+  .form-section__title { @apply font-display text-xl; }
+  .choice-pill {
+    @apply inline-flex cursor-pointer items-center gap-2 rounded-full border border-stone bg-surface px-4 py-2 text-sm;
+  }
+  .choice-pill:has(input:checked) { border-color: var(--brand-primary); background: color-mix(in srgb, var(--brand-primary) 8%, var(--brand-surface)); }
+  .choice-pill:has(input:focus-visible) { outline: 2px solid var(--brand-accent); outline-offset: 2px; }
 }

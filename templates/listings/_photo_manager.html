@@ -1,0 +1,62 @@
+{% load i18n %}
+{# HTMX partial: swapped into #photo-manager after every photo action. #}
+<div class="space-y-4"
+     x-data="{
+       dragging: null,
+       drop(target) {
+         if (!this.dragging || this.dragging === target) return;
+         const list = this.$refs.list;
+         const items = [...list.children];
+         if (items.indexOf(this.dragging) < items.indexOf(target)) target.after(this.dragging); else target.before(this.dragging);
+         this.dragging = null;
+         htmx.ajax('POST', '{% url 'listings:photo_reorder' listing.pk %}', {
+           target: '#photo-manager', swap: 'innerHTML',
+           values: { order: [...list.children].map(li => li.dataset.id) }
+         });
+       }
+     }">
+  {% for err in errors %}<p class="flash flash-error" role="alert">{{ err }}</p>{% endfor %}
+
+  {% if photos %}
+  <ol x-ref="list" class="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="{% translate 'Listing photos in display order' %}">
+    {% for photo in photos %}
+    <li class="group relative overflow-hidden rounded-brand-sm border hairline bg-surface" data-id="{{ photo.pk }}"
+        draggable="true" @dragstart="dragging = $el" @dragover.prevent @drop.prevent="drop($el)">
+      <img src="{{ photo.image.url }}" alt="{{ photo.alt_text }}" class="aspect-[4/3] w-full cursor-grab object-cover" loading="lazy" width="400" height="300">
+      {% if forloop.first %}<span class="badge badge-featured absolute left-2 top-2">{% translate "Cover" %}</span>{% endif %}
+      <div class="flex items-center justify-between gap-1 px-2 py-1.5 text-xs">
+        <span class="text-muted">{{ forloop.counter }}</span>
+        <span class="flex gap-0.5">
+          {% if not forloop.first %}
+          <button type="button" class="rounded px-1.5 py-1 hover:bg-sand" title="{% translate 'Make cover' %}"
+                  hx-post="{% url 'listings:photo_action' listing.pk photo.pk 'cover' %}" hx-target="#photo-manager">★<span class="sr-only">{% translate "Make cover" %}</span></button>
+          <button type="button" class="rounded px-1.5 py-1 hover:bg-sand" title="{% translate 'Move earlier' %}"
+                  hx-post="{% url 'listings:photo_action' listing.pk photo.pk 'up' %}" hx-target="#photo-manager">←<span class="sr-only">{% translate "Move earlier" %}</span></button>
+          {% endif %}
+          {% if not forloop.last %}
+          <button type="button" class="rounded px-1.5 py-1 hover:bg-sand" title="{% translate 'Move later' %}"
+                  hx-post="{% url 'listings:photo_action' listing.pk photo.pk 'down' %}" hx-target="#photo-manager">→<span class="sr-only">{% translate "Move later" %}</span></button>
+          {% endif %}
+          <button type="button" class="rounded px-1.5 py-1 text-danger hover:bg-danger/10" title="{% translate 'Delete photo' %}"
+                  hx-post="{% url 'listings:photo_action' listing.pk photo.pk 'delete' %}" hx-target="#photo-manager"
+                  hx-confirm="{% translate 'Delete this photo?' %}">✕<span class="sr-only">{% translate "Delete photo" %}</span></button>
+        </span>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="rounded-brand-sm border border-dashed border-stone px-4 py-8 text-center text-sm text-muted">{% translate "No photos yet. Listings need at least one photo before review." %}</p>
+  {% endif %}
+
+  {% if photos|length < max_photos %}
+  <form hx-post="{% url 'listings:photo_upload' listing.pk %}" hx-target="#photo-manager" hx-encoding="multipart/form-data"
+        class="flex flex-wrap items-center gap-3" x-data="{ busy: false }" @htmx:before-request="busy = true">
+    <label class="sr-only" for="photo-upload-input">{% translate "Add photos" %}</label>
+    <input id="photo-upload-input" type="file" name="photos" multiple accept="image/jpeg,image/png,image/webp"
+           class="text-sm file:mr-3 file:rounded-full file:border-0 file:bg-sand file:px-4 file:py-2 file:text-sm file:font-medium">
+    <button class="btn btn-quiet" type="submit" :disabled="busy"><span x-show="!busy">{% translate "Upload" %}</span><span x-show="busy" x-cloak>{% translate "Uploading…" %}</span></button>
+  </form>
+  <p class="text-xs text-muted">{% blocktranslate with n=max_photos %}JPEG, PNG or WebP, up to 10 MB each, {{ n }} photos max. Location data in photos is removed.{% endblocktranslate %}</p>
+  {% endif %}
+</div>

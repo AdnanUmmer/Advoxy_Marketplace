@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load i18n ui %}
+{% block title %}{% if listing %}{% translate "Edit listing" %}{% else %}{% translate "New listing" %}{% endif %}{% endblock %}
+{% block head %}{% include "partials/mapbox_assets.html" %}{% endblock %}
+
+{% block content %}
+<div class="container-page py-10">
+  <nav class="text-sm text-muted" aria-label="{% translate 'Breadcrumb' %}">
+    <a class="hover:underline" href="{% url 'accounts:dashboard' %}">{% translate "Dashboard" %}</a>
+    <span aria-hidden="true">/</span>
+    {% if listing %}{{ listing.title }}{% else %}{% translate "New listing" %}{% endif %}
+  </nav>
+  <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="display-md">{% if listing %}{% translate "Edit listing" %}{% else %}{% translate "List a property" %}{% endif %}</h1>
+      {% if listing %}<p class="mt-2 flex items-center gap-2 text-sm text-muted">{% translate "Status" %}: {% include "partials/status_badge.html" with status=listing.status label=listing.get_status_display %}</p>{% endif %}
+    </div>
+    {% if listing %}<a class="btn btn-quiet" href="{{ listing.get_absolute_url }}">{% if listing.status == "published" %}{% translate "View live listing" %}{% else %}{% translate "Preview" %}{% endif %}</a>{% endif %}
+  </div>
+
+  {% if listing.moderation_note %}
+  <div class="flash flash-warning mt-6" role="alert">
+    <p class="font-semibold">{% translate "Our review team asked for changes" %}</p>
+    <p class="mt-1">{{ listing.moderation_note }}</p>
+  </div>
+  {% endif %}
+
+  <div class="mt-6 grid gap-10 lg:grid-cols-[1fr_300px]">
+    <div class="min-w-0">
+      {% if listing %}
+      <section id="photos" class="form-section border-t-0 pt-0" aria-labelledby="photos-h">
+        <div><h2 id="photos-h" class="form-section__title">{% translate "Photos" %}</h2>
+          <p class="mt-1 text-sm text-muted">{% translate "Drag to reorder. The first photo is the cover." %}</p></div>
+        <div id="photo-manager">{% include "listings/_photo_manager.html" with photos=listing.photos.all errors=None %}</div>
+      </section>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% include "partials/form_errors.html" %}
+
+        <section class="form-section {% if not listing %}border-t-0 pt-0{% endif %}" aria-labelledby="basics-h">
+          <div><h2 id="basics-h" class="form-section__title">{% translate "The basics" %}</h2></div>
+          <div class="space-y-5">
+            {% include "partials/field.html" with field=form.title %}
+            <fieldset>
+              <legend class="field-label">{{ form.purpose.label }}</legend>
+              <div class="flex flex-wrap gap-2">
+                {% for radio in form.purpose %}<label class="choice-pill">{{ radio.tag }} {{ radio.choice_label }}</label>{% endfor %}
+              </div>
+              {% if form.purpose.errors %}<p class="field-error">{{ form.purpose.errors|join:" " }}</p>{% endif %}
+            </fieldset>
+            <div class="grid gap-5 sm:grid-cols-2">
+              {% include "partials/field.html" with field=form.property_type %}
+              {% include "partials/field.html" with field=form.price %}
+            </div>
+            {% include "partials/field.html" with field=form.description %}
+          </div>
+        </section>
+
+        <section class="form-section" aria-labelledby="details-h">
+          <div><h2 id="details-h" class="form-section__title">{% translate "Details" %}</h2></div>
+          <div class="space-y-5">
+            <div class="grid gap-5 sm:grid-cols-3">
+              {% include "partials/field.html" with field=form.bedrooms %}
+              {% include "partials/field.html" with field=form.bathrooms %}
+              {% include "partials/field.html" with field=form.area_sqm %}
+            </div>
+            <label class="flex items-center gap-3 text-sm">{{ form.furnished }} <span>{{ form.furnished.label }}</span></label>
+            <fieldset>
+              <legend class="field-label">{{ form.amenities.label }}</legend>
+              <div class="flex flex-wrap gap-2">
+                {% for box in form.amenities %}<label class="choice-pill">{{ box.tag }} {{ box.choice_label }}</label>{% endfor %}
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
+        <section class="form-section" aria-labelledby="loc-h">
+          <div><h2 id="loc-h" class="form-section__title">{% translate "Location" %}</h2>
+            <p class="mt-1 text-sm text-muted">{% if mapbox_token %}{% translate "Click the map or drag the pin to the property." %}{% else %}{% translate "Enter the coordinates of the property." %}{% endif %}</p></div>
+          <div class="space-y-5">
+            <div class="grid gap-5 sm:grid-cols-3">
+              {% include "partials/field.html" with field=form.city %}
+              {% include "partials/field.html" with field=form.country %}
+              {% include "partials/field.html" with field=form.neighborhood %}
+            </div>
+            {% include "partials/field.html" with field=form.address %}
+            {% if mapbox_token %}
+              <div class="map-frame h-[340px]" data-map-picker role="application" aria-label="{% translate 'Map: click to place the property pin' %}"></div>
+            {% else %}
+              <p class="flash flash-info">{% translate "The map picker appears once a Mapbox token is configured. Tip: right-click a place in any online map to copy its coordinates." %}</p>
+            {% endif %}
+            <div class="grid gap-5 sm:grid-cols-2">
+              {% include "partials/field.html" with field=form.latitude %}
+              {% include "partials/field.html" with field=form.longitude %}
+            </div>
+          </div>
+        </section>
+
+        {% if form.photos %}
+        <section class="form-section" aria-labelledby="ph-h">
+          <div><h2 id="ph-h" class="form-section__title">{% translate "Photos" %}</h2></div>
+          <div>
+            <label class="field-label" for="{{ form.photos.auto_id }}">{{ form.photos.label }}</label>
+            {{ form.photos }}
+            <p class="field-help">{{ form.photos.help_text }}</p>
+            {% if form.photos.errors %}<p class="field-error">{{ form.photos.errors|join:" " }}</p>{% endif %}
+          </div>
+        </section>
+        {% endif %}
+
+        <div class="flex flex-wrap gap-3 border-t hairline pt-6">
+          <button class="btn btn-primary btn-lg" type="submit">{% if listing %}{% translate "Save changes" %}{% else %}{% translate "Save draft" %}{% endif %}</button>
+          <a class="btn btn-quiet btn-lg" href="{% url 'accounts:dashboard' %}">{% translate "Cancel" %}</a>
+        </div>
+      </form>
+    </div>
+
+    <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+      {% include "listings/_capacity.html" %}
+      {% if listing %}
+      <section class="panel p-6" aria-labelledby="pub-h">
+        <h2 id="pub-h" class="font-display text-lg">{% translate "Publishing" %}</h2>
+        {% if listing.status == "draft" or listing.status == "expired" %}
+          {% if missing %}
+            <p class="mt-3 text-sm text-muted">{% translate "Before you submit, add:" %}</p>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">{% for m in missing %}<li>{{ m }}</li>{% endfor %}</ul>
+          {% else %}
+            <p class="mt-3 text-sm text-muted">{% translate "Ready for review. Our team checks every listing before it goes live." %}</p>
+          {% endif %}
+        {% elif listing.status == "pending" %}
+          <p class="mt-3 text-sm text-muted">{% translate "In review. You'll get an email when it's approved." %}</p>
+        {% elif listing.status == "published" %}
+          <p class="mt-3 text-sm text-muted">{% blocktranslate with date=listing.expires_at|date:"j F Y" %}Live until {{ date }}. Editing the content sends it back to review.{% endblocktranslate %}</p>
+        {% endif %}
+        <div class="mt-5 flex flex-col gap-2">
+          {% for action, label in actions %}
+          <form method="post" action="{% url 'listings:transition' listing.pk action %}"
+                {% if action == "remove" %}x-data @submit="if (!confirm('{{ _("Remove this listing? It will no longer be visible.")|escapejs }}')) $event.preventDefault()"{% endif %}>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="btn w-full {% if action == 'submit' %}btn-primary{% elif action == 'remove' %}btn-quiet text-danger{% else %}btn-quiet{% endif %}"
+                    {% if action == "submit" and missing %}disabled{% endif %}>{{ label }}</button>
+          </form>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+{% endblock %}
