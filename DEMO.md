@@ -26,7 +26,7 @@ The seed creates 64 listings across Nairobi, Lagos, Accra, Cape Town, Kigali, Ad
 3. **Sign in** as each demo account (`/accounts/login/`). Each role lands on its own dashboard. The seller account holds two roles and can switch between the Seller and Buyer dashboards.
 4. **Password reset** (`/accounts/password/reset/`): the reset link prints in the console.
 5. **Staff sign-in** (`/accounts/staff/login/`): only staff accounts get in. Non-staff accounts are refused.
-6. **Search stub** (`/search/?city=Nairobi&purpose=rent`): a simple grid until milestone 3.
+6. **Search** (`/search/`): see the milestone 3 notes below.
 7. **Design system** (`/styleguide/`, only when `DEBUG=True`).
 
 ## What to try (milestone 2: listings core)
@@ -40,6 +40,17 @@ The seed creates 64 listings across Nairobi, Lagos, Accra, Cape Town, Kigali, Ad
 7. **Agents** can prepare drafts but can't submit until subscriptions arrive in milestone 6 (QUESTIONS.md Q12).
 
 The map pin picker and the map on the listing page appear once `MAPBOX_TOKEN` holds a real public token. Until then, the form takes latitude and longitude as numbers.
+
+## What to try (milestone 3: search and map)
+
+1. **Search** (`/search/`): change any filter and the results update in place, with a clean, shareable URL. Filters: buy/rent, city, price range, bedrooms and sort in the bar; type, bathrooms, furnished, area, neighbourhood, distance and amenities under **More filters**.
+2. **Distance**: choose a city, then **More filters → Within 10 km**. Without a map, distance is measured from the centre of that city's listings (PostGIS).
+3. **Favorites**: sign in as the **buyer** or **renter**. Tap a heart on any card or listing page. Saved homes appear on the dashboard and under **Saved** in the header.
+4. **Saved searches**: run a search and choose **Save search**. Saved searches appear on the buyer/renter dashboard and at `/my/searches/`, where you can turn the daily email on or off or delete them. The renter starts with one saved search ("Rent · Lagos · 2+ beds").
+5. **Daily digest**: run `python manage.py shell -c "from apps.search.digest import send_digests; print(send_digests())"` after publishing a new matching listing. The email prints in the console.
+6. **Renters** land on rentals by default.
+
+**Map (needs `MAPBOX_TOKEN`)**: with a real token the search page becomes a split view: results on the left and a map on the right with price-bubble pins. Clicking a pin opens a preview card, hovering a card highlights its pin, you can draw an area or use **Search this area**, distance is measured from the map centre, and on phones a **Show map / Show list** button switches views.
 
 ## Recorded walkthrough
 

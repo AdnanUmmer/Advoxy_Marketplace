@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{% if summary %}{{ summary }}{% else %}{% translate "Search homes" %}{% endif %}{% endblock %}
+{% block head %}
+{% if mapbox_token %}
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.css">
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.5.0/mapbox-gl-draw.css">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.js" defer></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.5.0/mapbox-gl-draw.js" defer></script>
+<script src="{% static 'js/search_map.js' %}" defer></script>
+<meta data-mapbox-token="{{ mapbox_token }}">
+{% endif %}
+{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div x-data="{ view: 'list', more: false }" class="relative">
+  {# Filter bar ---------------------------------------------------------- #}
+  <form id="search-form" method="get" action="{% url 'search:results' %}" role="search" aria-label="{% translate 'Search filters' %}"
+        hx-get="{% url 'search:results' %}" hx-target="#results" hx-push-url="true" hx-trigger="change delay:150ms, submit"
+        hx-indicator="#results" class="z-30 border-b hairline bg-paper/95 backdrop-blur lg:sticky lg:top-[72px]">
+    <div class="flex flex-wrap items-end gap-2 px-5 py-3 sm:px-8">
+      <div class="w-[130px]">
+        <label class="sr-only" for="id_purpose">{{ form.purpose.label }}</label>
+        <select name="purpose" id="id_purpose" class="field-input py-2.5">
+          {% for value, label in form.fields.purpose.choices %}<option value="{{ value }}" {% if form.purpose.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="min-w-[170px] flex-1 sm:max-w-[240px]">
+        <label class="sr-only" for="id_city">{{ form.city.label }}</label>
+        <input id="id_city" name="city" value="{{ form.city.value|default:'' }}" class="field-input py-2.5" placeholder="{% translate 'City' %}" list="city-options" autocomplete="off">
+      </div>
+      <div class="flex items-center gap-1">
+        <label class="sr-only" for="id_price_min">{{ form.price_min.label }}</label>
+        <input id="id_price_min" name="price_min" type="number" min="0" step="1" inputmode="numeric" value="{{ form.price_min.value|default:'' }}" class="field-input w-[120px] py-2.5" placeholder="{% translate 'Min price' %}">
+        <span class="text-muted" aria-hidden="true">–</span>
+        <label class="sr-only" for="id_price_max">{{ form.price_max.label }}</label>
+        <input id="id_price_max" name="price_max" type="number" min="0" step="1" inputmode="numeric" value="{{ form.price_max.value|default:'' }}" class="field-input w-[120px] py-2.5" placeholder="{% translate 'Max price' %}">
+      </div>
+      <div class="w-[110px]">
+        <label class="sr-only" for="id_beds">{{ form.beds.label }}</label>
+        <select name="beds" id="id_beds" class="field-input py-2.5">
+          {% for value, label in form.fields.beds.choices %}<option value="{{ value }}" {% if form.beds.value == value %}selected{% endif %}>{% if value %}{{ label }} {% translate "beds" %}{% else %}{% translate "Beds" %}{% endif %}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="button" class="btn btn-quiet py-2.5" @click="more = !more" :aria-expanded="more.toString()" aria-controls="more-filters">
+        {% translate "More filters" %}{% if active_more %} <span class="badge badge-neutral">{{ active_more }}</span>{% endif %}
+      </button>
+      <div class="ml-auto w-[190px]">
+        <label class="sr-only" for="id_sort">{{ form.sort.label }}</label>
+        <select name="sort" id="id_sort" class="field-input py-2.5">
+          {% for value, label in form.fields.sort.choices %}<option value="{{ value }}" {% if form.sort.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <noscript><button class="btn btn-primary" type="submit">{% translate "Search" %}</button></noscript>
+    </div>
+
+    {# More filters panel #}
+    <div id="more-filters" x-cloak x-show="more" x-transition.opacity @keydown.escape="more = false" class="border-t hairline bg-surface">
+      <div class="grid gap-6 px-5 py-6 sm:px-8 md:grid-cols-2 xl:grid-cols-4">
+        <fieldset>
+          <legend class="field-label">{{ form.type.label }}</legend>
+          <div class="flex flex-wrap gap-2">{% for box in form.type %}<label class="choice-pill">{{ box.tag }} {{ box.choice_label }}</label>{% endfor %}</div>
+        </fieldset>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label" for="id_baths">{{ form.baths.label }}</label>
+            <select name="baths" id="id_baths" class="field-input">
+              {% for value, label in form.fields.baths.choices %}<option value="{{ value }}" {% if form.baths.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="id_furnished">{{ form.furnished.label }}</label>
+            <select name="furnished" id="id_furnished" class="field-input">
+              {% for value, label in form.fields.furnished.choices %}<option value="{{ value }}" {% if form.furnished.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="id_area_min">{{ form.area_min.label }}</label>
+            <input id="id_area_min" name="area_min" type="number" min="0" value="{{ form.area_min.value|default:'' }}" class="field-input">
+          </div>
+          <div>
+            <label class="field-label" for="id_area_max">{{ form.area_max.label }}</label>
+            <input id="id_area_max" name="area_max" type="number" min="0" value="{{ form.area_max.value|default:'' }}" class="field-input">
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="field-label" for="id_neighborhood">{{ form.neighborhood.label }}</label>
+            <input id="id_neighborhood" name="neighborhood" value="{{ form.neighborhood.value|default:'' }}" class="field-input">
+          </div>
+          <div>
+            <label class="field-label" for="id_radius">{{ form.radius.label }}</label>
+            <select name="radius" id="id_radius" class="field-input" aria-describedby="radius-help">
+              {% for value, label in form.fields.radius.choices %}<option value="{{ value }}" {% if form.radius.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+            <p id="radius-help" class="field-help">{% if mapbox_token %}{% translate "Measured from the map centre." %}{% else %}{% translate "Measured from the centre of the city you chose." %}{% endif %}</p>
+          </div>
+        </div>
+        <fieldset>
+          <legend class="field-label">{{ form.amenities.label }}</legend>
+          <div class="flex max-h-[190px] flex-wrap gap-2 overflow-y-auto">{% for box in form.amenities %}<label class="choice-pill">{{ box.tag }} {{ box.choice_label }}</label>{% endfor %}</div>
+        </fieldset>
+      </div>
+      <div class="flex flex-wrap justify-between gap-3 border-t hairline px-5 py-3 sm:px-8">
+        <a class="btn-link text-sm" href="{% url 'search:results' %}">{% translate "Clear all filters" %}</a>
+        <button type="button" class="btn btn-primary" @click="more = false">{% translate "Show results" %}</button>
+      </div>
+    </div>
+    <input type="hidden" name="near" id="id_near" value="{{ form.near.value|default:'' }}">
+    <input type="hidden" name="area" id="id_area" value="{{ form.area.value|default:'' }}">
+  </form>
+  <datalist id="city-options">{% for c in cities %}<option value="{{ c }}">{% endfor %}</datalist>
+
+  {# Split view ----------------------------------------------------------- #}
+  <div class="{% if mapbox_token %}lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,46%)]{% endif %}">
+    <div id="results" class="min-w-0 px-5 pb-24 pt-6 sm:px-8 [&.htmx-request]:opacity-60 transition-opacity" :class="view === 'map' && 'hidden lg:block'" aria-live="polite">
+      {% include "search/_results.html" %}
+    </div>
+    {% if mapbox_token %}
+    <div class="relative lg:sticky lg:top-[143px] lg:h-[calc(100vh-143px)]" :class="view === 'list' ? 'hidden lg:block' : 'block h-[calc(100vh-143px)]'">
+      <div id="search-map" class="h-full w-full bg-sand" role="region" aria-label="{% translate 'Map of results' %}"></div>
+      <div class="pointer-events-none absolute inset-x-0 top-4 flex justify-center">
+        <button type="button" id="search-area-btn" hidden class="btn btn-primary pointer-events-auto shadow-lg">{% translate "Search this area" %}</button>
+      </div>
+    </div>
+    <div class="fixed bottom-5 left-1/2 z-30 -translate-x-1/2 lg:hidden">
+      <button type="button" class="btn btn-primary shadow-lg" @click="view = view === 'list' ? 'map' : 'list'; $nextTick(() => window.dispatchEvent(new Event('resize')))">
+        <span x-show="view === 'list'">{% translate "Show map" %}</span><span x-show="view === 'map'" x-cloak>{% translate "Show list" %}</span>
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Clearing a map area works with or without the map.
+  document.body.addEventListener("click", function (e) {
+    if (!e.target.closest("[data-clear-area]")) return;
+    document.getElementById("id_area").value = "";
+    htmx.trigger(document.getElementById("search-form"), "submit");
+  });
+</script>
+{% endblock %}

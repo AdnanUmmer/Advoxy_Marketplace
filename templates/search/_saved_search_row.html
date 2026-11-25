@@ -1,0 +1,21 @@
+{% load i18n %}
+<li class="flex flex-wrap items-center gap-3 px-5 py-4" id="saved-{{ item.pk }}">
+  <a class="min-w-0 flex-1" href="{% url 'search:results' %}?{{ item.query }}">
+    <span class="block truncate font-medium hover:underline">{{ item.name }}</span>
+    <span class="block text-xs text-muted">{% blocktranslate with date=item.created_at|date:"j M Y" %}Saved {{ date }}{% endblocktranslate %}</span>
+  </a>
+  <form method="post" action="{% url 'search:saved_update' item.pk 'alerts' %}" hx-post="{% url 'search:saved_update' item.pk 'alerts' %}" hx-target="#saved-{{ item.pk }}" hx-swap="outerHTML">
+    {% csrf_token %}
+    <button type="submit" role="switch" aria-checked="{{ item.email_alerts|yesno:'true,false' }}" class="flex items-center gap-2 text-sm">
+      <span class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors {% if item.email_alerts %}bg-primary{% else %}bg-stone{% endif %}">
+        <span class="absolute h-4 w-4 rounded-full bg-surface transition-transform {% if item.email_alerts %}translate-x-[18px]{% else %}translate-x-[2px]{% endif %}"></span>
+      </span>
+      {% translate "Daily email" %}
+    </button>
+  </form>
+  <form method="post" action="{% url 'search:saved_update' item.pk 'delete' %}" hx-post="{% url 'search:saved_update' item.pk 'delete' %}" hx-target="#saved-{{ item.pk }}" hx-swap="outerHTML"
+        hx-confirm="{% translate 'Delete this saved search?' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-quiet px-3 py-1.5 text-sm text-danger">{% translate "Delete" %}</button>
+  </form>
+</li>

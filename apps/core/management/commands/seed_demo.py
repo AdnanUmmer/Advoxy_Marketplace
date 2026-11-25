@@ -21,6 +21,8 @@ from apps.accounts.models import AgencyTeam, AgentProfile, Profile, User, Verifi
 from apps.core import placeholder
 from apps.listings.geo import make_point
 from apps.listings.models import Amenity, Listing, ListingLocation, ListingPhoto, ListingStatus
+from apps.search import filters as search_filters
+from apps.search.models import Favorite, SavedSearch
 
 DEMO_DOMAIN = "demo.example.com"
 DEMO_PASSWORD = "AdvoxyDemo2026!"
@@ -95,6 +97,7 @@ class Command(BaseCommand):
             amenities = self._amenities()
             users = self._accounts()
             count = self._listings(users, amenities)
+            self._shortlists(users)
         self.stdout.write(self.style.SUCCESS(f"Seeded {len(ACCOUNTS)} demo accounts and {count} listings."))
         self.stdout.write(f"Password for every demo account: {DEMO_PASSWORD}")
 
@@ -221,3 +224,17 @@ class Command(BaseCommand):
                     photo.save()
                 created += 1
         return created
+
+    def _shortlists(self, users):
+        """Favorites and saved searches for the buyer and renter demo accounts."""
+        published = Listing.objects.published()
+        for key, purpose, city, query in (
+            ("buyer", "sale", "Nairobi", "purpose=sale&city=Nairobi"),
+            ("renter", "rent", "Lagos", "purpose=rent&city=Lagos&beds=2"),
+        ):
+            user = users[key]
+            for listing in published.filter(purpose=purpose).order_by("pk")[:4]:
+                Favorite.objects.create(user=user, listing=listing)
+            form, _qs, _c = search_filters.search(query)
+            SavedSearch.objects.create(user=user, name=search_filters.describe(form), query=search_filters.clean_querystring(query),
+                                       last_notified_at=timezone.now())

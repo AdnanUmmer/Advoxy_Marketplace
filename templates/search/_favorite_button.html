@@ -1,0 +1,18 @@
+{% load i18n %}
+{# Heart toggle. Needs `listing` and `is_favorite`. Swaps itself via HTMX. #}
+{% if user.is_authenticated %}
+<form method="post" action="{% url 'search:favorite_toggle' listing.pk %}" hx-post="{% url 'search:favorite_toggle' listing.pk %}" hx-swap="outerHTML" hx-target="this">
+  {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <button type="submit" aria-pressed="{{ is_favorite|yesno:'true,false' }}"
+          class="grid h-10 w-10 place-items-center rounded-full bg-surface/90 shadow-sm backdrop-blur transition hover:scale-105 {% if is_favorite %}text-accent{% else %}text-ink{% endif %}"
+          title="{% if is_favorite %}{% translate 'Remove from saved homes' %}{% else %}{% translate 'Save this home' %}{% endif %}">
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.5 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.5 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z" fill="{% if is_favorite %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+    <span class="sr-only">{% if is_favorite %}{% translate "Remove from saved homes" %}{% else %}{% translate "Save this home" %}{% endif %}</span>
+  </button>
+</form>
+{% else %}
+<a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}" class="grid h-10 w-10 place-items-center rounded-full bg-surface/90 text-ink shadow-sm backdrop-blur hover:scale-105" title="{% translate 'Sign in to save homes' %}">
+  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.5 4.5 7 4.5c2 0 3.4 1.1 5 3 1.6-1.9 3-3 5-3 3.5 0 5.6 3.5 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+  <span class="sr-only">{% translate "Sign in to save homes" %}</span>
+</a>
+{% endif %}

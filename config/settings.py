@@ -8,6 +8,7 @@ All secrets and environment-specific values come from environment variables
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.accounts",
     "apps.listings",
+    "apps.search",
 ]
 
 MIDDLEWARE = [
@@ -162,6 +164,10 @@ CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULE = {
     "expire-listings-daily": {"task": "apps.listings.tasks.expire_listings", "schedule": 60 * 60 * 24},
+    "saved-search-digest-daily": {
+        "task": "apps.search.tasks.send_saved_search_digests",
+        "schedule": crontab(hour=6, minute=0),  # 06:00 UTC, morning across most of Africa
+    },
 }
 
 # Listings

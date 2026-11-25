@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Saved homes" %}{% endblock %}
+{% block content %}
+<div class="container-page py-10">
+  <p class="eyebrow">{% translate "Your shortlist" %}</p>
+  <h1 class="display-md mt-2">{% translate "Saved homes" %}</h1>
+  {% if listings %}
+  <div class="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+    {% for listing in listings %}{% include "partials/listing_card.html" with listing=listing %}{% endfor %}
+  </div>
+  {% else %}
+  <div class="mt-8 rounded-brand border border-dashed border-stone px-6 py-16 text-center">
+    <p class="font-display text-2xl">{% translate "No saved homes yet" %}</p>
+    <p class="mt-2 text-muted">{% translate "Tap the heart on any listing to keep it here." %}</p>
+    <a class="btn btn-primary mt-6" href="{% url 'search:results' %}">{% translate "Browse homes" %}</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

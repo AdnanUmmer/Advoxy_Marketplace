@@ -11,8 +11,8 @@
     <div>
       <h2 class="eyebrow mb-4 font-sans">{% translate "Explore" %}</h2>
       <ul class="space-y-2 text-sm">
-        <li><a class="hover:underline" href="{% url 'listings:search' %}?purpose=sale">{% translate "Homes for sale" %}</a></li>
-        <li><a class="hover:underline" href="{% url 'listings:search' %}?purpose=rent">{% translate "Homes to rent" %}</a></li>
+        <li><a class="hover:underline" href="{% url 'search:results' %}?purpose=sale">{% translate "Homes for sale" %}</a></li>
+        <li><a class="hover:underline" href="{% url 'search:results' %}?purpose=rent">{% translate "Homes to rent" %}</a></li>
       </ul>
     </div>
     <div>

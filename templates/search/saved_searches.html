@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Saved searches" %}{% endblock %}
+{% block content %}
+<div class="container-narrow py-10">
+  <p class="eyebrow">{% translate "Alerts" %}</p>
+  <h1 class="display-md mt-2">{% translate "Saved searches" %}</h1>
+  <p class="mt-2 text-muted">{% translate "With email on, we send one digest a day when new homes match." %}</p>
+  {% if items %}
+  <ul class="panel mt-8 divide-y divide-sand overflow-hidden">
+    {% for item in items %}{% include "search/_saved_search_row.html" %}{% endfor %}
+  </ul>
+  {% else %}
+  <div class="mt-8 rounded-brand border border-dashed border-stone px-6 py-16 text-center">
+    <p class="font-display text-2xl">{% translate "No saved searches yet" %}</p>
+    <p class="mt-2 text-muted">{% translate "Run a search and choose “Save search” to get daily alerts." %}</p>
+    <a class="btn btn-primary mt-6" href="{% url 'search:results' %}">{% translate "Start a search" %}</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

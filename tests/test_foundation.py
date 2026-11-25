@@ -52,7 +52,7 @@ def test_seed_refuses_to_duplicate_without_reset(seeded):
     assert User.objects.filter(email=f"buyer@{DEMO_DOMAIN}").count() == 1
 
 
-@pytest.mark.parametrize("name", ["core:home", "core:about", "core:contact", "core:help", "listings:search",
+@pytest.mark.parametrize("name", ["core:home", "core:about", "core:contact", "core:help", "search:results",
                                   "accounts:login", "accounts:signup", "accounts:password_reset", "accounts:staff_login"])
 def test_public_pages_render(client, name):
     response = client.get(reverse(name))
@@ -77,8 +77,8 @@ def test_search_filters_by_city_and_purpose(client, make_user, make_listing):
     make_listing(owner, city="Accra", purpose="rent", title="Accra rental")
     make_listing(owner, city="Accra", purpose="sale", title="Accra sale")
     make_listing(owner, city="Cairo", purpose="rent", title="Cairo rental")
-    response = client.get(reverse("listings:search"), {"city": "accra", "purpose": "rent"})
-    assert [l.title for l in response.context["listings"]] == ["Accra rental"]
+    response = client.get(reverse("search:results"), {"city": "accra", "purpose": "rent"})
+    assert [l.title for l in response.context["page"].object_list] == ["Accra rental"]
 
 
 def test_money_filter_uses_currency_settings(settings):

@@ -46,19 +46,6 @@ def owned_listing(view):
 # ---------------------------------------------------------------------------
 # Public
 # ---------------------------------------------------------------------------
-def search(request):
-    """Milestone 1 stub: a plain grid filtered by city and purpose.
-    Milestone 3 replaces this with full filters and the Mapbox split view."""
-    qs = Listing.objects.published().prefetch_related("photos").order_by("-is_featured", "-published_at")
-    city = request.GET.get("city", "").strip()
-    purpose = request.GET.get("purpose", "")
-    if city:
-        qs = qs.filter(city__iexact=city)
-    if purpose in Purpose.values:
-        qs = qs.filter(purpose=purpose)
-    return render(request, "listings/search.html", {"listings": qs[:48], "city": city, "purpose": purpose, "total": qs.count()})
-
-
 def similar_listings(listing, limit=3):
     base = (
         Listing.objects.published()

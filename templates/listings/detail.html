@@ -24,7 +24,10 @@
       <h1 class="display-lg mt-3">{{ listing.title }}</h1>
       <p class="mt-2 text-muted">{% if listing.address %}{{ listing.address }}, {% endif %}{% if listing.neighborhood %}{{ listing.neighborhood }}, {% endif %}{{ listing.city }}, {{ listing.country }}</p>
     </div>
-    <p class="font-display text-[2.2rem] leading-none">{{ listing.price|money }} <span class="font-sans text-base text-muted">{{ listing|price_suffix }}</span></p>
+    <div class="flex items-center gap-4">
+      <p class="font-display text-[2.2rem] leading-none">{{ listing.price|money }} <span class="font-sans text-base text-muted">{{ listing|price_suffix }}</span></p>
+      {% if not preview %}{% include "search/_favorite_button.html" with is_favorite=listing.pk|is_in:favorite_ids %}{% endif %}
+    </div>
   </div>
 
   {# Gallery ----------------------------------------------------------- #}

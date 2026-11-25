@@ -1,9 +1,12 @@
 {% extends "accounts/dashboards/base.html" %}
 {% load i18n %}
 {% block dash_main %}
-<section class="panel panel-pad">
-  <h2 class="font-display text-xl">{% translate "Find a place to rent" %}</h2>
-  <p class="mt-2 text-muted">{% translate "Browse rentals across African cities. Saved homes and saved searches will appear here." %}</p>
-  <a class="btn btn-primary mt-5" href="{% url 'listings:search' %}?purpose=rent">{% translate "Browse rentals" %}</a>
+<section class="panel panel-pad flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <h2 class="font-display text-xl">{% translate "Find a place to rent" %}</h2>
+    <p class="mt-1 text-muted">{% translate "Browse rentals across African cities." %}</p>
+  </div>
+  <a class="btn btn-primary" href="{% url 'search:results' %}?purpose=rent">{% translate "Browse rentals" %}</a>
 </section>
+{% include "accounts/dashboards/_shortlist.html" %}
 {% endblock %}

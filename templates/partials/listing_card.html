@@ -1,6 +1,6 @@
 {% load i18n ui %}
 {# Usage: {% include "partials/listing_card.html" with listing=obj %} #}
-<article class="listing-card group">
+<article class="listing-card group relative" data-listing-id="{{ listing.pk }}">
   <a href="{{ listing.get_absolute_url }}" class="block focus-visible:outline-none">
     <div class="listing-card__media">
       {% with cover=listing.cover %}
@@ -24,4 +24,5 @@
       </p>
     </div>
   </a>
+  <div class="absolute right-3 top-3">{% include "search/_favorite_button.html" with is_favorite=listing.pk|is_in:favorite_ids %}</div>
 </article>

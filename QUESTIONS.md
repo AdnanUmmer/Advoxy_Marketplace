@@ -48,5 +48,9 @@ Agents and agencies need an active subscription to list. Plans and subscriptions
 **Default:** until then their capacity is 0: they can create and edit drafts, but cannot submit for review. Seeded agent listings stay published.
 
 ## Q13. Mapbox token needed
-`MAPBOX_TOKEN` in `.env` is still the placeholder. Without a real public token (starts with `pk.`), the listing form asks for coordinates as numbers and the detail page shows coordinates instead of a map. Milestone 3 (search and map) needs a real token. Please create a free Mapbox account and put the public token in `.env`. **Blocked item:** the map views in milestone 3.
+`MAPBOX_TOKEN` in `.env` is still the placeholder. Without a real public token (starts with `pk.`), the listing form asks for coordinates as numbers and the detail page shows coordinates instead of a map. Milestone 3 (search and map) needs a real token. Please create a free Mapbox account and put the public token in `.env`. **Blocked item:** the Mapbox split view in milestone 3 is built (price pins, preview cards, draw-an-area, "search this area", distance from map centre, mobile list/map toggle) but cannot be tested or checked off until a token is set. Everything else in milestone 3 works without it.
+
+## Q14. Saved-search digest timing
+SPEC asks for a daily digest but not when.
+**Default:** 06:00 UTC daily (morning across most of Africa). One email per user covering all their saved searches, only listings published since the last digest, up to 6 per search with a "see all" link.
 

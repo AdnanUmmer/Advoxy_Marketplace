@@ -128,6 +128,13 @@ def dashboard(request):
         "agency": getattr(user, "owned_agency", None) if user.is_agency else None,
         "agent_profile": getattr(user, "agent_profile", None) if user.is_agent else None,
     }
+    if role in (Role.BUYER, Role.RENTER):
+        from apps.search.models import Favorite, SavedSearch
+
+        favs = (Favorite.objects.filter(user=user, listing__status="published")
+                .select_related("listing").prefetch_related("listing__photos")[:6])
+        context["favorite_listings"] = [f.listing for f in favs]
+        context["saved_searches"] = SavedSearch.objects.filter(user=user)[:5]
     if role in (Role.SELLER, Role.LANDLORD, Role.AGENT):
         from apps.listings.views import owner_dashboard_context
 

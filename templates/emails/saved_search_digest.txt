@@ -1,0 +1,11 @@
+{% autoescape off %}{% load i18n ui %}{% blocktranslate %}Hello {{ user_name }},{% endblocktranslate %}
+
+{% translate "New homes that match your saved searches:" %}
+{% for s in sections %}
+{{ s.name }}
+{% for l in s.listings %}- {{ l.title }}, {{ l.price|money }}{% if l.purpose == "rent" %} {% translate "/ month" %}{% endif %}
+  {{ site_url }}{{ l.get_absolute_url }}
+{% endfor %}{% if s.more %}{% translate "See all matches:" %} {{ site_url }}{{ s.url }}
+{% endif %}{% endfor %}
+{% translate "Manage your saved searches or turn off these emails:" %} {{ site_url }}{{ manage_url }}
+{% endautoescape %}

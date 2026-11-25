@@ -15,7 +15,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 TAILWIND_VERSION = "v4.3.4"
-SCAN_GLOBS = [("templates", "**/*.html"), ("apps", "**/*.html"), ("apps", "**/*.py")]
+SCAN_GLOBS = [("templates", "**/*.html"), ("apps", "**/*.html"), ("apps", "**/*.py"), ("static/js", "**/*.js")]
 QUOTED = re.compile(r"\"([^\"\n]*)\"|'([^'\n]*)'")
 SAFE_TOKEN = re.compile(r"^[A-Za-z0-9_:/\[\]().#!@*&>+~=,\-]+$")
 

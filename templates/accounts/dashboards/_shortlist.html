@@ -1,0 +1,27 @@
+{% load i18n %}
+{# Saved homes + saved searches, shown on buyer and renter dashboards. #}
+<section class="panel overflow-hidden" aria-labelledby="fav-h">
+  <div class="flex items-center justify-between border-b hairline px-6 py-4">
+    <h2 id="fav-h" class="font-display text-lg">{% translate "Saved homes" %}</h2>
+    {% if favorite_listings %}<a class="btn-link text-sm" href="{% url 'search:favorites' %}">{% translate "View all" %}</a>{% endif %}
+  </div>
+  {% if favorite_listings %}
+  <div class="grid gap-6 p-6 sm:grid-cols-2 xl:grid-cols-3">
+    {% for listing in favorite_listings %}{% include "partials/listing_card.html" with listing=listing %}{% endfor %}
+  </div>
+  {% else %}
+  <p class="px-6 py-10 text-center text-sm text-muted">{% translate "Tap the heart on any listing to save it here." %}</p>
+  {% endif %}
+</section>
+
+<section class="panel overflow-hidden" aria-labelledby="ss-h">
+  <div class="flex items-center justify-between border-b hairline px-6 py-4">
+    <h2 id="ss-h" class="font-display text-lg">{% translate "Saved searches" %}</h2>
+    {% if saved_searches %}<a class="btn-link text-sm" href="{% url 'search:saved' %}">{% translate "Manage" %}</a>{% endif %}
+  </div>
+  {% if saved_searches %}
+  <ul class="divide-y divide-sand">{% for item in saved_searches %}{% include "search/_saved_search_row.html" %}{% endfor %}</ul>
+  {% else %}
+  <p class="px-6 py-10 text-center text-sm text-muted">{% translate "Save a search to get a daily email when new homes match." %}</p>
+  {% endif %}
+</section>

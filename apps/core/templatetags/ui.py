@@ -48,3 +48,11 @@ def field_widget(bound_field, css="field-input"):
     if described:
         attrs["aria-describedby"] = " ".join(described)
     return bound_field.as_widget(attrs=attrs)
+
+
+@register.filter
+def is_in(value, container):
+    try:
+        return value in container
+    except TypeError:
+        return False

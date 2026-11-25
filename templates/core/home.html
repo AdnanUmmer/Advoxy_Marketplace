@@ -10,7 +10,7 @@
     <h1 class="display-xl mt-5">{% blocktranslate %}Find the place<br class="hidden sm:block"> you'll call <em class="font-normal italic text-primary">home.</em>{% endblocktranslate %}</h1>
     <p class="lede mt-6 max-w-lg">{% translate "Verified agents, honest listings and calm search, from Lagos to Cape Town." %}</p>
 
-    <form action="{% url 'listings:search' %}" method="get" class="mt-9 max-w-xl rounded-[22px] border hairline bg-surface p-2 shadow-[0_18px_50px_-24px_rgba(26,26,23,0.35)]"
+    <form action="{% url 'search:results' %}" method="get" class="mt-9 max-w-xl rounded-[22px] border hairline bg-surface p-2 shadow-[0_18px_50px_-24px_rgba(26,26,23,0.35)]"
           x-data="{ purpose: '{{ default_purpose }}' }" role="search" aria-label="{% translate 'Search homes' %}">
       <fieldset class="flex gap-1 px-2 pt-1">
         <legend class="sr-only">{% translate "Purpose" %}</legend>
@@ -46,7 +46,7 @@
       <p class="eyebrow">{% translate "Hand-picked" %}</p>
       <h2 id="featured-heading" class="display-md mt-2">{% translate "Featured homes" %}</h2>
     </div>
-    <a class="btn-link hidden sm:inline-flex" href="{% url 'listings:search' %}">{% translate "View all" %} <span aria-hidden="true">→</span></a>
+    <a class="btn-link hidden sm:inline-flex" href="{% url 'search:results' %}">{% translate "View all" %} <span aria-hidden="true">→</span></a>
   </div>
   <div class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
     {% for listing in featured %}{% include "partials/listing_card.html" with listing=listing %}{% endfor %}
@@ -63,7 +63,7 @@
   <ul class="grid grid-cols-2 gap-px overflow-hidden rounded-brand border hairline bg-sand sm:grid-cols-4">
     {% for a in areas %}
     <li>
-      <a href="{% url 'listings:search' %}?city={{ a.city|urlencode }}" class="group flex h-full flex-col justify-between gap-6 bg-surface p-5 transition-colors hover:bg-paper">
+      <a href="{% url 'search:results' %}?city={{ a.city|urlencode }}" class="group flex h-full flex-col justify-between gap-6 bg-surface p-5 transition-colors hover:bg-paper">
         <span class="text-xs uppercase tracking-[0.14em] text-muted">{{ a.country }}</span>
         <span>
           <span class="font-display text-2xl group-hover:text-primary">{{ a.city }}</span>

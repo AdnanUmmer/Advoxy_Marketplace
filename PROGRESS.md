@@ -1,6 +1,6 @@
 # Advoxy build progress
 
-**Overall: 31% complete** (16 of 51 items)
+**Overall: 39% complete** (20 of 51 items)
 
 Percentage = completed items / total items, rounded down. Items are every milestone and every task from SPEC.md section 13. A milestone is checked only when all its tasks work, its tests pass, and the seeded demo runs.
 
@@ -25,12 +25,12 @@ Percentage = completed items / total items, rounded down. Items are every milest
 - [x] Owner dashboard
 
 ## Milestone 3: Search and map
-- [ ] **Milestone 3 complete**
-- [ ] Filters
-- [ ] Mapbox split view
-- [ ] PostGIS radius search
-- [ ] Favorites
-- [ ] Saved searches
+- [ ] **Milestone 3 complete** (blocked: Mapbox split view needs a real `MAPBOX_TOKEN` to test; see QUESTIONS.md Q13)
+- [x] Filters
+- [ ] Mapbox split view (built; code parses; untested until a Mapbox token is set)
+- [x] PostGIS radius search
+- [x] Favorites
+- [x] Saved searches
 
 ## Milestone 4: Inquiries and messaging
 - [ ] **Milestone 4 complete**

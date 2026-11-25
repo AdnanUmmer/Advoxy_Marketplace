@@ -1,0 +1,56 @@
+{% load i18n %}
+{# Results column. Rendered inside #results on full page loads and returned alone for HTMX requests. #}
+<div class="flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="font-display text-[1.7rem] leading-tight">
+      {% blocktranslate count n=total %}{{ n }} home{% plural %}{{ n }} homes{% endblocktranslate %}
+    </h1>
+    <p class="mt-1 text-sm text-muted">{{ summary }}</p>
+  </div>
+  {% if user.is_authenticated %}
+    {% if already_saved %}
+      <a class="btn btn-quiet text-sm" href="{% url 'search:saved' %}">✓ {% translate "Search saved" %}</a>
+    {% else %}
+      <form method="post" action="{% url 'search:saved_create' %}">{% csrf_token %}
+        <input type="hidden" name="query" value="{{ querystring }}">
+        <button class="btn btn-quiet text-sm" type="submit">{% translate "Save search" %}</button>
+      </form>
+    {% endif %}
+  {% else %}
+    <a class="btn btn-quiet text-sm" href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}">{% translate "Sign in to save this search" %}</a>
+  {% endif %}
+</div>
+
+{% if form.area.value %}
+<p class="mt-4 flex flex-wrap items-center gap-3 rounded-brand-sm border hairline bg-surface px-4 py-2 text-sm">
+  {% translate "Showing homes inside the area on the map." %}
+  <button type="button" class="btn-link text-sm" data-clear-area>{% translate "Clear area" %}</button>
+</p>
+{% endif %}
+
+{% if page.object_list %}
+<div class="mt-6 grid gap-x-6 gap-y-10 sm:grid-cols-2 {% if mapbox_token %}2xl:grid-cols-3{% else %}lg:grid-cols-3{% endif %}">
+  {% for listing in page.object_list %}{% include "partials/listing_card.html" with listing=listing %}{% endfor %}
+</div>
+{% else %}
+<div class="mt-10 rounded-brand border border-dashed border-stone px-6 py-16 text-center">
+  <p class="font-display text-2xl">{% translate "No homes match these filters" %}</p>
+  <p class="mt-2 text-muted">{% translate "Try a wider price range, fewer amenities or another city." %}</p>
+  <a class="btn btn-quiet mt-6" href="{% url 'search:results' %}">{% translate "Clear all filters" %}</a>
+</div>
+{% endif %}
+
+{% if page.has_other_pages %}
+<nav class="mt-12 flex items-center justify-between border-t hairline pt-6 text-sm" aria-label="{% translate 'Pagination' %}">
+  {% if page.has_previous %}
+    <a class="btn btn-quiet" href="?{{ querystring }}&amp;page={{ page.previous_page_number }}" hx-get="?{{ querystring }}&amp;page={{ page.previous_page_number }}" hx-target="#results" hx-swap="innerHTML show:window:top" hx-push-url="true">← {% translate "Previous" %}</a>
+  {% else %}<span></span>{% endif %}
+  <span class="text-muted">{% blocktranslate with n=page.number total=page.paginator.num_pages %}Page {{ n }} of {{ total }}{% endblocktranslate %}</span>
+  {% if page.has_next %}
+    <a class="btn btn-quiet" href="?{{ querystring }}&amp;page={{ page.next_page_number }}" hx-get="?{{ querystring }}&amp;page={{ page.next_page_number }}" hx-target="#results" hx-swap="innerHTML show:window:top" hx-push-url="true">{% translate "Next" %} →</a>
+  {% else %}<span></span>{% endif %}
+</nav>
+{% endif %}
+
+{{ pins|json_script:"map-pins" }}
+{% if center %}{{ center|json_script:"map-center" }}{% endif %}
