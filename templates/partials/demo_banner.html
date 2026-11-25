@@ -1,0 +1,7 @@
+{% load i18n %}
+<div class="bg-ink text-paper text-sm">
+  <div class="container-page flex flex-wrap items-center justify-between gap-2 py-2">
+    <p><strong class="font-semibold">{% translate "Demo site." %}</strong> {% translate "Listings, people and payments here are sample data." %}</p>
+    <a href="{% url 'accounts:login' %}" class="underline decoration-paper/40 hover:decoration-paper">{% translate "Sign in as a demo user" %}</a>
+  </div>
+</div>

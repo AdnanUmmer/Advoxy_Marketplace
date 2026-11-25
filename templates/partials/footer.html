@@ -1,0 +1,39 @@
+{% load static i18n %}
+<footer class="mt-24 border-t hairline bg-surface">
+  <div class="container-page grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+    <div class="max-w-sm">
+      <div class="flex items-center gap-2.5">
+        <img src="{% static brand.logo_mark %}" alt="" class="h-8 w-8" width="32" height="32">
+        <span class="font-display text-xl">{{ brand.name }}</span>
+      </div>
+      <p class="mt-4 text-muted">{{ brand.tagline }}</p>
+    </div>
+    <div>
+      <h2 class="eyebrow mb-4 font-sans">{% translate "Explore" %}</h2>
+      <ul class="space-y-2 text-sm">
+        <li><a class="hover:underline" href="{% url 'listings:search' %}?purpose=sale">{% translate "Homes for sale" %}</a></li>
+        <li><a class="hover:underline" href="{% url 'listings:search' %}?purpose=rent">{% translate "Homes to rent" %}</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="eyebrow mb-4 font-sans">{% translate "Company" %}</h2>
+      <ul class="space-y-2 text-sm">
+        <li><a class="hover:underline" href="{% url 'core:about' %}">{% translate "About" %}</a></li>
+        <li><a class="hover:underline" href="{% url 'core:contact' %}">{% translate "Contact" %}</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="eyebrow mb-4 font-sans">{% translate "Support" %}</h2>
+      <ul class="space-y-2 text-sm">
+        <li><a class="hover:underline" href="{% url 'core:help' %}">{% translate "Help centre" %}</a></li>
+        <li><a class="hover:underline" href="mailto:{{ brand.support_email }}">{{ brand.support_email }}</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t hairline">
+    <div class="container-page flex flex-wrap justify-between gap-2 py-5 text-xs text-muted">
+      <p>© {% now "Y" %} {{ brand.legal_name }}</p>
+      <p>{% blocktranslate with code=CURRENCY_CODE %}Prices shown in {{ code }}{% endblocktranslate %}</p>
+    </div>
+  </div>
+</footer>

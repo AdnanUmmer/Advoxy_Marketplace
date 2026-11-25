@@ -1,0 +1,8 @@
+{% autoescape off %}
+{% load i18n %}{% blocktranslate %}Hello {{ user_name }},{% endblocktranslate %}
+
+{% translate "Confirm your email address by opening this link:" %}
+{{ site_url }}{{ path }}
+
+{% translate "The link works for 3 days. If you did not create an account, ignore this email." %}
+{% endautoescape %}

@@ -1,0 +1,15 @@
+{% extends "core/page.html" %}
+{% load i18n %}
+{% block title %}{% translate "Help" %}{% endblock %}
+{% block eyebrow %}{% translate "Help centre" %}{% endblock %}
+{% block heading %}{% translate "How it works" %}{% endblock %}
+{% block body %}
+<h2>{% translate "Searching" %}</h2>
+<p>{% translate "Search by city, then narrow by price, bedrooms and more. Save listings you like and save searches to get a daily email when new homes match." %}</p>
+<h2>{% translate "Listing a property" %}</h2>
+<p>{% translate "Create an account as a seller or landlord. Sellers list one property free and landlords list two. Each listing is reviewed by our team before it is published." %}</p>
+<h2>{% translate "Agents and agencies" %}</h2>
+<p>{% translate "Agents and agencies list under a subscription plan and can apply for a verified badge by uploading their license." %}</p>
+<h2>{% translate "Payments" %}</h2>
+<p>{% translate "We only take payment for platform services: extra listings, featured placement and subscriptions. Buying or renting a home is arranged directly between you and the owner or agent." %}</p>
+{% endblock %}

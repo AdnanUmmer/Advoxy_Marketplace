@@ -1,0 +1,12 @@
+{% extends "core/page.html" %}
+{% load i18n %}
+{% block title %}{% translate "About" %}{% endblock %}
+{% block eyebrow %}{% translate "About us" %}{% endblock %}
+{% block heading %}{% blocktranslate with name=brand.name %}{{ name }} is a calmer way to find a home.{% endblocktranslate %}{% endblock %}
+{% block body %}
+<p>{% blocktranslate with name=brand.name %}{{ name }} brings homes for sale and rent from across Africa into one place, with clear prices, honest photos and people you can reach.{% endblocktranslate %}</p>
+<h2>{% translate "What we check" %}</h2>
+<p>{% translate "Every listing is reviewed before it goes live. Agents and agencies upload their license, and our team verifies it before they receive a verified badge." %}</p>
+<h2>{% translate "How we handle your data" %}</h2>
+<p>{% translate "We collect only what we need to run the marketplace. You choose whether to receive product news, and you can ask us to export or delete your data at any time." %}</p>
+{% endblock %}

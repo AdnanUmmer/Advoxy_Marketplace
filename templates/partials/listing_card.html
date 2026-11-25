@@ -1,0 +1,27 @@
+{% load i18n ui %}
+{# Usage: {% include "partials/listing_card.html" with listing=obj %} #}
+<article class="listing-card group">
+  <a href="{{ listing.get_absolute_url }}" class="block focus-visible:outline-none">
+    <div class="listing-card__media">
+      {% with cover=listing.cover %}
+        {% if cover %}
+          <img src="{{ cover.image.url }}" alt="{{ cover.alt_text|default:listing.title }}" loading="lazy" width="800" height="600">
+        {% endif %}
+      {% endwith %}
+      <div class="absolute left-3 top-3 flex gap-1.5">
+        {% if listing.is_featured %}<span class="badge badge-featured">{% translate "Featured" %}</span>{% endif %}
+        <span class="badge bg-surface/90 text-ink backdrop-blur">{{ listing.get_purpose_display }}</span>
+      </div>
+    </div>
+    <div class="mt-3.5 space-y-1">
+      <p class="listing-card__price">{{ listing.price|money }} <span class="font-sans text-sm text-muted">{{ listing|price_suffix }}</span></p>
+      <h3 class="font-sans text-[0.98rem] font-medium leading-snug group-hover:underline">{{ listing.title }}</h3>
+      <p class="text-sm text-muted">{% if listing.neighborhood %}{{ listing.neighborhood }}, {% endif %}{{ listing.city }}</p>
+      <p class="listing-card__facts pt-1">
+        {% if listing.bedrooms %}<span>{% blocktranslate count n=listing.bedrooms %}{{ n }} bed{% plural %}{{ n }} beds{% endblocktranslate %}</span>{% endif %}
+        {% if listing.bathrooms %}<span>{% blocktranslate count n=listing.bathrooms %}{{ n }} bath{% plural %}{{ n }} baths{% endblocktranslate %}</span>{% endif %}
+        {% if listing.area_sqm %}<span>{{ listing.area_sqm|floatformat:0 }} m²</span>{% endif %}
+      </p>
+    </div>
+  </a>
+</article>

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{# Shared editorial layout for static content pages. #}
+{% block content %}
+<article class="container-narrow pb-10 pt-14">
+  <p class="eyebrow">{% block eyebrow %}{% endblock %}</p>
+  <h1 class="display-lg mt-4">{% block heading %}{% endblock %}</h1>
+  <div class="prose-calm mt-8 text-[1.05rem]">{% block body %}{% endblock %}</div>
+</article>
+{% endblock %}

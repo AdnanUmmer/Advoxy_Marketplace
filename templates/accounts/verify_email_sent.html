@@ -1,0 +1,14 @@
+{% extends "accounts/auth_base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Verify your email" %}{% endblock %}
+{% block eyebrow %}{% translate "One more step" %}{% endblock %}
+{% block heading %}{% translate "Check your inbox" %}{% endblock %}
+{% block intro %}<p class="mt-3 text-muted">{% blocktranslate with email=user.email %}We sent a verification link to <strong class="text-ink">{{ email }}</strong>. Click it to finish setting up your account.{% endblocktranslate %}</p>{% endblock %}
+{% block form %}
+<div class="flex flex-wrap gap-3">
+  <form method="post" action="{% url 'accounts:verify_email_resend' %}">{% csrf_token %}
+    <button class="btn btn-quiet" type="submit">{% translate "Resend the link" %}</button>
+  </form>
+  <a class="btn btn-primary" href="{% url 'accounts:dashboard' %}">{% translate "Continue to dashboard" %}</a>
+</div>
+{% endblock %}

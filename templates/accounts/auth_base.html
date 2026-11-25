@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block content %}
+<div class="container-page grid gap-12 py-12 lg:grid-cols-[minmax(0,480px)_1fr] lg:py-20">
+  <section class="w-full">
+    <p class="eyebrow">{% block eyebrow %}{% endblock %}</p>
+    <h1 class="display-md mt-3">{% block heading %}{% endblock %}</h1>
+    {% block intro %}{% endblock %}
+    <div class="mt-8">{% block form %}{% endblock %}</div>
+  </section>
+  <aside class="relative hidden overflow-hidden rounded-[28px] bg-primary p-12 text-on-primary lg:flex lg:flex-col lg:justify-end" aria-hidden="true">
+    <svg class="absolute -right-24 -top-24 h-[420px] w-[420px] opacity-[0.12]" viewBox="0 0 64 64"><path d="M6 58 32 10l26 48" fill="none" stroke="currentColor" stroke-width="2"/><path d="M18 44h28" stroke="currentColor" stroke-width="2"/></svg>
+    <p class="font-display text-[2.2rem] font-light leading-tight">{{ brand.tagline }}</p>
+    <p class="mt-4 max-w-sm text-on-primary/75">{% translate "Reviewed listings. Verified agents. One calm place to look." %}</p>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "accounts/auth_base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Create account" %}{% endblock %}
+{% block eyebrow %}{% translate "Join" %}{% endblock %}
+{% block heading %}{% translate "Create your account" %}{% endblock %}
+{% block intro %}<p class="mt-3 text-muted">{% translate "Already have one?" %} <a class="btn-link" href="{% url 'accounts:login' %}">{% translate "Sign in" %}</a></p>{% endblock %}
+{% block form %}
+<form method="post" novalidate class="space-y-5" x-data="{ agency: false }">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  {% include "partials/field.html" with field=form.full_name %}
+  {% include "partials/field.html" with field=form.email %}
+
+  <fieldset aria-describedby="roles_help">
+    <legend class="field-label">{{ form.roles.label }}</legend>
+    <div class="grid gap-2 sm:grid-cols-2">
+      {% for value, label, help, checked in form.role_options %}
+      <label class="role-tile">
+        <span class="flex items-center gap-2.5">
+          <input type="checkbox" name="roles" value="{{ value }}" class="check" {% if checked %}checked{% endif %}
+                 {% if value == "agency" %}x-init="agency = $el.checked" @change="agency = $el.checked"{% endif %}>
+          <span class="font-medium">{{ label }}</span>
+        </span>
+        <span class="pl-[26px] text-sm text-muted">{{ help }}</span>
+      </label>
+      {% endfor %}
+    </div>
+    <p class="field-help" id="roles_help">{{ form.roles.help_text }}</p>
+    {% if form.roles.errors %}<p class="field-error">{{ form.roles.errors|join:" " }}</p>{% endif %}
+  </fieldset>
+
+  <div x-show="agency" x-cloak>
+    {% include "partials/field.html" with field=form.agency_name %}
+  </div>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    {% include "partials/field.html" with field=form.password1 %}
+    {% include "partials/field.html" with field=form.password2 %}
+  </div>
+
+  <div class="space-y-3 border-t hairline pt-5 text-sm">
+    <label class="flex items-start gap-3">
+      <input type="checkbox" name="accept_terms" class="check mt-0.5" {% if form.accept_terms.value %}checked{% endif %} required>
+      <span>{{ form.accept_terms.label }}</span>
+    </label>
+    {% if form.accept_terms.errors %}<p class="field-error">{% translate "Please accept the terms to continue." %}</p>{% endif %}
+    <label class="flex items-start gap-3">
+      <input type="checkbox" name="marketing_opt_in" class="check mt-0.5" {% if form.marketing_opt_in.value %}checked{% endif %}>
+      <span class="text-muted">{{ form.marketing_opt_in.label }}</span>
+    </label>
+  </div>
+
+  <button class="btn btn-primary btn-lg w-full" type="submit">{% translate "Create account" %}</button>
+</form>
+{% endblock %}

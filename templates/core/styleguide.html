@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Design system{% endblock %}
+{% block content %}
+{# Developer reference for the design system. Routed only when DEBUG=True. #}
+<div class="container-page space-y-14 py-12">
+  <header>
+    <p class="eyebrow">Design system</p>
+    <h1 class="display-lg mt-3">Tokens and components</h1>
+    <p class="lede mt-3 max-w-2xl">Colors and fonts come from <code>static/brand/theme.css</code>. Components live in <code>static/src/app.css</code>.</p>
+  </header>
+
+  <section>
+    <h2 class="display-md mb-5">Color</h2>
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+      <div class="panel p-3"><div class="h-14 rounded-brand-sm border hairline bg-paper"></div><p class="mt-2 text-sm">paper</p></div>
+      <div class="panel p-3"><div class="h-14 rounded-brand-sm border hairline bg-surface"></div><p class="mt-2 text-sm">surface</p></div>
+      <div class="panel p-3"><div class="h-14 rounded-brand-sm bg-sand"></div><p class="mt-2 text-sm">sand</p></div>
+      <div class="panel p-3"><div class="h-14 rounded-brand-sm bg-stone"></div><p class="mt-2 text-sm">stone</p></div>
+      <div class="panel p-3"><div class="h-14 rounded-brand-sm bg-ink"></div><p class="mt-2 text-sm">ink</p></div>
+      <div class="panel p-3"><div class="h-14 rounded-brand-sm bg-muted"></div><p class="mt-2 text-sm">muted</p></div>
+      <div class="panel p-3"><div class="h-14 rounded-brand-sm bg-primary"></div><p class="mt-2 text-sm">primary</p></div>
+      <div class="panel p-3"><div class="h-14 rounded-brand-sm bg-accent"></div><p class="mt-2 text-sm">accent</p></div>
+    </div>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="display-md mb-5">Type</h2>
+    <p class="eyebrow">Eyebrow label</p>
+    <p class="display-xl">Display XL</p>
+    <p class="display-lg">Display large</p>
+    <p class="display-md">Display medium</p>
+    <p class="lede max-w-2xl">Lede paragraph for introductions. Calm, readable, generous line height.</p>
+    <p class="max-w-2xl">Body copy in the sans family at the default size.</p>
+  </section>
+
+  <section>
+    <h2 class="display-md mb-5">Buttons and badges</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      <button class="btn btn-primary">Primary</button>
+      <button class="btn btn-primary btn-lg">Primary large</button>
+      <button class="btn btn-quiet">Quiet</button>
+      <a class="btn-link" href="#">Text link</a>
+      <button class="btn btn-primary" disabled>Disabled</button>
+    </div>
+    <div class="mt-5 flex flex-wrap gap-2">
+      <span class="badge badge-neutral">Draft</span><span class="badge badge-warning">Pending review</span>
+      <span class="badge badge-success">Published</span><span class="badge badge-info">Sold</span>
+      <span class="badge badge-danger">Removed</span><span class="badge badge-featured">Featured</span>
+    </div>
+  </section>
+
+  <section class="max-w-md space-y-5">
+    <h2 class="display-md">Forms</h2>
+    <div><label class="field-label" for="sg1">Label</label><input id="sg1" class="field-input" placeholder="Placeholder"><p class="field-help">Help text</p></div>
+    <div><label class="field-label" for="sg2">With error</label><input id="sg2" class="field-input" aria-invalid="true" value="bad value"><p class="field-error">Error message</p></div>
+    <div class="flash flash-success">Saved.</div>
+    <div class="flash flash-error">Something needs attention.</div>
+  </section>
+</div>
+{% endblock %}

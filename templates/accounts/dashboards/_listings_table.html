@@ -1,0 +1,31 @@
+{% load i18n ui %}
+<section class="panel overflow-hidden" aria-labelledby="mylist-h">
+  <div class="flex items-center justify-between border-b hairline px-6 py-4">
+    <h2 id="mylist-h" class="font-display text-lg">{% if table_title %}{{ table_title }}{% else %}{% translate "Your listings" %}{% endif %}</h2>
+    <span class="text-sm text-muted">{% blocktranslate count n=listings|length %}{{ n }} listing{% plural %}{{ n }} listings{% endblocktranslate %}</span>
+  </div>
+  {% if listings %}
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-paper text-left text-xs uppercase tracking-wider text-muted">
+        <tr>
+          <th scope="col" class="px-6 py-3 font-medium">{% translate "Listing" %}</th>
+          <th scope="col" class="px-3 py-3 font-medium">{% translate "Price" %}</th>
+          <th scope="col" class="px-3 py-3 font-medium">{% translate "Status" %}</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-sand">
+        {% for l in listings %}
+        <tr>
+          <td class="px-6 py-3"><a class="font-medium hover:underline" href="{{ l.get_absolute_url }}">{{ l.title }}</a><div class="text-muted">{{ l.city }}</div></td>
+          <td class="whitespace-nowrap px-3 py-3">{{ l.price|money }}</td>
+          <td class="px-3 py-3">{% include "partials/status_badge.html" with status=l.status label=l.get_status_display %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="px-6 py-10 text-center text-muted">{% translate "No listings yet." %}</p>
+  {% endif %}
+</section>

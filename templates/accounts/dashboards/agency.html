@@ -1,0 +1,36 @@
+{% extends "accounts/dashboards/base.html" %}
+{% load i18n %}
+{% block dash_main %}
+{% if agency %}
+<section class="panel overflow-hidden" aria-labelledby="team-h">
+  <div class="flex items-center justify-between border-b hairline px-6 py-4">
+    <h2 id="team-h" class="font-display text-lg">{% translate "Your team" %}</h2>
+    <span class="text-sm text-muted">{% blocktranslate count n=agency.agents.count %}{{ n }} agent{% plural %}{{ n }} agents{% endblocktranslate %}</span>
+  </div>
+  <ul class="divide-y divide-sand">
+    {% for agent in agency.agents.all %}
+    <li class="flex items-center gap-3 px-6 py-3 text-sm">
+      <span class="grid h-9 w-9 place-items-center rounded-full bg-sand text-xs font-semibold" aria-hidden="true">{{ agent.user.initials }}</span>
+      <span class="flex-1"><span class="font-medium">{{ agent.user.full_name }}</span><span class="block text-muted">{{ agent.user.email }}</span></span>
+      {% include "partials/status_badge.html" with status=agent.verification_status label=agent.get_verification_status_display %}
+    </li>
+    {% empty %}
+    <li class="px-6 py-10 text-center text-muted">{% translate "No agents on your team yet." %}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% translate "Team listings" as team_title %}
+{% include "accounts/dashboards/_listings_table.html" with listings=agency.listings.all table_title=team_title %}
+{% endif %}
+{% endblock %}
+{% block dash_aside %}
+{% if agency %}
+<section class="panel p-6">
+  <h2 class="font-display text-lg">{{ agency.name }}</h2>
+  <dl class="mt-4 space-y-3 text-sm">
+    <div><dt class="text-muted">{% translate "Verification" %}</dt><dd class="mt-1">{% include "partials/status_badge.html" with status=agency.verification_status label=agency.get_verification_status_display %}</dd></div>
+    {% if agency.city %}<div><dt class="text-muted">{% translate "Based in" %}</dt><dd class="mt-0.5">{{ agency.city }}, {{ agency.country }}</dd></div>{% endif %}
+  </dl>
+</section>
+{% endif %}
+{% endblock %}

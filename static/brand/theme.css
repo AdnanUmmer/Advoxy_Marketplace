@@ -1,0 +1,52 @@
+/*
+ * BRAND THEME: the one CSS file for colors and fonts.
+ * Font families must match the families loaded by BRAND["fonts_url"] in config/brand.py.
+ * Tailwind utilities (bg-paper, text-ink, font-display, ...) read these variables,
+ * so editing values here rebrands the whole site without rebuilding CSS.
+ */
+:root {
+  /* Neutrals */
+  --brand-paper: #f6f2ea;      /* page background, warm off-white */
+  --brand-surface: #ffffff;    /* cards, inputs */
+  --brand-sand: #e7dfd0;       /* hairlines, subtle fills */
+  --brand-stone: #cfc4b1;      /* stronger borders */
+  --brand-ink: #1a1a17;        /* primary text (15.9:1 on paper) */
+  --brand-muted: #5b574f;      /* secondary text (6.6:1 on paper) */
+
+  /* Brand colors */
+  --brand-primary: #1e3a2f;        /* deep forest: buttons, links */
+  --brand-primary-hover: #152a22;
+  --brand-on-primary: #f6f2ea;
+  --brand-accent: #a4492a;         /* clay: highlights, focus (5.4:1 on white) */
+  --brand-accent-soft: #f3e3d9;
+  --brand-gold: #b8913f;           /* featured marker */
+
+  /* Status */
+  --brand-success: #2f6b46;
+  --brand-warning: #8a5a00;
+  --brand-danger: #a12c2c;
+  --brand-info: #2b5c84;
+
+  /* Type */
+  --brand-font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --brand-font-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+
+  /* Shape */
+  --brand-radius: 14px;
+  --brand-radius-sm: 8px;
+}
+
+/* Admin dashboard dark mode (milestone 5) reuses the same tokens. */
+[data-theme="dark"] {
+  --brand-paper: #121411;
+  --brand-surface: #1b1e1a;
+  --brand-sand: #2a2e28;
+  --brand-stone: #3b4038;
+  --brand-ink: #ecebe6;
+  --brand-muted: #a9a79f;
+  --brand-primary: #8fc1a7;
+  --brand-primary-hover: #a6d1ba;
+  --brand-on-primary: #10130f;
+  --brand-accent: #e39a7b;
+  --brand-accent-soft: #3a2a22;
+}

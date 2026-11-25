@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Dashboard" %}{% endblock %}
+{% block content %}
+<div class="container-page py-10">
+  <div class="flex flex-wrap items-end justify-between gap-4 border-b hairline pb-6">
+    <div>
+      <p class="eyebrow">{% block dash_eyebrow %}{{ dashboard_role.label }}{% endblock %}</p>
+      <h1 class="display-md mt-2">{% blocktranslate with name=user.get_short_name %}Hello, {{ name }}{% endblocktranslate %}</h1>
+    </div>
+    {% if switchable_roles|length > 1 %}
+    <nav aria-label="{% translate 'Switch dashboard' %}" class="flex flex-wrap gap-1 rounded-full border hairline bg-surface p-1">
+      {% for role in switchable_roles %}
+        <a href="?as={{ role.value }}" class="rounded-full px-4 py-1.5 text-sm {% if role == dashboard_role %}bg-ink text-paper{% else %}text-muted hover:text-ink{% endif %}"
+           {% if role == dashboard_role %}aria-current="page"{% endif %}>{{ role.label }}</a>
+      {% endfor %}
+    </nav>
+    {% endif %}
+  </div>
+
+  <div class="mt-8 grid gap-8 lg:grid-cols-[1fr_300px]">
+    <div class="space-y-8">{% block dash_main %}{% endblock %}</div>
+    <aside class="space-y-6">
+      <section class="panel p-6" aria-labelledby="acct-h">
+        <h2 id="acct-h" class="font-display text-lg">{% translate "Your account" %}</h2>
+        <dl class="mt-4 space-y-3 text-sm">
+          <div><dt class="text-muted">{% translate "Email" %}</dt>
+            <dd class="mt-0.5 flex flex-wrap items-center gap-2 break-all">{{ user.email }}
+              {% if user.is_email_verified %}<span class="badge badge-success">{% translate "Verified" %}</span>{% else %}<span class="badge badge-warning">{% translate "Unverified" %}</span>{% endif %}</dd></div>
+          <div><dt class="text-muted">{% translate "Roles" %}</dt>
+            <dd class="mt-1 flex flex-wrap gap-1">{% for role in user.roles %}<span class="badge badge-neutral">{{ role.label }}</span>{% endfor %}</dd></div>
+          <div><dt class="text-muted">{% translate "Member since" %}</dt><dd class="mt-0.5">{{ user.date_joined|date:"F Y" }}</dd></div>
+        </dl>
+      </section>
+      {% block dash_aside %}{% endblock %}
+    </aside>
+  </div>
+</div>
+{% endblock %}

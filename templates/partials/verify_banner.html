@@ -1,0 +1,9 @@
+{% load i18n %}
+<div class="border-b hairline bg-accent-soft/60">
+  <div class="container-page flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm">
+    <p>{% blocktranslate with email=user.email %}Confirm <strong>{{ email }}</strong> to list properties and message people.{% endblocktranslate %}</p>
+    <form method="post" action="{% url 'accounts:verify_email_resend' %}">{% csrf_token %}
+      <button class="btn-link text-sm" type="submit">{% translate "Resend link" %}</button>
+    </form>
+  </div>
+</div>

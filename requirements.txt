@@ -1,0 +1,11 @@
+# Runtime dependencies (pinned to minor versions; see README for upgrade notes)
+Django>=5.2,<5.3
+psycopg[binary]>=3.2,<3.3
+django-environ>=0.12,<0.13
+django-htmx>=1.23,<2
+Pillow>=11,<12
+celery>=5.5,<5.6
+redis>=5.2,<7
+stripe>=12,<13
+gunicorn>=23,<24
+pytailwindcss>=0.2,<0.4

@@ -1,0 +1,7 @@
+{% extends "emails/base.html" %}{% load i18n %}
+{% block body %}
+<p>{% blocktranslate %}Hello {{ user_name }},{% endblocktranslate %}</p>
+<p>{% translate "Confirm your email address to start listing and messaging." %}</p>
+<p style="margin:28px 0;"><a href="{{ site_url }}{{ path }}" style="background:#1e3a2f;color:#f6f2ea;text-decoration:none;padding:12px 22px;border-radius:999px;display:inline-block;">{% translate "Confirm email" %}</a></p>
+<p style="font-size:13px;color:#5b574f;">{% translate "The link works for 3 days. If you did not create an account, ignore this email." %}</p>
+{% endblock %}

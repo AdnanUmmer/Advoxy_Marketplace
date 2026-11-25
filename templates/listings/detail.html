@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n ui %}
+{% block title %}{{ listing.title }}{% endblock %}
+{% block meta_description %}{{ listing.description|truncatewords:30 }}{% endblock %}
+{% block content %}
+<article class="container-page pt-10">
+  <p class="eyebrow">{{ listing.get_purpose_display }} · {{ listing.get_property_type_display }}</p>
+  <h1 class="display-lg mt-3 max-w-3xl">{{ listing.title }}</h1>
+  <p class="mt-2 text-muted">{% if listing.neighborhood %}{{ listing.neighborhood }}, {% endif %}{{ listing.city }}, {{ listing.country }}</p>
+  {% with cover=listing.cover %}{% if cover %}
+    <img src="{{ cover.image.url }}" alt="{{ cover.alt_text|default:listing.title }}" class="mt-8 aspect-[16/8] w-full rounded-brand object-cover" width="1600" height="800">
+  {% endif %}{% endwith %}
+  <div class="mt-8 grid gap-10 lg:grid-cols-[1fr_320px]">
+    <div class="prose-calm">{{ listing.description|linebreaks }}</div>
+    <aside class="panel panel-pad h-fit">
+      <p class="font-display text-3xl">{{ listing.price|money }} <span class="font-sans text-base text-muted">{{ listing|price_suffix }}</span></p>
+      <dl class="mt-5 grid grid-cols-2 gap-3 text-sm">
+        <div><dt class="text-muted">{% translate "Bedrooms" %}</dt><dd class="font-medium">{{ listing.bedrooms }}</dd></div>
+        <div><dt class="text-muted">{% translate "Bathrooms" %}</dt><dd class="font-medium">{{ listing.bathrooms }}</dd></div>
+        {% if listing.area_sqm %}<div><dt class="text-muted">{% translate "Area" %}</dt><dd class="font-medium">{{ listing.area_sqm }} m²</dd></div>{% endif %}
+        <div><dt class="text-muted">{% translate "Furnished" %}</dt><dd class="font-medium">{{ listing.furnished|yesno:_("Yes,No") }}</dd></div>
+      </dl>
+    </aside>
+  </div>
+</article>
+{% endblock %}

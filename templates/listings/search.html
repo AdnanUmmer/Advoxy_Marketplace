@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if city %}{% blocktranslate %}Homes in {{ city }}{% endblocktranslate %}{% else %}{% translate "Search homes" %}{% endif %}{% endblock %}
+{% block content %}
+<section class="container-page pt-10">
+  <form method="get" class="flex flex-wrap items-end gap-3 border-b hairline pb-6" role="search">
+    <div>
+      <label class="field-label" for="s-purpose">{% translate "Looking to" %}</label>
+      <select id="s-purpose" name="purpose" class="field-input">
+        <option value="">{% translate "Buy or rent" %}</option>
+        <option value="sale" {% if purpose == "sale" %}selected{% endif %}>{% translate "Buy" %}</option>
+        <option value="rent" {% if purpose == "rent" %}selected{% endif %}>{% translate "Rent" %}</option>
+      </select>
+    </div>
+    <div class="min-w-[220px] flex-1">
+      <label class="field-label" for="s-city">{% translate "City" %}</label>
+      <input id="s-city" name="city" value="{{ city }}" class="field-input" placeholder="{% translate 'Any city' %}">
+    </div>
+    <button class="btn btn-primary" type="submit">{% translate "Update" %}</button>
+  </form>
+  <h1 class="display-md mt-8">{% blocktranslate count n=total %}{{ n }} home{% plural %}{{ n }} homes{% endblocktranslate %}{% if city %} {% blocktranslate %}in {{ city }}{% endblocktranslate %}{% endif %}</h1>
+  <div class="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+    {% for listing in listings %}{% include "partials/listing_card.html" with listing=listing %}
+    {% empty %}<p class="text-muted">{% translate "No homes match yet. Try another city." %}</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

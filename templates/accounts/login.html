@@ -1,0 +1,17 @@
+{% extends "accounts/auth_base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Sign in" %}{% endblock %}
+{% block eyebrow %}{% translate "Welcome back" %}{% endblock %}
+{% block heading %}{% translate "Sign in" %}{% endblock %}
+{% block intro %}<p class="mt-3 text-muted">{% translate "New here?" %} <a class="btn-link" href="{% url 'accounts:signup' %}">{% translate "Create an account" %}</a></p>{% endblock %}
+{% block form %}
+<form method="post" novalidate class="space-y-5">
+  {% csrf_token %}
+  {% include "partials/form_errors.html" %}
+  {% include "partials/field.html" with field=form.username %}
+  {% include "partials/field.html" with field=form.password %}
+  <input type="hidden" name="next" value="{{ next }}">
+  <a class="btn-link text-sm" href="{% url 'accounts:password_reset' %}">{% translate "Forgot your password?" %}</a>
+  <button class="btn btn-primary btn-lg w-full" type="submit">{% translate "Sign in" %}</button>
+</form>
+{% endblock %}

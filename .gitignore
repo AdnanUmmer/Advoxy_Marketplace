@@ -1,0 +1,13 @@
+.env
+*.pyc
+__pycache__/
+.venv/
+venv/
+media/
+staticfiles/
+static/css/app.css
+.pytest_cache/
+*.sqlite3
+.devtools/
+static/src/_candidates.css
+.claude/settings.local.json

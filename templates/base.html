@@ -1,0 +1,37 @@
+{% load static i18n %}<!doctype html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}"{% block html_attrs %}{% endblock %}>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ brand.name }}{% endblock %}{% block title_suffix %} · {{ brand.name }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ brand.tagline }}{% endblock %}">
+  <link rel="icon" href="{% static brand.favicon %}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="{{ brand.fonts_url }}">
+  <link rel="stylesheet" href="{% static 'brand/theme.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+  <script src="{% static 'vendor/alpine.min.js' %}" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="{% block body_class %}min-h-screen flex flex-col{% endblock %}">
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 btn btn-primary">{% translate "Skip to content" %}</a>
+
+  {% if DEMO_MODE %}{% include "partials/demo_banner.html" %}{% endif %}
+
+  {% block header %}{% include "partials/header.html" %}{% endblock %}
+
+  {% if user.is_authenticated and not user.is_email_verified %}{% include "partials/verify_banner.html" %}{% endif %}
+
+  {% include "partials/messages.html" %}
+
+  <main id="main" class="flex-1" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}{% include "partials/footer.html" %}{% endblock %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

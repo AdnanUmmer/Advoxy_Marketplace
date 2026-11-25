@@ -1,0 +1,10 @@
+{% extends "core/page.html" %}
+{% load i18n %}
+{% block title %}{% translate "Contact" %}{% endblock %}
+{% block eyebrow %}{% translate "Contact" %}{% endblock %}
+{% block heading %}{% translate "We'd like to hear from you." %}{% endblock %}
+{% block body %}
+<p>{% translate "Questions about a listing are best sent to the owner or agent using the form on that listing. For anything else, write to us:" %}</p>
+<p><a class="btn-link text-lg" href="mailto:{{ brand.support_email }}">{{ brand.support_email }}</a></p>
+<p class="text-muted">{% translate "We reply within two working days." %}</p>
+{% endblock %}
