@@ -1,0 +1,18 @@
+[Unit]
+Description=Advoxy scheduler (Celery beat: listing expiry, featured end, saved-search digest)
+After=network.target redis-server.service
+Wants=redis-server.service
+
+[Service]
+User=advoxy
+Group=advoxy
+WorkingDirectory=/srv/advoxy/app
+Environment=DJANGO_SETTINGS_MODULE=config.settings
+ExecStart=/srv/advoxy/venv/bin/celery -A config beat --loglevel=INFO --schedule=/srv/advoxy/celerybeat-schedule
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

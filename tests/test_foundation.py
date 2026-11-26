@@ -117,3 +117,9 @@ def test_seed_falls_back_to_generated_photos(settings, tmp_path):
     pool = Command()._build_photo_pool()
     assert pool["villa"] and all(not n.startswith("seed/villa-0") or n.endswith(".jpg") for n in pool["villa"])
     assert (tmp_path / "media" / pool["interior"][0]).exists()
+
+
+def test_healthz_reports_ok(client):
+    resp = client.get("/healthz/")
+    assert resp.status_code == 200
+    assert resp.json() == {"ok": True, "db": True, "cache": True}

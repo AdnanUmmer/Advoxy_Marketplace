@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
+    "config.staticfiles.AdvoxyStaticFilesConfig",
     "django.contrib.gis",
     "django.contrib.humanize",
     "django_htmx",
@@ -171,6 +171,14 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Advoxy <no-reply@example
 # ---------------------------------------------------------------------------
 # Celery + Redis
 # ---------------------------------------------------------------------------
+# Shared cache (site settings, sessions-free). Production: a Redis database, e.g. redis://localhost:6379/1,
+# so every Gunicorn worker sees admin setting changes at once. Empty = in-process memory (dev, tests).
+CACHE_URL = env("CACHE_URL", default="")
+CACHES = {
+    "default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": CACHE_URL, "KEY_PREFIX": "advoxy"}
+    if CACHE_URL else {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
+}
+
 CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = None
 CELERY_TASK_ALWAYS_EAGER = env("CELERY_TASK_ALWAYS_EAGER")

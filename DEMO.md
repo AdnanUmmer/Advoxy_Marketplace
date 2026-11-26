@@ -102,6 +102,31 @@ Payments run in **Stripe test mode**: use card `4242 4242 4242 4242`, any future
 
 Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (README, "Sign in with Google") and restart. **Sign in with Google** on `/accounts/login/` or **Sign up with Google** on `/accounts/signup/`. A new Google user lands on "Finish signing up" to choose roles; an existing email is linked and signed straight in.
 
-## Recorded walkthrough
+## What to try (milestone 8: admin settings, audit log, emails)
 
-A scripted shot list for the recorded walkthrough is added in milestone 8 (see QUESTIONS.md, Q7).
+Sign in at `/accounts/staff/login/` as the **admin**.
+
+1. **Settings** (`/staff/settings/`): change the site name, upload a logo, switch currency (e.g. `KES`, `KSh `), change the featured price or free listing limits. The header, prices, pricing page, checkout and emails follow at once. Plans (price, listings, seats, offered) are edited on the right.
+2. **Audit log** (`/staff/audit/`): every moderation decision, bulk action, user change, verification review and settings or plan edit, with who, when and what changed. Filter by area, date or text.
+3. **Emails** (`/staff/emails/`): every transactional email with sample data, HTML and plain text.
+4. **Dark mode**: the moon button in the admin sidebar.
+
+## Recorded walkthrough (script, about 8 minutes)
+
+I can't record video, so here is the shot list and narration (QUESTIONS.md, Q7). Record at 1440x900 with the demo data freshly seeded (`seed_demo --reset`).
+
+| # | Screen | Do | Say |
+|---|---|---|---|
+| 1 | Home | Scroll the hero, switch Buy/Rent, open Property type and Price | "Advoxy lists homes for sale and rent across Africa, starting with the largest markets." |
+| 2 | Search | Search Nairobi, rent, 2+ beds; open **Show map**, then full map; draw an area | "Every result shows the details people ask about first. The map shows only what's in view." |
+| 3 | Listing | Open a listing; gallery, facts, amenities, map; agent card with Verified badge | "Verified means our team checked the agent's licence." |
+| 4 | Inquiry | Sign in as **buyer**, send an inquiry; switch to the **agent** in another browser; reply | "Messages arrive within seconds and by email." |
+| 5 | Saved | Save the home and the search | "Saved searches send a daily email of new matches." |
+| 6 | Owner | Sign in as **landlord**; create a listing with photos; submit for review; show the 2/2 limit | "Individual owners list a few homes free." |
+| 7 | Payments | Buy an extra slot with card 4242 4242 4242 4242; feature a listing | "Payments run through Stripe; we never see card numbers." |
+| 8 | Agency | Sign in as **agency**; Manage team; invite an agent; show seats | "Agencies run their team and share one plan." |
+| 9 | Admin overview | Sign in as **admin**; metrics, charts, activity | "Everything the team needs on one screen." |
+| 10 | Moderation | Approve one listing, request edits on another with a note | "Owners get an email either way." |
+| 11 | Users and verifications | Approve a licence; suspend and restore a user | |
+| 12 | Settings and audit | Change the featured price; show it in the audit log and on the pricing page | "Prices, limits and branding change without code, and every change is recorded." |
+| 13 | Close | Home page in dark admin and light public side by side | |

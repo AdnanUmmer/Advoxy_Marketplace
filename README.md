@@ -107,4 +107,38 @@ deploy/            VPS deployment (milestone 8)
 
 ## Deployment
 
-The target is an Ubuntu VPS on Hostinger, running Nginx, Gunicorn, PostgreSQL 16 + PostGIS, Redis, and a Celery worker and beat under systemd. `deploy/deploy.sh` and the server configuration ship in milestone 8.
+Target: an Ubuntu 24.04 VPS (Hostinger KVM or similar, 2 GB RAM or more) running Nginx, Gunicorn, PostgreSQL 16 + PostGIS, Redis, and a Celery worker and beat under systemd, with HTTPS from Let's Encrypt.
+
+| File | What it does |
+|---|---|
+| `deploy/provision.sh` | One-time server setup: packages, firewall, `advoxy` user, database, virtualenv, `.env`, services, Nginx, HTTPS, nightly backups |
+| `deploy/deploy.sh` | Every release: pull, install, `check --deploy`, migrate, build CSS, collectstatic, thumbnails, restart, health check |
+| `deploy/env.production.example` | Production settings template (copied to `.env` on the server) |
+| `deploy/nginx/advoxy.conf` | Static files cached for a year, media, gzip, upload size, proxy to Gunicorn |
+| `deploy/systemd/*.service` | Gunicorn, Celery worker, Celery beat |
+| `deploy/backup.sh` | Nightly `pg_dump`, 14 days kept |
+
+**First deploy**
+
+1. Point your domain's A record at the VPS and SSH in as a sudo user.
+2. Get the code onto the server and provision it:
+   ```bash
+   git clone https://github.com/OWNER/Advoxy_Marketplace.git /tmp/advoxy
+   sudo DOMAIN=your-domain.com EMAIL=you@your-domain.com REPO=https://github.com/OWNER/Advoxy_Marketplace.git         bash /tmp/advoxy/deploy/provision.sh
+   ```
+   (For a private repository, add a read-only deploy key for the `advoxy` user first.)
+3. Fill in `/srv/advoxy/app/.env`: Stripe keys and webhook secret, Mapbox token, SMTP details, Google keys.
+4. Release and create the first admin:
+   ```bash
+   sudo -u advoxy /srv/advoxy/app/deploy/deploy.sh
+   sudo -u advoxy /srv/advoxy/venv/bin/python /srv/advoxy/app/manage.py createsuperuser
+   ```
+5. In Stripe, add the webhook `https://your-domain.com/billing/webhook/stripe/` (events listed in QUESTIONS.md, Q20). In Google Cloud, add `https://your-domain.com/accounts/google/callback/`.
+
+**Later releases:** push to `main`, then `sudo -u advoxy /srv/advoxy/app/deploy/deploy.sh`.
+
+**Live demo site:** set `DEMO_MODE=True` (shows the demo banner) and run `manage.py seed_demo` once.
+
+**Health check:** `/healthz/` returns `{"ok": true}` when the database and cache answer; point an uptime monitor at it.
+
+**Backups:** dumps are in `/srv/advoxy/backups/`. Restore with `pg_restore --no-owner --dbname=advoxy FILE.dump`. Uploaded photos (`/srv/advoxy/media`) and licence files (`/srv/advoxy/private_media`) are not in the dump; include them in VPS snapshots.

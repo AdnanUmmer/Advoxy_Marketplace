@@ -102,3 +102,10 @@ Done, see Q6. The home page hero image is a brand setting (`BRAND["hero_image"]`
 - **Staff accounts** can't use Google; they keep the staff sign-in.
 - **No extra library:** the ID token comes straight from Google's token endpoint in exchange for a one-time code plus PKCE, so its claims are checked without downloading Google's keys. Tell me if you want full signature checks with the `google-auth` package instead.
 
+## Q23. Milestone 8 defaults
+- **Settings scope:** site name, logo mark, support email, currency code and symbol, one-time prices and lengths, free limits for sellers and landlords, listing lifetime, and plans. Changing the currency doesn't convert existing prices; it changes the label and what Stripe charges from then on.
+- **Plan price changes** apply to new subscriptions only; existing subscribers keep their price until they change plan.
+- **Audit log** keeps entries forever and can't be edited. Tell me if you want a retention period (e.g. 2 years).
+- **Going live needs you:** I can't reach your VPS. Run `deploy/provision.sh` and `deploy/deploy.sh` (README, "Deployment"), or give me SSH access in a later session and I'll do it with you.
+- **Recording the walkthrough** needs a person; the script is in DEMO.md.
+

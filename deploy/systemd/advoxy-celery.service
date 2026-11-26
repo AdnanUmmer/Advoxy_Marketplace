@@ -1,0 +1,20 @@
+[Unit]
+Description=Advoxy background worker (Celery: emails, digests, expiry)
+After=network.target redis-server.service postgresql.service
+Wants=redis-server.service
+
+[Service]
+User=advoxy
+Group=advoxy
+WorkingDirectory=/srv/advoxy/app
+Environment=DJANGO_SETTINGS_MODULE=config.settings
+ExecStart=/srv/advoxy/venv/bin/celery -A config worker --loglevel=INFO --concurrency=2 --max-tasks-per-child=500
+Restart=on-failure
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=60
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
