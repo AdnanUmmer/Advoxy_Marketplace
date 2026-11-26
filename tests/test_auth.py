@@ -129,4 +129,4 @@ def test_staff_login_rejects_non_staff(client, make_user):
     assert response.status_code == 200 and "_auth_user_id" not in client.session
     staff = make_user(email="staff@example.com", is_staff=True)
     response = client.post(reverse("accounts:staff_login"), {"username": staff.email, "password": PASSWORD})
-    assert response.status_code == 302 and response.url == reverse("accounts:staff_home")
+    assert response.status_code == 302 and response.url == reverse("staff:overview")

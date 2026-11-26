@@ -1,0 +1,112 @@
+{% extends "staff/base.html" %}
+{% load i18n ui humanize %}
+{% block title %}{% translate "Moderation" %}{% endblock %}
+{% block page_title %}{% translate "Moderation queue" %}{% endblock %}
+{% block page_subtitle %}<p class="mt-1 text-sm text-muted">{% blocktranslate count n=queue|length %}{{ n }} listing waiting, oldest first{% plural %}{{ n }} listings waiting, oldest first{% endblocktranslate %}</p>{% endblock %}
+
+{% block staff_content %}
+{% if queue %}
+<div x-data="{ selected: [] }">
+  <form method="post" action="{% url 'staff:moderation_bulk' %}" x-ref="bulk" class="mb-4 flex flex-wrap items-center gap-3 rounded-brand border hairline bg-surface px-4 py-3"
+        @submit.prevent="if (selected.length) $refs.confirmBulk.showModal()">
+    {% csrf_token %}
+    <label class="flex items-center gap-2 text-sm">
+      <input type="checkbox" class="check" @change="selected = $event.target.checked ? [...document.querySelectorAll('[data-queue-id]')].map(e => e.dataset.queueId) : []"
+             :checked="selected.length && selected.length === document.querySelectorAll('[data-queue-id]').length">
+      {% translate "Select all" %}
+    </label>
+    <span class="text-sm text-muted" x-text="selected.length + ' {% translate "selected" %}'"></span>
+    <template x-for="id in selected" :key="id"><input type="hidden" name="ids" :value="id"></template>
+    <button class="btn btn-primary ml-auto px-4 py-2 text-sm" type="submit" :disabled="!selected.length">{% translate "Approve selected" %}</button>
+    <dialog x-ref="confirmBulk" class="m-auto w-[min(420px,92vw)] rounded-brand border hairline bg-surface p-6 text-ink backdrop:bg-ink/50">
+      <h2 class="text-lg font-bold">{% translate "Approve listings?" %}</h2>
+      <p class="mt-2 text-sm text-muted"><span x-text="selected.length"></span> {% translate "listings will go live and their owners will be emailed." %}</p>
+      <div class="mt-5 flex justify-end gap-2">
+        <button type="button" class="btn btn-quiet" @click="$refs.confirmBulk.close()">{% translate "Cancel" %}</button>
+        <button type="button" class="btn btn-primary" @click="$refs.bulk.submit()">{% translate "Approve" %}</button>
+      </div>
+    </dialog>
+  </form>
+
+  <ol class="space-y-4">
+    {% for l in queue %}
+    <li id="listing-{{ l.pk }}" class="overflow-hidden rounded-brand border hairline bg-surface" x-data="{ mode: null }">
+      <div class="grid lg:grid-cols-[minmax(0,340px)_1fr]">
+        {# Photos #}
+        <div class="relative bg-sand">
+          {% with photos=l.photos.all %}
+          {% if photos %}
+          <a href="{{ photos.0.image.url }}" target="_blank" rel="noopener" class="block aspect-[4/3] overflow-hidden">
+            <img src="{{ photos.0.image.url }}" alt="{{ photos.0.alt_text }}" class="h-full w-full object-cover" loading="lazy" width="340" height="255"></a>
+          {% if photos|length > 1 %}
+          <div class="flex gap-0.5 overflow-x-auto p-0.5">
+            {% for p in photos|slice:"1:8" %}<a href="{{ p.image.url }}" target="_blank" rel="noopener" class="block h-14 w-20 shrink-0 overflow-hidden"><img src="{{ p.image.url }}" alt="{{ p.alt_text }}" class="h-full w-full object-cover" loading="lazy" width="80" height="56"></a>{% endfor %}
+          </div>
+          {% endif %}
+          {% else %}
+          <p class="grid h-full min-h-40 place-items-center text-sm text-muted">{% translate "No photos" %}</p>
+          {% endif %}
+          <label class="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-surface/95 px-2.5 py-1 text-xs font-semibold shadow">
+            <input type="checkbox" class="check" value="{{ l.pk }}" data-queue-id="{{ l.pk }}" x-model="selected">{% translate "Select" %}
+          </label>
+          {% endwith %}
+        </div>
+
+        {# Details #}
+        <div class="flex min-w-0 flex-col gap-2 p-5">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+              <h2 class="text-lg font-bold">{{ l.title }}</h2>
+              <p class="text-sm text-muted">{{ l.get_purpose_display }} · {{ l.get_property_type_display }} · {% if l.neighborhood %}{{ l.neighborhood }}, {% endif %}{{ l.city }}, {{ l.country }}</p>
+            </div>
+            <p class="text-xl font-extrabold">{{ l.price|money }} <span class="text-sm font-medium text-muted">{{ l|price_suffix }}</span></p>
+          </div>
+          <p class="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <span>{% blocktranslate count n=l.bedrooms %}{{ n }} bed{% plural %}{{ n }} beds{% endblocktranslate %}</span>
+            <span>{% blocktranslate count n=l.bathrooms %}{{ n }} bath{% plural %}{{ n }} baths{% endblocktranslate %}</span>
+            {% if l.area_sqm %}<span>{{ l.area_sqm|intcomma }} m²</span>{% endif %}
+            <span>{% if l.furnished %}{% translate "Furnished" %}{% else %}{% translate "Unfurnished" %}{% endif %}</span>
+            <span>{% blocktranslate count n=l.photos.all|length %}{{ n }} photo{% plural %}{{ n }} photos{% endblocktranslate %}</span>
+            <span>{% if l.location %}{% translate "Pin set" %}{% else %}<span class="text-danger">{% translate "No map pin" %}</span>{% endif %}</span>
+          </p>
+          <p class="line-clamp-3 text-sm text-ink/80">{{ l.description }}</p>
+          {% with amenities=l.amenities.all %}{% if amenities %}<p class="text-xs text-muted">{% for a in amenities %}{{ a.name }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}{% endwith %}
+          <p class="text-sm">
+            <a class="font-semibold hover:underline" href="{% url 'staff:user_detail' l.owner_id %}">{{ l.owner.full_name }}</a>
+            <span class="text-muted">· {% if l.owner.is_agent %}{% translate "Agent" %}{% if l.agency %}, {{ l.agency.name }}{% endif %}{% elif l.owner.is_landlord %}{% translate "Landlord" %}{% else %}{% translate "Seller" %}{% endif %}
+            · {% blocktranslate with when=l.updated_at|naturaltime %}submitted {{ when }}{% endblocktranslate %}</span>
+          </p>
+
+          <div class="mt-auto flex flex-wrap items-center gap-2 border-t hairline pt-3">
+            <form method="post" action="{% url 'staff:moderation_action' l.pk %}">{% csrf_token %}
+              <input type="hidden" name="decision" value="approve">
+              <button class="btn btn-primary px-4 py-2 text-sm" type="submit">{% include "partials/icon.html" with name="check" %}{% translate "Approve" %}</button>
+            </form>
+            <button type="button" class="btn btn-quiet px-4 py-2 text-sm" @click="mode = mode === 'request_edits' ? null : 'request_edits'" :aria-expanded="(mode === 'request_edits').toString()">{% translate "Request edits" %}</button>
+            <button type="button" class="btn btn-quiet px-4 py-2 text-sm text-danger" @click="mode = mode === 'reject' ? null : 'reject'" :aria-expanded="(mode === 'reject').toString()">{% translate "Reject" %}</button>
+            <a class="ml-auto text-sm font-semibold text-primary hover:underline" href="{{ l.get_absolute_url }}" target="_blank" rel="noopener">{% translate "Full preview" %} ↗</a>
+          </div>
+          <form method="post" action="{% url 'staff:moderation_action' l.pk %}" x-show="mode" x-cloak class="space-y-2 rounded-brand-sm bg-paper p-3">
+            {% csrf_token %}
+            <input type="hidden" name="decision" :value="mode">
+            <label class="field-label" for="note-{{ l.pk }}" x-text="mode === 'reject' ? '{% translate "Reason for rejection (sent to the owner)" %}' : '{% translate "What should the owner change? (sent to them)" %}'"></label>
+            <textarea id="note-{{ l.pk }}" name="note" rows="3" required class="field-input" x-ref="note" x-effect="mode && $nextTick(() => $refs.note.focus())"></textarea>
+            <div class="flex justify-end gap-2">
+              <button type="button" class="btn btn-quiet px-4 py-2 text-sm" @click="mode = null">{% translate "Cancel" %}</button>
+              <button type="submit" class="btn px-4 py-2 text-sm" :class="mode === 'reject' ? 'bg-danger text-white hover:opacity-90' : 'btn-primary'"
+                      x-text="mode === 'reject' ? '{% translate "Reject listing" %}' : '{% translate "Send back for changes" %}'"></button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+</div>
+{% else %}
+<div class="rounded-brand border border-dashed border-stone bg-surface px-6 py-16 text-center">
+  <p class="text-xl font-bold">{% translate "All caught up" %}</p>
+  <p class="mt-1 text-sm text-muted">{% translate "New submissions appear here, oldest first." %}</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -5,6 +5,7 @@
 {% endblock %}
 {% block dash_aside %}
 {% include "listings/_capacity.html" %}
+{% if agent_profile %}{% include "accounts/dashboards/_verification.html" with status=agent_profile.verification_status status_label=agent_profile.get_verification_status_display %}{% endif %}
 {% if agent_profile %}
 <section class="panel p-6">
   <h2 class="font-display text-lg">{% translate "Agent profile" %}</h2>

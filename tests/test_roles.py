@@ -99,7 +99,8 @@ def test_staff_area_forbidden_for_members(client, make_user):
 
 def test_staff_area_open_to_staff(client, make_user):
     client.force_login(make_user(is_staff=True))
-    assert client.get(reverse("accounts:staff_home")).status_code == 200
+    assert client.get(reverse("accounts:staff_home")).url == reverse("staff:overview")
+    assert client.get(reverse("staff:overview")).status_code == 200
 
 
 @pytest.mark.parametrize(
@@ -131,7 +132,7 @@ def test_dashboard_switch_only_to_held_roles(client, make_user):
 def test_staff_dashboard_redirects_to_staff_home(client, make_user):
     client.force_login(make_user(is_staff=True))
     response = client.get(reverse("accounts:dashboard"))
-    assert response.status_code == 302 and response.url == reverse("accounts:staff_home")
+    assert response.status_code == 302 and response.url == reverse("staff:overview")
 
 
 def test_suspended_user_cannot_sign_in(client, make_user):

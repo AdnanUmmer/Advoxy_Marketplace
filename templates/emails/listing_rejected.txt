@@ -1,0 +1,8 @@
+{% autoescape off %}{% load i18n %}{% blocktranslate %}Hello {{ user_name }},{% endblocktranslate %}
+
+{% if changes_requested %}{% blocktranslate %}Our review team asked for changes to "{{ listing_title }}" before it can go live:{% endblocktranslate %}{% else %}{% blocktranslate %}"{{ listing_title }}" was not approved:{% endblocktranslate %}{% endif %}
+
+{{ note }}
+
+{% translate "Edit and resubmit:" %} {{ site_url }}{{ path }}
+{% endautoescape %}

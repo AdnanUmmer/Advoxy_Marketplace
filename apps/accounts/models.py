@@ -1,4 +1,7 @@
+import os
+
 from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
@@ -211,6 +214,29 @@ class AgentProfile(models.Model):
         return self.verification_status == VerificationStatus.VERIFIED
 
 
+class PrivateStorage(FileSystemStorage):
+    """Files outside MEDIA_ROOT (license documents), only served to staff through a checked view.
+
+    The location is read from settings on every use so tests and deployments can change it.
+    """
+
+    @property
+    def base_location(self):
+        return settings.PRIVATE_MEDIA_ROOT
+
+    @property
+    def location(self):
+        return os.path.abspath(self.base_location)
+
+    @property
+    def base_url(self):
+        return None
+
+
+def private_storage():
+    return PrivateStorage()
+
+
 class VerificationDocument(models.Model):
     """License document uploaded by an agent or agency for admin review."""
 
@@ -221,7 +247,7 @@ class VerificationDocument(models.Model):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="verification_documents")
     agency = models.ForeignKey(AgencyTeam, on_delete=models.CASCADE, null=True, blank=True, related_name="documents")
-    document = models.FileField(_("license document"), upload_to="verification/%Y/%m/")
+    document = models.FileField(_("license document"), upload_to="verification/%Y/%m/", storage=private_storage)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     rejection_reason = models.TextField(blank=True)
     reviewed_by = models.ForeignKey(
@@ -235,6 +261,3 @@ class VerificationDocument(models.Model):
 
     def __str__(self):
         return f"Verification for {self.user} ({self.status})"
-
-    def get_absolute_url(self):
-        return reverse("accounts:dashboard")

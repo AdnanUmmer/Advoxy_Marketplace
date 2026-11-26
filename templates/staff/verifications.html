@@ -1,0 +1,59 @@
+{% extends "staff/base.html" %}
+{% load i18n humanize %}
+{% block title %}{% translate "Verifications" %}{% endblock %}
+{% block page_title %}{% translate "Verifications" %}{% endblock %}
+
+{% block staff_content %}
+<nav class="mb-4 flex gap-1" aria-label="{% translate 'Verification tabs' %}">
+  <a href="?tab=pending" class="rounded-full px-4 py-1.5 text-sm font-semibold {% if tab == 'pending' %}bg-ink text-paper{% else %}text-muted hover:text-ink{% endif %}" {% if tab == 'pending' %}aria-current="page"{% endif %}>{% translate "Waiting" %}{% if nav.pending_verifications %} ({{ nav.pending_verifications }}){% endif %}</a>
+  <a href="?tab=history" class="rounded-full px-4 py-1.5 text-sm font-semibold {% if tab == 'history' %}bg-ink text-paper{% else %}text-muted hover:text-ink{% endif %}" {% if tab == 'history' %}aria-current="page"{% endif %}>{% translate "Reviewed" %}</a>
+</nav>
+
+<div class="overflow-auto rounded-brand border hairline bg-surface">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th scope="col" class="px-3 py-2.5 text-left font-semibold">{% translate "Applicant" %}</th>
+        <th scope="col" class="px-3 py-2.5 text-left font-semibold">{% translate "Type" %}</th>
+        <th scope="col" class="px-3 py-2.5 text-left font-semibold">{% translate "Document" %}</th>
+        <th scope="col" class="px-3 py-2.5 text-left font-semibold">{% if tab == "pending" %}{% translate "Uploaded" %}{% else %}{% translate "Decision" %}{% endif %}</th>
+        <th scope="col" class="px-3 py-2.5 text-right font-semibold">{% if tab == "pending" %}{% translate "Review" %}{% endif %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in docs %}
+      <tr x-data="{ rejecting: false }">
+        <td class="whitespace-nowrap"><a class="font-semibold hover:text-primary hover:underline" href="{% url 'staff:user_detail' d.user_id %}">{{ d.user.full_name }}</a><span class="block text-xs text-muted">{{ d.user.email }}</span></td>
+        <td>{% if d.agency %}{% translate "Agency" %}: {{ d.agency.name }}{% else %}{% translate "Agent" %}{% if d.user.agent_profile.license_number %} · {{ d.user.agent_profile.license_number }}{% endif %}{% endif %}</td>
+        <td><a class="font-medium text-primary hover:underline" href="{% url 'staff:verification_file' d.pk %}" target="_blank" rel="noopener">{% translate "Open license" %} ↗</a></td>
+        <td class="whitespace-nowrap text-muted">
+          {% if tab == "pending" %}{{ d.created_at|naturaltime }}
+          {% else %}{% include "partials/status_badge.html" with status=d.status label=d.get_status_display %} <span class="text-xs">{{ d.reviewed_at|date:"j M Y" }}{% if d.reviewed_by %} · {{ d.reviewed_by.full_name }}{% endif %}</span>
+            {% if d.rejection_reason %}<span class="block text-xs">{{ d.rejection_reason|truncatechars:80 }}</span>{% endif %}{% endif %}
+        </td>
+        <td class="text-right">
+          {% if tab == "pending" %}
+          <div class="flex flex-wrap justify-end gap-2" x-show="!rejecting">
+            <form method="post" action="{% url 'staff:verification_review' d.pk %}">{% csrf_token %}<input type="hidden" name="decision" value="approve">
+              <button class="btn btn-primary px-3.5 py-1.5 text-sm" type="submit">{% translate "Approve" %}</button></form>
+            <button type="button" class="btn btn-quiet px-3.5 py-1.5 text-sm text-danger" @click="rejecting = true">{% translate "Reject" %}</button>
+          </div>
+          <form method="post" action="{% url 'staff:verification_review' d.pk %}" x-show="rejecting" x-cloak class="flex min-w-[280px] flex-col items-end gap-2">
+            {% csrf_token %}<input type="hidden" name="decision" value="reject">
+            <label class="sr-only" for="reason-{{ d.pk }}">{% translate "Reason (sent to the applicant)" %}</label>
+            <textarea id="reason-{{ d.pk }}" name="reason" rows="2" required class="field-input text-sm" placeholder="{% translate 'Reason (sent to the applicant)' %}"></textarea>
+            <div class="flex gap-2">
+              <button type="button" class="btn btn-quiet px-3.5 py-1.5 text-sm" @click="rejecting = false">{% translate "Cancel" %}</button>
+              <button type="submit" class="btn bg-danger px-3.5 py-1.5 text-sm text-white hover:opacity-90">{% translate "Reject" %}</button>
+            </div>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="py-14 text-center text-muted">{% if tab == "pending" %}{% translate "No licenses waiting for review." %}{% else %}{% translate "Nothing reviewed yet." %}{% endif %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

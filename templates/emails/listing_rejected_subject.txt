@@ -1,0 +1,1 @@
+{% autoescape off %}{% load i18n %}{% if changes_requested %}{% blocktranslate %}Changes requested: {{ listing_title }}{% endblocktranslate %}{% else %}{% blocktranslate %}Listing not approved: {{ listing_title }}{% endblocktranslate %}{% endif %}{% endautoescape %}

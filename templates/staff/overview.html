@@ -1,0 +1,93 @@
+{% extends "staff/base.html" %}
+{% load i18n humanize staff_ui %}
+{% block title %}{% translate "Overview" %}{% endblock %}
+{% block page_title %}{% translate "Overview" %}{% endblock %}
+{% block page_subtitle %}<p class="mt-1 text-sm text-muted">{% now "l j F Y" %}</p>{% endblock %}
+{% block page_actions %}
+{% if metrics.pending %}<a class="btn btn-primary" href="{% url 'staff:moderation' %}">{% blocktranslate count n=metrics.pending %}Review {{ n }} listing{% plural %}Review {{ n }} listings{% endblocktranslate %}</a>{% endif %}
+{% endblock %}
+
+{% block staff_content %}
+{# Key metrics #}
+<section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5" aria-label="{% translate 'Key metrics' %}">
+  <a href="{% url 'staff:listings' %}" class="stat-tile hover:border-stone">
+    <p class="stat-label">{% translate "Total listings" %}</p>
+    <p class="stat-value tabular-nums">{{ metrics.listings_total|intcomma }}</p>
+    <p class="mt-2 text-sm text-muted">{% blocktranslate with n=metrics.published|intcomma %}{{ n }} live{% endblocktranslate %}</p>
+  </a>
+  <a href="{% url 'staff:moderation' %}" class="stat-tile hover:border-stone">
+    <p class="stat-label">{% translate "Pending reviews" %}</p>
+    <p class="stat-value tabular-nums">{{ metrics.pending }}</p>
+    <p class="mt-2 text-sm {% if metrics.pending %}text-warning{% else %}text-muted{% endif %}">{% if metrics.pending %}{% translate "Waiting for a decision" %}{% else %}{% translate "Queue is clear" %}{% endif %}</p>
+  </a>
+  <a href="{% url 'staff:users' %}" class="stat-tile hover:border-stone">
+    <p class="stat-label">{% translate "Active users" %}</p>
+    <p class="stat-value tabular-nums">{{ metrics.users_total|intcomma }}</p>
+    <p class="mt-2 text-sm text-muted">{% blocktranslate with n=metrics.new_users_week %}+{{ n }} this week{% endblocktranslate %}</p>
+  </a>
+  <div class="stat-tile">
+    <p class="stat-label">{% translate "Revenue this month" %}</p>
+    <p class="stat-value tabular-nums">{{ CURRENCY_SYMBOL }}0</p>
+    <p class="mt-2 text-sm text-muted">{% translate "Payments arrive in milestone 6" %}</p>
+  </div>
+  <div class="stat-tile">
+    <p class="stat-label">{% translate "New inquiries (7 days)" %}</p>
+    <p class="stat-value tabular-nums">{{ metrics.inquiries_week }}</p>
+    <p class="mt-2 text-sm text-muted">
+      {% if metrics.inquiries_delta > 0 %}▲ {% blocktranslate with n=metrics.inquiries_delta %}{{ n }} more than the week before{% endblocktranslate %}
+      {% elif metrics.inquiries_delta < 0 %}▼ {% blocktranslate with n=metrics.inquiries_delta|stringformat:"d"|slice:"1:" %}{{ n }} fewer than the week before{% endblocktranslate %}
+      {% else %}{% translate "Same as the week before" %}{% endif %}
+    </p>
+  </div>
+</section>
+
+{# Charts #}
+<div class="mt-4 grid gap-4 xl:grid-cols-2">
+  {% translate "New listings per day" as t1 %}{% include "staff/_bar_chart.html" with series=listing_series peak=listing_peak total=listing_total title=t1 chart_id="chart-listings" %}
+  {% translate "New inquiries per day" as t2 %}{% include "staff/_bar_chart.html" with series=inquiry_series peak=inquiry_peak total=inquiry_total title=t2 chart_id="chart-inquiries" %}
+</div>
+
+<div class="mt-4 grid gap-4 xl:grid-cols-[1fr_1fr_1.3fr]">
+  {# Listings by status #}
+  <section class="stat-tile" aria-labelledby="status-h">
+    <h2 id="status-h" class="text-[0.95rem] font-bold">{% translate "Listings by status" %}</h2>
+    <ul class="mt-3 divide-y divide-sand text-sm">
+      {% for value, label, n in status_rows %}
+      <li><a href="{% url 'staff:listings' %}?status={{ value }}" class="flex items-center justify-between py-2 hover:text-primary">
+        {% include "partials/status_badge.html" with status=value label=label %}<span class="tabular-nums font-semibold">{{ n|intcomma }}</span></a></li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {# Active users by role: single-series bar list #}
+  <section class="stat-tile" aria-labelledby="roles-h">
+    <h2 id="roles-h" class="text-[0.95rem] font-bold">{% translate "Active users by role" %}</h2>
+    <ul class="mt-3 space-y-2.5 text-sm">
+      {% for role, n in roles %}
+      <li>
+        <a href="{% url 'staff:users' %}?role={{ role.value }}" class="block hover:text-primary">
+          <span class="flex justify-between"><span>{{ role.label }}</span><span class="tabular-nums font-semibold">{{ n }}</span></span>
+          <span class="mt-1 block h-1.5 overflow-hidden rounded-full bg-sand"><span class="block h-full rounded-full bg-primary" style="width: {{ n|pct:roles_peak }}%"></span></span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {# Activity feed #}
+  <section class="stat-tile" aria-labelledby="activity-h">
+    <h2 id="activity-h" class="text-[0.95rem] font-bold">{% translate "Recent activity" %}</h2>
+    <ol class="mt-3 space-y-3 text-sm">
+      {% for a in activity %}
+      <li class="flex gap-3">
+        <span class="mt-1 h-2 w-2 shrink-0 rounded-full {% if a.kind == 'review' %}bg-warning{% elif a.kind == 'verification' %}bg-info{% elif a.kind == 'inquiry' %}bg-accent{% else %}bg-primary{% endif %}" aria-hidden="true"></span>
+        <span class="min-w-0 flex-1">
+          <a href="{{ a.url }}" class="line-clamp-1 hover:text-primary hover:underline">{{ a.text }}</a>
+          <span class="text-xs text-muted">{{ a.when|naturaltime }}</span>
+        </span>
+      </li>
+      {% empty %}<li class="text-muted">{% translate "Nothing yet." %}</li>{% endfor %}
+    </ol>
+  </section>
+</div>
+{% endblock %}

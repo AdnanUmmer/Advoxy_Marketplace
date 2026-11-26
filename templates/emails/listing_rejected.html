@@ -1,0 +1,4 @@
+{% extends "emails/base.html" %}{% load i18n %}
+{% block body %}
+<p>{% blocktranslate %}Hello {{ user_name }},{% endblocktranslate %}</p><p>{% if changes_requested %}{% blocktranslate %}Our review team asked for changes to <strong>{{ listing_title }}</strong> before it can go live:{% endblocktranslate %}{% else %}{% blocktranslate %}<strong>{{ listing_title }}</strong> was not approved:{% endblocktranslate %}{% endif %}</p><blockquote style="margin:16px 0;padding:12px 16px;background:#f6f2ea;border-radius:10px;white-space:pre-line;">{{ note }}</blockquote><p style="margin:28px 0;"><a href="{{ site_url }}{{ path }}" style="background:#1e3a2f;color:#f6f2ea;text-decoration:none;padding:12px 22px;border-radius:999px;display:inline-block;">{% translate "Edit listing" %}</a></p>
+{% endblock %}

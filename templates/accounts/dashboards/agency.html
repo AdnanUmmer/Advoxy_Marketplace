@@ -24,6 +24,7 @@
 {% endif %}
 {% endblock %}
 {% block dash_aside %}
+{% if agency %}{% include "accounts/dashboards/_verification.html" with status=agency.verification_status status_label=agency.get_verification_status_display %}{% endif %}
 {% if agency %}
 <section class="panel p-6">
   <h2 class="font-display text-lg">{{ agency.name }}</h2>

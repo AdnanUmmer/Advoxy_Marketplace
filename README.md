@@ -52,6 +52,7 @@ In local dev, `CELERY_TASK_ALWAYS_EAGER=True` runs background tasks inline. Emai
 
 | What | Where |
 |---|---|
+| Private files (license documents) | `PRIVATE_MEDIA_ROOT` env var (default `private_media/`, never served publicly) |
 | Secrets, database URL, Stripe keys, Mapbox token, SMTP | environment variables (`.env`), see `.env.example` |
 | Currency | `CURRENCY_CODE`, `CURRENCY_SYMBOL` env vars (default USD / $) |
 | Brand name, logo, fonts, contact email | `config/brand.py` |
@@ -69,7 +70,10 @@ All user-facing text goes through Django i18n (`{% translate %}` and `gettext`).
 config/            settings, urls, celery, brand.py
 apps/core/         public pages, email helper, Celery tasks, seed + build_css commands
 apps/accounts/     custom User with role flags, profiles, agencies, agents, auth flows, permissions
-apps/listings/     listing models, PostGIS location + geo queries
+apps/listings/     listing models, PostGIS location + geo queries, limits, lifecycle
+apps/search/       search filters, map, favorites, saved searches, daily digest
+apps/messaging/    inquiries, threads, messages, unread counts, email throttling
+apps/staff/        admin dashboard at /staff/ (overview, moderation, listings, users, verifications)
 templates/         Django templates (partials/, accounts/, core/, listings/, emails/)
 static/brand/      theme.css + logos (rebrand here)
 static/src/app.css Tailwind entry point and design-system components

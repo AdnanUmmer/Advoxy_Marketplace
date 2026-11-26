@@ -71,3 +71,11 @@ Done, see Q6. The home page hero image is a brand setting (`BRAND["hero_image"]`
 - **Polling:** the open conversation, the conversation list and the header unread badge refresh every 5 seconds, only while the browser tab is visible.
 - **Agency owners** do not see their agents' conversations yet. Tell me if they should (milestone 7, agency teams).
 
+## Q19. Admin dashboard defaults (milestone 5)
+- **Admin URL:** `/staff/` (separate staff sign-in at `/accounts/staff/login/`). Django's raw database admin stays at `/django-admin/` for superusers only.
+- **Unpublish** (bulk) moves listings back to draft with a note to the owner; **Delete permanently** also removes their photos, conversations and favorites and needs "DELETE" typed to confirm.
+- **Reject vs request edits:** both return the listing to draft with the staff note emailed to the owner; the email wording differs. A rejected listing can be fixed and resubmitted.
+- **License documents** are stored outside the public media folder and only staff can open them (`PRIVATE_MEDIA_ROOT`). Accepted: PDF, JPG, PNG up to 10 MB.
+- **Role changes:** staff can change public roles; only superusers can change another superuser; nobody changes their own account from the dashboard. Granting staff access stays in `/django-admin/`.
+- **Revenue this month** shows $0 until payments (milestone 6). **Audit log** of admin actions comes in milestone 8.
+

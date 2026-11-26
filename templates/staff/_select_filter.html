@@ -1,0 +1,8 @@
+{% load i18n staff_ui %}
+<div class="min-w-[130px] flex-1">
+  <label class="field-label text-xs" for="f-{{ name }}">{{ label }}</label>
+  <select id="f-{{ name }}" name="{{ name }}" class="field-input h-10 py-0">
+    <option value="">{% translate "All" %}</option>
+    {% for value, text in options %}<option value="{{ value }}" {% if request.GET|get_item:name == value %}selected{% endif %}>{{ text }}</option>{% endfor %}
+  </select>
+</div>

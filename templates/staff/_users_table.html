@@ -1,0 +1,42 @@
+{% load i18n staff_ui %}
+<p class="mb-3 text-sm text-muted">
+  {% blocktranslate count n=table.page.paginator.count %}{{ n }} user{% plural %}{{ n }} users{% endblocktranslate %}{% if filtered %} · <a class="font-semibold text-primary hover:underline" href="{% url 'staff:users' %}">{% translate "Clear filters" %}</a>{% endif %}
+</p>
+<div class="overflow-auto rounded-brand border hairline bg-surface lg:max-h-[calc(100vh-260px)]">
+  <table class="data-table">
+    <thead>
+      <tr>
+        {% translate "Name" as h %}{% sort_th "name" h %}
+        {% translate "Email" as h %}{% sort_th "email" h %}
+        <th scope="col" class="px-3 py-2.5 text-left font-semibold">{% translate "Roles" %}</th>
+        <th scope="col" class="px-3 py-2.5 text-left font-semibold">{% translate "Status" %}</th>
+        {% translate "Listings" as h %}{% sort_th "listings" h "right" %}
+        {% translate "Joined" as h %}{% sort_th "joined" h %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in table.page.object_list %}
+      <tr>
+        <td class="whitespace-nowrap">
+          <a class="flex items-center gap-2.5 font-semibold hover:text-primary hover:underline" href="{% url 'staff:user_detail' u.pk %}">
+            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sand text-xs font-bold" aria-hidden="true">{{ u.initials }}</span>{{ u.full_name }}
+          </a>
+        </td>
+        <td class="text-muted">{{ u.email }}</td>
+        <td><span class="flex flex-wrap gap-1">{% for r in u.roles %}<span class="badge badge-neutral">{{ r.label }}</span>{% endfor %}</span></td>
+        <td class="whitespace-nowrap">
+          {% if u.is_suspended %}<span class="badge badge-danger">{% translate "Suspended" %}</span>
+          {% elif not u.is_email_verified %}<span class="badge badge-warning">{% translate "Email unverified" %}</span>
+          {% else %}<span class="badge badge-success">{% translate "Active" %}</span>{% endif %}
+          {% if u.agent_profile.is_verified or u.owned_agency.is_verified %}<span class="badge badge-info">✓ {% translate "Licensed" %}</span>{% endif %}
+        </td>
+        <td class="text-right tabular-nums">{{ u.listing_count }}</td>
+        <td class="whitespace-nowrap text-muted">{{ u.date_joined|date:"j M Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="py-14 text-center text-muted">{% translate "No users match these filters." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "staff/_pagination.html" %}

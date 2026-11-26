@@ -11,3 +11,4 @@ static/css/app.css
 .devtools/
 static/src/_candidates.css
 .claude/settings.local.json
+private_media/

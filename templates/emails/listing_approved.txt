@@ -1,0 +1,6 @@
+{% autoescape off %}{% load i18n %}{% blocktranslate %}Hello {{ user_name }},{% endblocktranslate %}
+
+{% blocktranslate %}"{{ listing_title }}" passed review and is now live.{% endblocktranslate %}
+
+{{ site_url }}{{ path }}
+{% endautoescape %}

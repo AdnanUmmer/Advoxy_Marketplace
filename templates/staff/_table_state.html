@@ -1,0 +1,4 @@
+{# Keeps sort and page size when filters change. Synced from the URL after each table swap. #}
+<input type="hidden" name="sort" value="{{ table.sort }}" data-sync="sort">
+<input type="hidden" name="dir" value="{{ table.dir }}" data-sync="dir">
+<input type="hidden" name="per_page" value="{{ table.per_page }}" data-sync="per_page">

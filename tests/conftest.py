@@ -25,6 +25,7 @@ def _test_env(settings, _media_root):
     celery_app.conf.task_eager_propagates = True
     settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
     settings.MEDIA_ROOT = str(_media_root)
+    settings.PRIVATE_MEDIA_ROOT = str(_media_root / "private")
     settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 
 

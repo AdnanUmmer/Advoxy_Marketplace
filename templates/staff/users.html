@@ -1,0 +1,34 @@
+{% extends "staff/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Users" %}{% endblock %}
+{% block page_title %}{% translate "Users" %}{% endblock %}
+
+{% block staff_content %}
+<form id="filters" method="get" role="search" aria-label="{% translate 'Filter users' %}" class="mb-4 flex flex-wrap items-end gap-2"
+      hx-get="{% url 'staff:users' %}" hx-target="#table-region" hx-push-url="true" hx-trigger="change, keyup changed delay:300ms from:#f-q, submit"
+      x-data @keydown.window.slash="if (!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) { $event.preventDefault(); $refs.q.focus() }">
+  <div class="min-w-[240px] flex-[2]">
+    <label class="field-label text-xs" for="f-q">{% translate "Search" %} <kbd class="ml-1 rounded border hairline px-1 text-[0.65rem] text-muted">/</kbd></label>
+    <input id="f-q" x-ref="q" name="q" value="{{ request.GET.q }}" class="field-input h-10 py-0" placeholder="{% translate 'Name or email' %}" type="search">
+  </div>
+  <div class="min-w-[150px] flex-1">
+    <label class="field-label text-xs" for="f-role">{% translate "Role" %}</label>
+    <select id="f-role" name="role" class="field-input h-10 py-0">
+      <option value="">{% translate "All roles" %}</option>
+      {% for r in roles %}<option value="{{ r.value }}" {% if request.GET.role == r.value %}selected{% endif %}>{{ r.label }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="min-w-[150px] flex-1">
+    <label class="field-label text-xs" for="f-state">{% translate "Account" %}</label>
+    <select id="f-state" name="state" class="field-input h-10 py-0">
+      <option value="">{% translate "All" %}</option>
+      <option value="suspended" {% if request.GET.state == "suspended" %}selected{% endif %}>{% translate "Suspended" %}</option>
+      <option value="unverified" {% if request.GET.state == "unverified" %}selected{% endif %}>{% translate "Email not verified" %}</option>
+    </select>
+  </div>
+  {% include "staff/_table_state.html" %}
+  <noscript><button class="btn btn-primary" type="submit">{% translate "Filter" %}</button></noscript>
+</form>
+<div id="table-region">{% include "staff/_users_table.html" %}</div>
+{% endblock %}
+{% block scripts %}{% include "staff/_table_sync.html" %}{% endblock %}

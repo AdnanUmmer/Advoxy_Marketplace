@@ -66,6 +66,18 @@ Without a `MAPBOX_TOKEN`, the form takes latitude and longitude as numbers and t
 4. **Owners** see the inquirer's contact details at the top of the conversation.
 5. **Email throttling**: several quick messages produce one email; the next one is sent after the recipient reads the conversation or 15 minutes pass.
 
+## What to try (milestone 5: admin dashboard)
+
+Sign in at `/accounts/staff/login/` as `admin@demo.example.com`.
+
+1. **Overview** (`/staff/`): metric tiles, daily charts for new listings and inquiries (hover a bar, or **Show as table**), listings by status, users by role, recent activity. Toggle **Dark mode** in the sidebar (remembered; follows your system by default).
+2. **Moderation**: listings waiting for review, oldest first, with photos and details. **Approve** publishes and emails the owner; **Request edits** and **Reject** need a note, which is emailed. Select several and **Approve selected** (with confirmation).
+3. **Listings**: search (press `/` to jump to the box), filter by status, purpose, type, country or featured, sort any column, change rows per page. Tick rows and use **Bulk action** (feature, remove featured, unpublish, delete). A confirmation dialog appears; delete requires typing DELETE.
+4. **Users**: search and filter by role or account state. Open a user to see their profile and listings, change roles, set the verification status, or suspend (they are signed out immediately and can't sign in).
+5. **Verifications**: Jean-Paul Habimana (agency agent 3) has a license waiting. **Open license** shows the private file; approve, or reject with a reason (emailed).
+6. **As an agent** (`agent@demo.example.com`): the dashboard has a **Verified badge** panel; when not verified, it offers a license upload (PDF/JPG/PNG).
+7. **Tablet**: at tablet width the sidebar becomes a top bar and tables scroll inside their frame.
+
 ## Recorded walkthrough
 
 A scripted shot list for the recorded walkthrough is added in milestone 8 (see QUESTIONS.md, Q7).

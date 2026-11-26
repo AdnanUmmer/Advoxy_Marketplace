@@ -1,0 +1,1 @@
+{% autoescape off %}{% load i18n %}{% blocktranslate %}Your listing is live: {{ listing_title }}{% endblocktranslate %}{% endautoescape %}

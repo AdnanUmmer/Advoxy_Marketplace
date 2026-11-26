@@ -1,0 +1,8 @@
+{% autoescape off %}{% load i18n %}{% blocktranslate %}Hello {{ user_name }},{% endblocktranslate %}
+
+{% translate "We could not verify the license you uploaded:" %}
+
+{{ reason }}
+
+{% translate "You can upload a new document from your dashboard." %}
+{% endautoescape %}

@@ -96,6 +96,10 @@ class Command(BaseCommand):
         if demo_users.exists():
             if not opts["reset"]:
                 raise CommandError("Demo data already exists. Run with --reset to recreate it.")
+            from apps.accounts.models import VerificationDocument
+
+            for doc in VerificationDocument.objects.filter(user__in=demo_users):
+                doc.document.delete(save=False)  # private files are not removed by the cascade
             demo_users.delete()  # cascades to listings, profiles, agencies
         self.rnd = random.Random(2026)
         with transaction.atomic():
@@ -105,6 +109,7 @@ class Command(BaseCommand):
             count = self._listings(users, amenities)
             self._shortlists(users)
             self._conversations(users)
+            self._admin_queue(users)
         self.stdout.write(self.style.SUCCESS(f"Seeded {len(ACCOUNTS)} demo accounts and {count} listings."))
         self.stdout.write(f"Password for every demo account: {DEMO_PASSWORD}")
 
@@ -242,6 +247,10 @@ class Command(BaseCommand):
                     published_at=published_at,
                     expires_at=published_at + timedelta(days=90) if published_at else None,
                 )
+                # Spread creation dates so admin charts show realistic history.
+                created_at = (published_at - timedelta(days=rnd.randint(0, 3), hours=rnd.randint(0, 20))
+                              if published_at else now - timedelta(days=rnd.randint(0, 20), hours=rnd.randint(0, 20)))
+                Listing.objects.filter(pk=listing.pk).update(created_at=created_at)
                 listing.amenities.set(rnd.sample(amenities, rnd.randint(3, 7)))
                 # ~1.5 km jitter around the neighborhood centre
                 ListingLocation.objects.create(
@@ -257,6 +266,24 @@ class Command(BaseCommand):
                     photo.save()
                 created += 1
         return created
+
+    def _admin_queue(self, users):
+        """Work for the admin dashboard: listings awaiting review and a license to check."""
+        from django.core.files.base import ContentFile
+
+        from apps.accounts.models import VerificationDocument
+
+        now = timezone.now()
+        pending_ids = list(
+            Listing.objects.filter(status=ListingStatus.PUBLISHED, owner__email__startswith="agency.agent", is_featured=False)
+            .order_by("-pk").values_list("pk", flat=True)[:4]
+        )
+        for i, pk in enumerate(pending_ids):
+            Listing.objects.filter(pk=pk).update(status=ListingStatus.PENDING, published_at=None, expires_at=None,
+                                                 updated_at=now - timedelta(hours=6 * (i + 1)))
+        pdf = b"%PDF-1.4" + bytes([10]) + b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj trailer<</Root 1 0 R>>" + bytes([10]) + b"%%EOF"
+        doc = VerificationDocument(user=users["agency_agent3"])
+        doc.document.save("demo-license.pdf", ContentFile(pdf), save=True)
 
     def _conversations(self, users):
         """Sample inquiries and threads so every inbox has something in it."""
@@ -278,6 +305,24 @@ class Command(BaseCommand):
                 ("b", "Hello, could you share the service charge and whether there is backup power?", 5),
             ]),
         ]
+        rnd = random.Random(7)
+        extra = list(published.exclude(owner__email__in=[users["buyer"].email, users["renter"].email]).order_by("pk"))
+        rnd.shuffle(extra)
+        for listing in extra[:14]:
+            person = users["renter"] if listing.purpose == "rent" else users["buyer"]
+            when = now - timedelta(days=rnd.randint(1, 29), hours=rnd.randint(0, 23))
+            if Thread.objects.filter(listing=listing, buyer=person).exists() or listing.owner_id == person.pk:
+                continue
+            text = f"Hello, is {listing.title} still available? I'd like to arrange a viewing."
+            thread = Thread.objects.create(listing=listing, buyer=person, owner=listing.owner, last_message_at=when)
+            inquiry = Inquiry.objects.create(listing=listing, sender=person, thread=thread, name=person.full_name,
+                                             email=person.email, message=text)
+            msg = Message.objects.create(thread=thread, sender=person, body=text)
+            Message.objects.filter(pk=msg.pk).update(created_at=when)
+            Inquiry.objects.filter(pk=inquiry.pk).update(created_at=when)
+            Thread.objects.filter(pk=thread.pk).update(created_at=when)
+            MessageRead.objects.create(thread=thread, user=person, last_read_at=when)
+            MessageRead.objects.create(thread=thread, user=listing.owner, last_read_at=when + timedelta(hours=2))
         for buyer_key, owner_key, purpose, lines in scripts:
             buyer, owner = users[buyer_key], users[owner_key]
             listing = published.filter(owner=owner, purpose=purpose).order_by("pk").first()
@@ -285,8 +330,9 @@ class Command(BaseCommand):
                 continue
             first_at = now - timedelta(hours=lines[0][2])
             thread = Thread.objects.create(listing=listing, buyer=buyer, owner=owner, last_message_at=first_at)
-            Inquiry.objects.create(listing=listing, sender=buyer, thread=thread, name=buyer.full_name,
-                                   email=buyer.email, phone="+234 800 000 0000", message=lines[0][1])
+            inq = Inquiry.objects.create(listing=listing, sender=buyer, thread=thread, name=buyer.full_name,
+                                         email=buyer.email, phone="+234 800 000 0000", message=lines[0][1])
+            Inquiry.objects.filter(pk=inq.pk).update(created_at=first_at)
             for who, text, hours in lines:
                 sender = buyer if who == "b" else owner
                 msg = Message.objects.create(thread=thread, sender=sender, body=text)

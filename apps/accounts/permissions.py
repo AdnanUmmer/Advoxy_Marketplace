@@ -82,6 +82,20 @@ def verified_email_required(view):
     return wrapped
 
 
+def staff_required(view):
+    """Function-view version of StaffRequiredMixin."""
+
+    @wraps(view)
+    def wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path(), settings.STAFF_LOGIN_URL)
+        if not can_access_staff(request.user):
+            raise PermissionDenied
+        return view(request, *args, **kwargs)
+
+    return wrapped
+
+
 class StaffRequiredMixin(AccessMixin):
     """Admin dashboard views. Anonymous users go to the separate staff login."""
 

@@ -1,0 +1,9 @@
+<script>
+  // After sorting or paging (which push a new URL), copy sort/dir/per_page back into the filter form.
+  document.body.addEventListener("htmx:pushedIntoHistory", function () {
+    var params = new URLSearchParams(location.search);
+    document.querySelectorAll("#filters [data-sync]").forEach(function (input) {
+      if (params.has(input.dataset.sync)) input.value = params.get(input.dataset.sync);
+    });
+  });
+</script>

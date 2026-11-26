@@ -1,0 +1,32 @@
+{% extends "staff/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Listings" %}{% endblock %}
+{% block page_title %}{% translate "Listings" %}{% endblock %}
+
+{% block staff_content %}
+<form id="filters" method="get" role="search" aria-label="{% translate 'Filter listings' %}" class="mb-4 flex flex-wrap items-end gap-2"
+      hx-get="{% url 'staff:listings' %}" hx-target="#table-region" hx-push-url="true" hx-trigger="change, keyup changed delay:300ms from:#f-q, submit"
+      x-data @keydown.window.slash="if (!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) { $event.preventDefault(); $refs.q.focus() }">
+  <div class="min-w-[220px] flex-[2]">
+    <label class="field-label text-xs" for="f-q">{% translate "Search" %} <kbd class="ml-1 rounded border hairline px-1 text-[0.65rem] text-muted">/</kbd></label>
+    <input id="f-q" x-ref="q" name="q" value="{{ request.GET.q }}" class="field-input h-10 py-0" placeholder="{% translate 'Title, city, owner, ID…' %}" type="search">
+  </div>
+  {% include "staff/_select_filter.html" with name="status" label=_("Status") options=statuses %}
+  {% include "staff/_select_filter.html" with name="purpose" label=_("Purpose") options=purposes %}
+  {% include "staff/_select_filter.html" with name="type" label=_("Type") options=types %}
+  <div class="min-w-[140px] flex-1">
+    <label class="field-label text-xs" for="f-country">{% translate "Country" %}</label>
+    <select id="f-country" name="country" class="field-input h-10 py-0">
+      <option value="">{% translate "All" %}</option>
+      {% for c in countries %}<option value="{{ c }}" {% if request.GET.country == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+  </div>
+  <label class="flex h-10 items-center gap-2 text-sm"><input type="checkbox" name="featured" value="1" class="check" {% if request.GET.featured %}checked{% endif %}>{% translate "Featured only" %}</label>
+  {% include "staff/_table_state.html" %}
+  <noscript><button class="btn btn-primary" type="submit">{% translate "Filter" %}</button></noscript>
+</form>
+
+<div id="table-region">{% include "staff/_listings_table.html" %}</div>
+{% endblock %}
+
+{% block scripts %}{% include "staff/_table_sync.html" %}{% endblock %}

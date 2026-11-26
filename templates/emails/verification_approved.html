@@ -1,0 +1,4 @@
+{% extends "emails/base.html" %}{% load i18n %}
+{% block body %}
+<p>{% blocktranslate %}Hello {{ user_name }},{% endblocktranslate %}</p><p>{% translate "Your license was approved. Your profile and listings now show the verified badge." %}</p>
+{% endblock %}

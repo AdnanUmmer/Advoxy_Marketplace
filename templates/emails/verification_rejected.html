@@ -1,0 +1,4 @@
+{% extends "emails/base.html" %}{% load i18n %}
+{% block body %}
+<p>{% blocktranslate %}Hello {{ user_name }},{% endblocktranslate %}</p><p>{% translate "We could not verify the license you uploaded:" %}</p><blockquote style="margin:16px 0;padding:12px 16px;background:#f6f2ea;border-radius:10px;white-space:pre-line;">{{ reason }}</blockquote><p>{% translate "You can upload a new document from your dashboard." %}</p>
+{% endblock %}

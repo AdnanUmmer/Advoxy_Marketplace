@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static i18n ui %}
+{% block title_suffix %} · {{ brand.name }} {% translate "Admin" %}{% endblock %}
+{% block head %}
+<script>
+  // Apply the saved theme before paint (light, dark, or follow the system).
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem("advoxy.adminTheme"); } catch (e) {}
+    if (t !== "light" && t !== "dark") t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+{% endblock %}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block messages %}{% endblock %}
+{% block body_class %}min-h-screen bg-paper text-ink{% endblock %}
+
+{% block content %}
+<div class="lg:grid lg:grid-cols-[236px_minmax(0,1fr)]">
+  {# Sidebar (desktop) / top bar (tablet and phone) #}
+  <aside class="z-30 border-b hairline bg-surface lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r"
+         x-data="{ theme: document.documentElement.getAttribute('data-theme') }">
+    <div class="flex h-full flex-col gap-1 p-3 lg:p-4">
+      <div class="flex items-center gap-2.5 px-2 py-1.5 lg:mb-4">
+        <img src="{% static brand.logo_mark %}" alt="" class="h-8 w-8" width="32" height="32">
+        <span class="text-lg font-extrabold">{{ brand.name }}</span>
+        <span class="badge badge-neutral">{% translate "Admin" %}</span>
+        <button type="button" class="ml-auto grid h-9 w-9 place-items-center rounded-full border hairline text-ink hover:bg-sand/60 lg:hidden"
+                @click="theme = theme === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', theme); try { localStorage.setItem('advoxy.adminTheme', theme) } catch (e) {}"
+                :aria-label="theme === 'dark' ? '{% translate "Switch to light mode" %}' : '{% translate "Switch to dark mode" %}'">
+          <span x-text="theme === 'dark' ? '☀' : '☾'" aria-hidden="true"></span>
+        </button>
+        <a class="text-xs font-semibold text-muted hover:text-ink lg:hidden" href="{% url 'core:home' %}">{% translate "View site" %}</a>
+        <form method="post" action="{% url 'accounts:logout' %}" class="lg:hidden">{% csrf_token %}<button class="text-xs font-semibold text-muted hover:text-ink" type="submit">{% translate "Sign out" %}</button></form>
+      </div>
+      <nav class="flex gap-1 overflow-x-auto lg:flex-col lg:overflow-visible" aria-label="{% translate 'Admin' %}">
+        <a class="admin-nav-link shrink-0 {% active 'staff:overview' %}" href="{% url 'staff:overview' %}">{% include "partials/icon.html" with name="home" %}{% translate "Overview" %}</a>
+        <a class="admin-nav-link shrink-0 {% active 'staff:moderation' %}" href="{% url 'staff:moderation' %}">{% include "partials/icon.html" with name="check" %}{% translate "Moderation" %}{% if nav.pending_listings %}<span class="admin-count">{{ nav.pending_listings }}</span>{% endif %}</a>
+        <a class="admin-nav-link shrink-0 {% active 'staff:listings' %}" href="{% url 'staff:listings' %}">{% include "partials/icon.html" with name="list" %}{% translate "Listings" %}</a>
+        <a class="admin-nav-link shrink-0 {% active 'staff:user' %}" href="{% url 'staff:users' %}">{% include "partials/icon.html" with name="sliders" %}{% translate "Users" %}</a>
+        <a class="admin-nav-link shrink-0 {% active 'staff:verification' %}" href="{% url 'staff:verifications' %}">{% include "partials/icon.html" with name="bell" %}{% translate "Verifications" %}{% if nav.pending_verifications %}<span class="admin-count">{{ nav.pending_verifications }}</span>{% endif %}</a>
+      </nav>
+      <div class="mt-auto hidden space-y-1 border-t hairline pt-3 lg:block">
+        <button type="button" class="admin-nav-link w-full"
+                @click="theme = theme === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', theme); try { localStorage.setItem('advoxy.adminTheme', theme) } catch (e) {}">
+          <span x-text="theme === 'dark' ? '☀' : '☾'" aria-hidden="true" class="w-4 text-center"></span>
+          <span x-text="theme === 'dark' ? '{% translate "Light mode" %}' : '{% translate "Dark mode" %}'"></span>
+        </button>
+        <a class="admin-nav-link" href="{% url 'core:home' %}">{% include "partials/icon.html" with name="expand" %}{% translate "View site" %}</a>
+        {% if user.is_superuser %}<a class="admin-nav-link" href="{% url 'admin:index' %}">{% include "partials/icon.html" with name="list" %}{% translate "Database admin" %}</a>{% endif %}
+        <div class="flex items-center gap-2 px-3 pt-2 text-sm">
+          <span class="grid h-8 w-8 place-items-center rounded-full bg-primary text-xs font-bold text-on-primary" aria-hidden="true">{{ user.initials }}</span>
+          <span class="min-w-0 flex-1 truncate">{{ user.full_name }}</span>
+          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="text-xs font-semibold text-muted hover:text-ink" type="submit">{% translate "Sign out" %}</button></form>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="min-w-0">
+    {% include "partials/messages.html" %}
+    <div class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 class="text-[1.6rem] font-extrabold tracking-tight">{% block page_title %}{% endblock %}</h1>
+          {% block page_subtitle %}{% endblock %}
+        </div>
+        <div class="flex flex-wrap gap-2">{% block page_actions %}{% endblock %}</div>
+      </div>
+      {% block staff_content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

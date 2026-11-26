@@ -13,7 +13,7 @@ from apps.core.emails import send_templated_email
 
 from .forms import EmailLoginForm, QueuedPasswordResetForm, SignupForm, StaffLoginForm
 from .models import Role, User
-from .permissions import StaffRequiredMixin
+from .permissions import StaffRequiredMixin, role_required, verified_email_required
 from .tokens import make_email_token, read_email_token
 
 
@@ -79,7 +79,7 @@ class StaffLoginView(auth_views.LoginView):
     redirect_authenticated_user = False
 
     def get_default_redirect_url(self):
-        return reverse("accounts:staff_home")
+        return reverse("staff:overview")
 
 
 class PasswordResetView(auth_views.PasswordResetView):
@@ -116,7 +116,7 @@ def dashboard(request):
     """Each role has its own home screen. Users with several roles can switch."""
     user = request.user
     if user.is_staff and not request.GET.get("as"):
-        return redirect("accounts:staff_home")
+        return redirect("staff:overview")
     public_roles = [r for r in user.roles if r in DASHBOARD_TEMPLATES]
     requested = request.GET.get("as")
     role = Role(requested) if requested in [r.value for r in public_roles] else None
@@ -143,6 +143,28 @@ def dashboard(request):
 
 
 class StaffHomeView(StaffRequiredMixin, TemplateView):
-    """Staff landing page. The full admin dashboard arrives in milestone 5."""
+    """Old staff landing URL: forwards to the admin dashboard."""
 
-    template_name = "accounts/staff_home.html"
+    def get(self, request, *args, **kwargs):
+        return redirect("staff:overview")
+
+
+@require_POST
+@verified_email_required
+@role_required(Role.AGENT, Role.AGENCY)
+def verification_upload(request):
+    from django.core.exceptions import ValidationError
+
+    from .verification import submit_document
+
+    upload = request.FILES.get("document")
+    if not upload:
+        messages.error(request, _("Choose a file to upload."))
+    else:
+        try:
+            submit_document(request.user, upload)
+        except ValidationError as exc:
+            messages.error(request, " ".join(exc.messages))
+        else:
+            messages.success(request, _("License uploaded. Our team reviews it within two working days."))
+    return redirect("accounts:dashboard")
