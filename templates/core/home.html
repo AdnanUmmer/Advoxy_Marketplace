@@ -10,10 +10,10 @@
 
 {% block content %}
 <section class="relative isolate overflow-hidden bg-ink">
-  {% with hero=featured.0.cover %}{% if hero %}
-  <img src="{{ hero.image.url }}" alt="" class="absolute inset-0 -z-10 h-full w-full object-cover opacity-60" aria-hidden="true">
-  {% endif %}{% endwith %}
-  <div class="absolute inset-0 -z-10 bg-gradient-to-b from-ink/40 via-ink/30 to-ink/70" aria-hidden="true"></div>
+  {% if brand.hero_image %}
+  <img src="{% static brand.hero_image %}" alt="" class="absolute inset-0 -z-10 h-full w-full object-cover opacity-70" aria-hidden="true" fetchpriority="high">
+  {% endif %}
+  <div class="absolute inset-0 -z-10 bg-gradient-to-b from-ink/60 via-ink/45 to-ink/75" aria-hidden="true"></div>
   <div class="container-page pb-16 pt-14 text-center sm:pb-24 sm:pt-20">
     <h1 class="display-xl text-paper">{% translate "Find your next home across Africa" %}</h1>
     <p class="mx-auto mt-3 max-w-xl text-lg text-paper/85">{% translate "Reviewed listings from verified agents and owners, from Lagos to Johannesburg." %}</p>

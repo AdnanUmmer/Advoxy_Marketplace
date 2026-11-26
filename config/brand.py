@@ -11,6 +11,7 @@ BRAND = {
     "logo": "brand/logo.svg",          # path under static/
     "logo_mark": "brand/mark.svg",     # square mark, used for favicon and compact headers
     "favicon": "brand/mark.svg",
+    "hero_image": "brand/hero.jpg",    # home page hero background (path under static/)
     # Web fonts. Family names must match --brand-font-* in theme.css.
     "fonts_url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
     "support_email": "hello@example.com",

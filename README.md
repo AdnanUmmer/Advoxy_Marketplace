@@ -56,7 +56,7 @@ In local dev, `CELERY_TASK_ALWAYS_EAGER=True` runs background tasks inline. Emai
 | Currency | `CURRENCY_CODE`, `CURRENCY_SYMBOL` env vars (default USD / $) |
 | Brand name, logo, fonts, contact email | `config/brand.py` |
 | Brand colors and font stacks | `static/brand/theme.css` |
-| Logo files | `static/brand/` |
+| Logo files, home hero image | `static/brand/` (`BRAND["hero_image"]`) |
 | Demo banner | `DEMO_MODE=True` (live demo only) |
 
 To rebrand, edit `config/brand.py` and `static/brand/theme.css`, then replace the SVGs in `static/brand/`. Colors are CSS variables, so a color change doesn't need a CSS rebuild.
@@ -74,6 +74,7 @@ templates/         Django templates (partials/, accounts/, core/, listings/, ema
 static/brand/      theme.css + logos (rebrand here)
 static/src/app.css Tailwind entry point and design-system components
 tests/             pytest suite
+seed_assets/       demo listing photos (Unsplash License, see CREDITS.md) used by seed_demo
 scripts/           local setup script
 deploy/            VPS deployment (milestone 8)
 ```

@@ -17,7 +17,7 @@ Create the demo data with `python manage.py seed_demo` (or `--reset` to recreate
 | Agency agent 2 | `agency.agent2@demo.example.com` | Verified |
 | Agency agent 3 | `agency.agent3@demo.example.com` | Verification pending |
 
-The seed creates 77 listings across 11 cities in the priority countries: Lagos and Abuja (Nigeria), Nairobi (Kenya), Johannesburg and Cape Town (South Africa), Accra (Ghana), Addis Ababa (Ethiopia), Dakar (Senegal), Kinshasa (DR Congo), Mogadishu (Somalia) and Khartoum (Sudan). Coordinates are real (jittered about 1.5 km around each neighbourhood), prices are realistic in USD, and photos are generated placeholders.
+The seed creates 77 listings across 11 cities in the priority countries: Lagos and Abuja (Nigeria), Nairobi (Kenya), Johannesburg and Cape Town (South Africa), Accra (Ghana), Addis Ababa (Ethiopia), Dakar (Senegal), Kinshasa (DR Congo), Mogadishu (Somalia) and Khartoum (Sudan). Coordinates are real (jittered about 1.5 km around each neighbourhood), prices are realistic in USD, and each listing has five real photos (two exteriors, three interiors) from Unsplash (free licence; sources in `seed_assets/photos/CREDITS.md`).
 
 ## What to try (milestone 1)
 

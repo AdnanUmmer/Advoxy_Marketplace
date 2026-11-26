@@ -7,6 +7,7 @@ Later milestones extend this command (inquiries, threads, subscriptions).
 """
 
 import random
+import shutil
 from datetime import timedelta
 from decimal import Decimal
 from pathlib import Path
@@ -107,6 +108,30 @@ class Command(BaseCommand):
 
     # ------------------------------------------------------------------
     def _build_photo_pool(self):
+        """Photos shared by demo listings, stored under MEDIA_ROOT/seed/.
+
+        Uses the real photos in seed_assets/photos/ (Unsplash License, see CREDITS.md).
+        Falls back to generated placeholder drawings if that folder is missing.
+        """
+        assets = Path(settings.BASE_DIR) / "seed_assets" / "photos"
+        real = sorted(assets.glob("*.jpg")) if assets.is_dir() else []
+        if real:
+            out_dir = Path(settings.MEDIA_ROOT) / "seed"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            pool = {"apartment": [], "villa": [], "townhouse": [], "interior": []}
+            for src in real:
+                kind = src.stem.split("-")[0]
+                if kind not in pool:
+                    continue
+                dest = out_dir / src.name
+                if not dest.exists() or dest.stat().st_size != src.stat().st_size:
+                    shutil.copyfile(src, dest)
+                pool[kind].append(f"seed/{src.name}")
+            if all(pool.values()):
+                return pool
+        return self._generated_photo_pool()
+
+    def _generated_photo_pool(self):
         """Generate a reusable pool of placeholder images under MEDIA_ROOT/seed/."""
         out_dir = Path(settings.MEDIA_ROOT) / "seed"
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -221,7 +246,9 @@ class Command(BaseCommand):
                     listing=listing,
                     point=make_point(lat + rnd.uniform(-0.012, 0.012), lng + rnd.uniform(-0.012, 0.012)),
                 )
-                photos = [rnd.choice(self.photo_pool[kind]), rnd.choice(self.photo_pool["interior"]), rnd.choice(self.photo_pool[kind])]
+                exteriors = rnd.sample(self.photo_pool[kind], min(2, len(self.photo_pool[kind])))
+                interiors = rnd.sample(self.photo_pool["interior"], min(3, len(self.photo_pool["interior"])))
+                photos = [exteriors[0], *interiors[:2], *exteriors[1:], *interiors[2:]]
                 for pos, name in enumerate(photos):
                     photo = ListingPhoto(listing=listing, position=pos, alt_text=f"{title}, photo {pos + 1}")
                     photo.image.name = name

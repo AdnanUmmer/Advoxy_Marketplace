@@ -94,3 +94,25 @@ def test_demo_banner_controlled_by_flag(client, settings):
     assert "Demo site." not in client.get(reverse("core:home")).content.decode()
     settings.DEMO_MODE = True
     assert "Demo site." in client.get(reverse("core:home")).content.decode()
+
+
+def test_seed_uses_real_photos(seeded):
+    from apps.listings.models import ListingPhoto
+
+    names = set(ListingPhoto.objects.values_list("image", flat=True))
+    assert names and all(n.startswith("seed/") for n in names)
+    assert any(n.startswith("seed/villa-") for n in names)
+    assert any(n.startswith("seed/interior-") for n in names)
+    listing = Listing.objects.filter(property_type="villa").first()
+    files = [p.image.name for p in listing.photos.all()]
+    assert len(files) == 5 and len(set(files)) == 5  # no repeated photo within one listing
+
+
+def test_seed_falls_back_to_generated_photos(settings, tmp_path):
+    from apps.core.management.commands.seed_demo import Command
+
+    settings.BASE_DIR = tmp_path  # no seed_assets/photos here
+    settings.MEDIA_ROOT = str(tmp_path / "media")
+    pool = Command()._build_photo_pool()
+    assert pool["villa"] and all(not n.startswith("seed/villa-0") or n.endswith(".jpg") for n in pool["villa"])
+    assert (tmp_path / "media" / pool["interior"][0]).exists()
