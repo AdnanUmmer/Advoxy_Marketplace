@@ -1,4 +1,5 @@
 {% extends "emails/base.html" %}{% load i18n %}
+{% block preheader %}{{ message|truncatechars:90 }}{% endblock %}
 {% block body %}
 <p>{% blocktranslate %}Hello {{ owner_name }},{% endblocktranslate %}</p>
 <p>{% blocktranslate %}<strong>{{ name }}</strong> sent an inquiry about <a href="{{ site_url }}{{ listing_path }}" style="color:#1e3a2f;">{{ listing_title }}</a>:{% endblocktranslate %}</p>

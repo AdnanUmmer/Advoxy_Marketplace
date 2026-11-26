@@ -19,6 +19,7 @@ from . import photos as photo_ops
 from . import rules
 from .forms import ListingForm
 from .models import Listing, ListingStatus, Purpose
+from apps.core import site_settings
 
 
 def mapbox_token():
@@ -126,7 +127,7 @@ def featured_until(listing):
 
 @lister_required
 def create(request):
-    form = ListingForm(request.POST or None, request.FILES or None, currency_code=settings.CURRENCY_CODE)
+    form = ListingForm(request.POST or None, request.FILES or None, currency_code=site_settings.get("currency_code"))
     if request.method == "POST" and form.is_valid():
         files = form.cleaned_data.get("photos") or []
         with transaction.atomic():
@@ -157,7 +158,7 @@ def edit(request, listing):
     if listing.status in rules.CLOSED_STATUSES and listing.status != ListingStatus.EXPIRED:
         messages.info(request, _("Closed listings can't be edited."))
         return redirect("listings:mine")
-    form = ListingForm(request.POST or None, instance=listing, currency_code=settings.CURRENCY_CODE)
+    form = ListingForm(request.POST or None, instance=listing, currency_code=site_settings.get("currency_code"))
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             listing = form.save(commit=False)
@@ -180,8 +181,8 @@ def edit(request, listing):
         "missing": rules.missing_for_review(listing),
         "max_photos": rules.MAX_PHOTOS,
         "featured_until": featured_until(listing),
-        "featured_price": settings.FEATURED_PRICE,
-        "featured_days": settings.FEATURED_DAYS,
+        "featured_price": site_settings.get("featured_price"),
+        "featured_days": site_settings.get("featured_days"),
     })
 
 

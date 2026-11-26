@@ -1,0 +1,38 @@
+{% load i18n staff_ui %}
+<p class="mb-3 text-sm text-muted">
+  {% blocktranslate count n=table.page.paginator.count %}{{ n }} entry{% plural %}{{ n }} entries{% endblocktranslate %}{% if filtered %} · <a class="font-semibold text-primary hover:underline" href="{% url 'staff:audit' %}">{% translate "Clear filters" %}</a>{% endif %}
+</p>
+<div class="overflow-auto rounded-brand border hairline bg-surface lg:max-h-[calc(100vh-260px)]">
+  <table class="data-table">
+    <thead>
+      <tr>
+        {% translate "When" as h %}{% sort_th "when" h %}
+        {% translate "Staff" as h %}{% sort_th "actor" h %}
+        {% translate "Action" as h %}{% sort_th "action" h %}
+        <th scope="col" class="px-3 py-2.5 text-left font-semibold">{% translate "Item" %}</th>
+        <th scope="col" class="px-3 py-2.5 text-left font-semibold">{% translate "Details" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in table.page.object_list %}
+      <tr>
+        <td class="whitespace-nowrap text-muted"><time datetime="{{ e.created_at|date:'c' }}" title="{{ e.created_at|date:'j M Y H:i:s' }}">{{ e.created_at|date:"j M, H:i" }}</time></td>
+        <td class="whitespace-nowrap">{{ e.actor_label }}</td>
+        <td class="whitespace-nowrap"><span class="badge {{ e.action|audit_badge }}">{{ e.action|audit_label }}</span></td>
+        <td class="max-w-[260px]">
+          {% if e.target_type == "listing" %}<a class="hover:text-primary hover:underline" href="{% url 'staff:listings' %}?q={{ e.target_id }}">{{ e.target_label }}</a>
+          {% elif e.target_type == "user" %}<a class="hover:text-primary hover:underline" href="{% url 'staff:user_detail' e.target_id %}">{{ e.target_label }}</a>
+          {% else %}{{ e.target_label|default:"—" }}{% endif %}
+        </td>
+        <td class="max-w-[380px] text-sm text-muted">
+          {% for key, pair in e.changes.items %}<span class="block"><span class="font-semibold text-ink">{{ key|field_label }}</span>: {{ pair.0|default:"—" }} → {{ pair.1|default:"—" }}</span>{% endfor %}
+          {% if e.note %}<span class="block">{{ e.note }}</span>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="py-14 text-center text-muted">{% translate "Nothing recorded yet." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "staff/_pagination.html" %}

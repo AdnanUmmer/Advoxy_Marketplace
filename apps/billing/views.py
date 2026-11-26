@@ -19,6 +19,7 @@ from . import services
 from .models import Plan, Purchase, Subscription
 from .providers import WebhookVerificationError, get_provider
 from .providers.base import PaymentError
+from apps.core import site_settings
 
 log = logging.getLogger(__name__)
 
@@ -28,8 +29,8 @@ def pricing(request):
     return render(request, "billing/pricing.html", {
         "agent_plans": [p for p in plans if p.audience == Plan.Audience.AGENT],
         "agency_plans": [p for p in plans if p.audience == Plan.Audience.AGENCY],
-        "extra_price": settings.EXTRA_LISTING_PRICE, "extra_days": settings.EXTRA_LISTING_DAYS,
-        "featured_price": settings.FEATURED_PRICE, "featured_days": settings.FEATURED_DAYS,
+        "extra_price": site_settings.get("extra_listing_price"), "extra_days": site_settings.get("extra_listing_days"),
+        "featured_price": site_settings.get("featured_price"), "featured_days": site_settings.get("featured_days"),
         "current": services.active_subscription(request.user) if request.user.is_authenticated else None,
     })
 
@@ -48,7 +49,7 @@ def account(request):
         "can_buy_slots": user.is_seller or user.is_landlord or user.is_agent or user.is_agency,
         "slots": Purchase.objects.filter(user=user, kind=Purchase.Kind.EXTRA_LISTING, status=Purchase.Status.PAID).order_by("-expires_at")[:10],
         "purchases": Purchase.objects.filter(user=user).exclude(status=Purchase.Status.PENDING).select_related("listing")[:50],
-        "extra_price": settings.EXTRA_LISTING_PRICE, "extra_days": settings.EXTRA_LISTING_DAYS,
+        "extra_price": site_settings.get("extra_listing_price"), "extra_days": site_settings.get("extra_listing_days"),
         "now": timezone.now(),
         "agency_plan_shared": user.is_agent and not user.is_agency and getattr(getattr(user, "agent_profile", None), "agency_id", None),
     }

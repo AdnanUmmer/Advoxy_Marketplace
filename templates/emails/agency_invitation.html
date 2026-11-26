@@ -1,4 +1,6 @@
 {% extends "emails/base.html" %}{% load i18n %}
+{% block footer_reason %}{% blocktranslate with name=brand.name %}You received this because someone invited this address to an agency team on {{ name }}. If you weren't expecting it, you can ignore this email.{% endblocktranslate %}{% endblock %}
+{% block preheader %}{% blocktranslate %}Join {{ agency_name }} on {{ brand.name }}{% endblocktranslate %}{% endblock %}
 {% block body %}
 <p>{% blocktranslate %}<strong>{{ inviter_name }}</strong> invited you to join <strong>{{ agency_name }}</strong> as an agent on {{ brand.name }}.{% endblocktranslate %}</p>
 <p style="margin:28px 0;"><a href="{{ site_url }}{{ path }}" style="background:#1e3a2f;color:#f6f2ea;text-decoration:none;padding:12px 22px;border-radius:999px;display:inline-block;">{% translate "View invitation" %}</a></p>

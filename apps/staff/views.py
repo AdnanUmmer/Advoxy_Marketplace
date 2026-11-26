@@ -18,6 +18,7 @@ from django.views.decorators.http import require_POST
 from apps.accounts import verification
 from apps.accounts.models import ROLE_FIELDS, Role, User, VerificationDocument, VerificationStatus
 from apps.accounts.permissions import staff_required
+from apps.core import audit
 from apps.core.emails import send_templated_email
 from apps.listings import rules
 from apps.listings.models import Listing, ListingStatus, PropertyType, Purpose
@@ -158,6 +159,7 @@ def moderation_action(request, pk):
     except rules.TransitionError as exc:
         messages.error(request, str(exc))
     else:
+        audit.record(request, f"listing.{decision}", listing, note=request.POST.get("note", ""))
         label = {"approve": _("approved"), "reject": _("rejected"), "request_edits": _("sent back for changes")}[decision]
         messages.success(request, _("“%(title)s” %(label)s.") % {"title": listing.title, "label": label})
     return _back(request, reverse("staff:moderation"))
@@ -170,6 +172,7 @@ def moderation_bulk_approve(request):
     done = 0
     for listing in Listing.objects.filter(pk__in=ids, status=ListingStatus.PENDING):
         moderate_and_notify(listing, request.user, "approve")
+        audit.record(request, "listing.approve", listing, note="bulk")
         done += 1
     messages.success(request, _("Approved %(n)s listings.") % {"n": done})
     return redirect("staff:moderation")
@@ -230,6 +233,7 @@ def listings_bulk(request):
         messages.error(request, _("Type DELETE to confirm permanent deletion."))
         return _back(request, reverse("staff:listings"))
     now = timezone.now()
+    audit.record_many(request, f"listing.{action}", list(qs), note="bulk")
     if action == "feature":
         n = qs.filter(status=ListingStatus.PUBLISHED).update(is_featured=True, updated_at=now)
     elif action == "unfeature":
@@ -300,18 +304,22 @@ def user_action(request, pk, action):
     if action == "suspend":
         member.is_suspended = True
         member.save(update_fields=["is_suspended"])
+        audit.record(request, "user.suspend", member, note=request.POST.get("reason", ""))
         messages.success(request, _("%(name)s is suspended and signed out.") % {"name": member.full_name})
     elif action == "unsuspend":
         member.is_suspended = False
         member.save(update_fields=["is_suspended"])
+        audit.record(request, "user.unsuspend", member)
         messages.success(request, _("%(name)s can sign in again.") % {"name": member.full_name})
     elif action == "roles":
         chosen = [Role(r) for r in request.POST.getlist("roles") if r in [x.value for x in EDITABLE_ROLES]]
         if not chosen:
             messages.error(request, _("Keep at least one role."))
             return redirect(url)
+        before = sorted(r.value for r in member.roles)
         member.set_roles(chosen)
         member.save()
+        audit.record(request, "user.roles", member, changes={"roles": [before, sorted(r.value for r in chosen)]})
         from apps.accounts.models import AgencyTeam, AgentProfile
 
         if member.is_agent:
@@ -324,6 +332,7 @@ def user_action(request, pk, action):
         if status not in VerificationStatus.values:
             raise Http404
         verification.set_status(member, status)
+        audit.record(request, "user.verification", member, changes={"verification": [None, status]})
         messages.success(request, _("Verification status updated."))
     else:
         raise Http404
@@ -352,6 +361,8 @@ def verification_review(request, pk):
     except ValidationError as exc:
         messages.error(request, " ".join(exc.messages))
     else:
+        audit.record(request, "verification.approve" if approve else "verification.reject", doc.user,
+                     note=request.POST.get("reason", ""))
         messages.success(request, _("Verification approved.") if approve else _("Verification rejected."))
     return redirect("staff:verifications")
 

@@ -1,4 +1,5 @@
 {% extends "emails/base.html" %}{% load i18n %}
+{% block preheader %}{% translate "One click to confirm your email address." %}{% endblock %}
 {% block body %}
 <p>{% blocktranslate %}Hello {{ user_name }},{% endblocktranslate %}</p>
 <p>{% translate "Confirm your email address to start listing and messaging." %}</p>

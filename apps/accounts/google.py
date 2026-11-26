@@ -33,7 +33,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy as _lazy
 
-from config.brand import BRAND
+from apps.core import site_settings
 
 from .forms import ROLE_HELP
 from .models import SIGNUP_ROLES, AgencyTeam, AgentProfile, Profile, Role, SocialAccount, User
@@ -222,6 +222,6 @@ def finish(request):
                 AgentProfile.objects.create(user=user)
             SocialAccount.objects.create(user=user, provider=SocialAccount.GOOGLE, uid=pending["sub"], email=pending["email"])
         request.session.pop(PENDING_KEY, None)
-        messages.success(request, _("Welcome to %(brand)s.") % {"brand": BRAND["name"]})
+        messages.success(request, _("Welcome to %(brand)s.") % {"brand": site_settings.get("site_name")})
         return _sign_in(request, user, pending["next"])
     return render(request, "accounts/google_finish.html", {"form": form, "email": pending["email"]})

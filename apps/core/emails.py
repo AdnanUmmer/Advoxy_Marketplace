@@ -7,13 +7,13 @@ Sending is always queued through Celery.
 from django.conf import settings
 from django.template.loader import render_to_string
 
-from config.brand import BRAND
+from apps.core import site_settings
 
 from .tasks import send_email_task
 
 
 def build_context(extra=None):
-    ctx = {"brand": BRAND, "site_url": settings.SITE_URL}
+    ctx = {"brand": site_settings.brand(), "site_url": settings.SITE_URL}
     ctx.update(extra or {})
     return ctx
 

@@ -4,6 +4,7 @@ from django import template
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.utils.translation import gettext as _
+from apps.core import site_settings
 
 register = template.Library()
 
@@ -19,7 +20,7 @@ def money(value, decimals=0):
         return value
     amount = round(amount, int(decimals))
     text = intcomma(f"{amount:.{int(decimals)}f}")
-    return f"{settings.CURRENCY_SYMBOL}{text}"
+    return f"{site_settings.get("currency_symbol")}{text}"
 
 
 @register.filter

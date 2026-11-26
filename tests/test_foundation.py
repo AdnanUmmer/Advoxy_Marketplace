@@ -81,11 +81,12 @@ def test_search_filters_by_city_and_purpose(client, make_user, make_listing):
     assert [l.title for l in response.context["page"].object_list] == ["Accra rental"]
 
 
-def test_money_filter_uses_currency_settings(settings):
-    settings.CURRENCY_SYMBOL = "$"
+def test_money_filter_uses_currency_settings(db):
+    from apps.core import site_settings
+
     out = Template("{% load ui %}{{ v|money }}").render(Context({"v": Decimal("1250000")}))
     assert out == "$1,250,000"
-    settings.CURRENCY_SYMBOL = "€"
+    site_settings.save({"currency_symbol": "€"})
     assert Template("{% load ui %}{{ v|money }}").render(Context({"v": 900})) == "€900"
 
 

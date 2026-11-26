@@ -1,0 +1,35 @@
+{% extends "staff/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Audit log" %}{% endblock %}
+{% block page_title %}{% translate "Audit log" %}{% endblock %}
+{% block page_subtitle %}<p class="mt-1 text-sm text-muted">{% blocktranslate count n=week_count %}{{ n }} change in the last 7 days{% plural %}{{ n }} changes in the last 7 days{% endblocktranslate %}</p>{% endblock %}
+
+{% block staff_content %}
+<form id="filters" method="get" role="search" aria-label="{% translate 'Filter audit log' %}" class="mb-4 flex flex-wrap items-end gap-2"
+      hx-get="{% url 'staff:audit' %}" hx-target="#table-region" hx-push-url="true" hx-trigger="change, keyup changed delay:300ms from:#f-q, submit"
+      x-data @keydown.window.slash="if (!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) { $event.preventDefault(); $refs.q.focus() }">
+  <div class="min-w-[220px] flex-[2]">
+    <label class="field-label text-xs" for="f-q">{% translate "Search" %} <kbd class="ml-1 rounded border hairline px-1 text-[0.65rem] text-muted">/</kbd></label>
+    <input id="f-q" x-ref="q" name="q" value="{{ request.GET.q }}" class="field-input h-10 py-0" placeholder="{% translate 'Staff email, item or note' %}" type="search">
+  </div>
+  <div class="min-w-[150px] flex-1">
+    <label class="field-label text-xs" for="f-area">{% translate "Area" %}</label>
+    <select id="f-area" name="area" class="field-input h-10 py-0">
+      <option value="">{% translate "Everything" %}</option>
+      {% for value, label in areas %}<option value="{{ value }}" {% if request.GET.area == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="min-w-[140px] flex-1">
+    <label class="field-label text-xs" for="f-from">{% translate "From" %}</label>
+    <input id="f-from" name="from" type="date" value="{{ request.GET.from }}" class="field-input h-10 py-0">
+  </div>
+  <div class="min-w-[140px] flex-1">
+    <label class="field-label text-xs" for="f-to">{% translate "To" %}</label>
+    <input id="f-to" name="to" type="date" value="{{ request.GET.to }}" class="field-input h-10 py-0">
+  </div>
+  {% include "staff/_table_state.html" %}
+  <noscript><button class="btn btn-primary" type="submit">{% translate "Filter" %}</button></noscript>
+</form>
+<div id="table-region">{% include "staff/_audit_table.html" %}</div>
+{% endblock %}
+{% block scripts %}{% include "staff/_table_sync.html" %}{% endblock %}

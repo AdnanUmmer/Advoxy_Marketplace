@@ -18,15 +18,15 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
+from apps.core import site_settings
+
 from .models import Listing, ListingLocation, ListingStatus, Purpose
 
 # Listings that occupy a slot. Drafts are free to create and keep.
 ACTIVE_STATUSES = (ListingStatus.PENDING, ListingStatus.PUBLISHED)
 CLOSED_STATUSES = (ListingStatus.SOLD, ListingStatus.RENTED, ListingStatus.REMOVED, ListingStatus.EXPIRED)
 
-FREE_SELLER_LISTINGS = 1
-FREE_LANDLORD_LISTINGS = 2
-LISTING_LIFETIME_DAYS = getattr(settings, "LISTING_LIFETIME_DAYS", 90)
+# Free allowances and listing lifetime are admin settings (apps/core/site_settings.py).
 MAX_PHOTOS = 20
 
 
@@ -62,9 +62,9 @@ class Capacity:
 def free_allowance(user):
     allowance = 0
     if user.is_seller:
-        allowance += FREE_SELLER_LISTINGS
+        allowance += site_settings.get("free_seller_listings")
     if user.is_landlord:
-        allowance += FREE_LANDLORD_LISTINGS
+        allowance += site_settings.get("free_landlord_listings")
     return allowance
 
 
@@ -205,7 +205,7 @@ def moderate(listing, staff_user, decision, note=""):
     if decision == "approve":
         listing.status = ListingStatus.PUBLISHED
         listing.published_at = now
-        listing.expires_at = now + timedelta(days=LISTING_LIFETIME_DAYS)
+        listing.expires_at = now + timedelta(days=site_settings.get("listing_lifetime_days"))
         listing.moderation_note = ""
     elif decision in ("reject", "request_edits"):
         if not note.strip():

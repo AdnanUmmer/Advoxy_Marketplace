@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.utils.functional import SimpleLazyObject
 
-from config.brand import BRAND
+from apps.core import site_settings
 
 
 def _favorite_ids(user):
@@ -15,10 +15,10 @@ def _favorite_ids(user):
 def site(request):
     user = getattr(request, "user", None)
     return {
-        "brand": BRAND,
+        "brand": site_settings.brand(),
         "DEMO_MODE": settings.DEMO_MODE,
-        "CURRENCY_CODE": settings.CURRENCY_CODE,
-        "CURRENCY_SYMBOL": settings.CURRENCY_SYMBOL,
+        "CURRENCY_CODE": site_settings.get("currency_code"),
+        "CURRENCY_SYMBOL": site_settings.get("currency_symbol"),
         "GOOGLE_SIGNIN": bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET),
         # Evaluated only when a template asks (listing cards' heart buttons).
         "favorite_ids": SimpleLazyObject(lambda: _favorite_ids(user)) if user else frozenset(),

@@ -1,0 +1,89 @@
+{% extends "staff/base.html" %}
+{% load i18n ui %}
+{% block title %}{% translate "Settings" %}{% endblock %}
+{% block page_title %}{% translate "Settings" %}{% endblock %}
+{% block page_subtitle %}<p class="mt-1 text-sm text-muted">{% translate "Changes apply straight away and are recorded in the audit log." %}</p>{% endblock %}
+
+{% block staff_content %}
+<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+  <form method="post" enctype="multipart/form-data" class="space-y-6" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="section" value="site">
+    {% include "partials/form_errors.html" %}
+    {% for label, fields in form.groups %}
+    <section class="rounded-brand border hairline bg-surface" aria-labelledby="sg-{{ forloop.counter }}">
+      <h2 id="sg-{{ forloop.counter }}" class="border-b hairline px-5 py-3.5 font-bold">{{ label }}</h2>
+      <div class="grid gap-5 p-5 sm:grid-cols-2">
+        {% for field in fields %}
+          {% if field.name == "logo" %}
+          <div class="sm:col-span-2">
+            <span class="field-label">{{ field.label }}</span>
+            <div class="flex flex-wrap items-center gap-4">
+              <img src="{{ logo_url }}" alt="{% translate 'Current logo' %}" class="h-14 w-14 rounded-xl border hairline bg-paper object-contain p-1" width="56" height="56">
+              <div class="min-w-0 flex-1 space-y-2">
+                <input type="file" name="logo" id="{{ field.auto_id }}" accept="image/png,image/jpeg,image/webp" class="block w-full text-sm" aria-describedby="{{ field.auto_id }}_help">
+                <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="clear_logo" class="check"> {{ form.clear_logo.label }}</label>
+              </div>
+            </div>
+            <p class="field-help" id="{{ field.auto_id }}_help">{{ field.help_text }}</p>
+            {% if field.errors %}<p class="field-error">{{ field.errors|join:" " }}</p>{% endif %}
+          </div>
+          {% else %}
+            {% include "partials/field.html" with field=field %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+    <div class="sticky bottom-0 -mx-1 flex justify-end bg-paper/90 px-1 py-3 backdrop-blur">
+      <button class="btn btn-primary" type="submit">{% translate "Save settings" %}</button>
+    </div>
+  </form>
+
+  <section class="self-start rounded-brand border hairline bg-surface" aria-labelledby="plans-h">
+    <div class="border-b hairline px-5 py-3.5">
+      <h2 id="plans-h" class="font-bold">{% translate "Subscription plans" %}</h2>
+      <p class="mt-0.5 text-sm text-muted">{% translate "Prices are monthly. People already subscribed keep their current price until they change plan." %}</p>
+    </div>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="section" value="plans">
+      {{ plans.management_form }}
+      {% if plans.non_form_errors %}<p class="field-error px-5 pt-3">{{ plans.non_form_errors|join:" " }}</p>{% endif %}
+      <div class="divide-y divide-sand">
+        {% for pf in plans.forms %}
+        <fieldset class="grid gap-3 p-5 sm:grid-cols-6">
+          {{ pf.id }}
+          <legend class="sr-only">{{ pf.instance.name }}</legend>
+          <div class="sm:col-span-3">
+            <label class="field-label text-xs" for="{{ pf.name.auto_id }}">{% translate "Name" %}</label>
+            {{ pf.name|field_widget }}
+          </div>
+          <div class="sm:col-span-3">
+            <label class="field-label text-xs" for="{{ pf.price_monthly.auto_id }}">{% blocktranslate with code=CURRENCY_CODE %}Monthly price ({{ code }}){% endblocktranslate %}</label>
+            {{ pf.price_monthly|field_widget }}
+          </div>
+          <div class="sm:col-span-2">
+            <label class="field-label text-xs" for="{{ pf.listing_limit.auto_id }}">{% translate "Active listings" %}</label>
+            {{ pf.listing_limit|field_widget }}
+          </div>
+          <div class="sm:col-span-2">
+            <label class="field-label text-xs" for="{{ pf.seats.auto_id }}">{% translate "Agent seats" %}</label>
+            {{ pf.seats|field_widget }}
+          </div>
+          <label class="flex items-end gap-2 pb-2.5 text-sm sm:col-span-2">{{ pf.is_active }} {% translate "Offered" %}</label>
+          <div class="sm:col-span-6">
+            <label class="field-label text-xs" for="{{ pf.description.auto_id }}">{% translate "Description" %}</label>
+            {{ pf.description|field_widget }}
+          </div>
+          {% for f in pf %}{% if f.errors %}<p class="field-error sm:col-span-6">{{ f.label }}: {{ f.errors|join:" " }}</p>{% endif %}{% endfor %}
+        </fieldset>
+        {% endfor %}
+      </div>
+      <div class="flex justify-end border-t hairline px-5 py-3">
+        <button class="btn btn-primary" type="submit">{% translate "Save plans" %}</button>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}

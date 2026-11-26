@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ brand.name }}{% endblock %}{% block title_suffix %} · {{ brand.name }}{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}{{ brand.tagline }}{% endblock %}">
-  <link rel="icon" href="{% static brand.favicon %}" type="image/svg+xml">
+  <link rel="icon" href="{{ brand.mark_url }}" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="{{ brand.fonts_url }}">

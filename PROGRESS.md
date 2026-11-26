@@ -1,6 +1,6 @@
 # Advoxy build progress
 
-**Overall: 84% complete** (43 of 51 items)
+**Overall: 90% complete** (46 of 51 items)
 
 Percentage = completed items / total items, rounded down. Items are every milestone and every task from SPEC.md section 13. A milestone is checked only when all its tasks work, its tests pass, and the seeded demo runs.
 
@@ -63,9 +63,9 @@ Percentage = completed items / total items, rounded down. Items are every milest
 
 ## Milestone 8: Polish and launch
 - [ ] **Milestone 8 complete**
-- [ ] Admin settings page
-- [ ] Audit log
-- [ ] Email templates
+- [x] Admin settings page
+- [x] Audit log
+- [x] Email templates
 - [ ] Accessibility pass
 - [ ] Performance pass
 - [ ] Deploy to VPS

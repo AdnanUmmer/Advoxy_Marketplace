@@ -3,7 +3,7 @@
         x-data="{ open: false }" @keydown.escape.window="open = false">
   <div class="container-page flex h-[72px] items-center justify-between gap-6">
     <a href="{% url 'core:home' %}" class="flex items-center gap-2.5" aria-label="{% blocktranslate with name=brand.name %}{{ name }} home{% endblocktranslate %}">
-      <img src="{% static brand.logo_mark %}" alt="" class="h-9 w-9" width="36" height="36">
+      <img src="{{ brand.mark_url }}" alt="" class="h-9 w-9" width="36" height="36">
       <span class="font-display text-[1.35rem] font-extrabold tracking-tight">{{ brand.name }}</span>
     </a>
 

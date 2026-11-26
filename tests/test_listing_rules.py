@@ -5,6 +5,7 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 
+from apps.core import site_settings
 from apps.listings import rules
 from apps.listings.models import ListingPhoto, ListingStatus
 
@@ -146,7 +147,7 @@ def test_approve_publishes_with_expiry(make_user, ready_listing):
     listing = ready_listing(make_user(is_seller=True), status=S.PENDING)
     listing = rules.moderate(listing, staff, "approve")
     assert listing.status == S.PUBLISHED
-    assert listing.published_at and listing.expires_at - listing.published_at == timedelta(days=rules.LISTING_LIFETIME_DAYS)
+    assert listing.published_at and listing.expires_at - listing.published_at == timedelta(days=site_settings.get("listing_lifetime_days"))
 
 
 @pytest.mark.parametrize("decision", ["reject", "request_edits"])

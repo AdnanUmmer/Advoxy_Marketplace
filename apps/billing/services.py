@@ -22,6 +22,7 @@ from apps.listings.models import Listing, ListingStatus
 from .models import FeaturedPlacement, Plan, Purchase, Subscription, WebhookEvent
 from .providers import get_provider
 from .providers.base import CheckoutRequest, LineItem, PaymentError
+from apps.core import site_settings
 
 log = logging.getLogger(__name__)
 
@@ -90,7 +91,7 @@ def _start(user, purchase, mode, item, metadata, cancel_path, base_url=None):
         cancel_url=_url(cancel_path, base_url),
         reference=str(user.pk),
         metadata={k: str(v) for k, v in metadata.items()},
-        currency=settings.CURRENCY_CODE,
+        currency=site_settings.get("currency_code"),
     )
     try:
         result = get_provider().create_checkout(request)
@@ -112,10 +113,10 @@ def start_extra_listing_checkout(user, base_url=None):
 
     if capacity_for(user).needs_subscription:
         raise BillingError(_("Agents and agencies need a plan first. Extra slots add to your plan."))
-    price, days = Decimal(settings.EXTRA_LISTING_PRICE), settings.EXTRA_LISTING_DAYS
+    price, days = site_settings.get("extra_listing_price"), site_settings.get("extra_listing_days")
     desc = _("Extra active listing slot for %(days)s days") % {"days": days}
     purchase = Purchase.objects.create(user=user, kind=Purchase.Kind.EXTRA_LISTING, description=desc,
-                                       amount=price, currency=settings.CURRENCY_CODE)
+                                       amount=price, currency=site_settings.get("currency_code"))
     return _start(user, purchase, "payment", LineItem(desc, _cents(price)),
                   {"purchase_id": purchase.pk, "kind": purchase.kind}, reverse("billing:account"), base_url)
 
@@ -125,10 +126,10 @@ def start_featured_checkout(user, listing, base_url=None):
         raise BillingError(_("You can only feature your own listings."))
     if listing.status != ListingStatus.PUBLISHED:
         raise BillingError(_("Only live listings can be featured."))
-    price, days = Decimal(settings.FEATURED_PRICE), settings.FEATURED_DAYS
+    price, days = site_settings.get("featured_price"), site_settings.get("featured_days")
     desc = _("Featured placement for %(days)s days: %(title)s") % {"days": days, "title": listing.title}
     purchase = Purchase.objects.create(user=user, kind=Purchase.Kind.FEATURED, listing=listing, description=desc[:200],
-                                       amount=price, currency=settings.CURRENCY_CODE)
+                                       amount=price, currency=site_settings.get("currency_code"))
     return _start(user, purchase, "payment", LineItem(desc[:200], _cents(price)),
                   {"purchase_id": purchase.pk, "kind": purchase.kind, "listing_id": listing.pk},
                   reverse("listings:edit", args=[listing.pk]), base_url)
@@ -257,7 +258,7 @@ def _on_invoice_paid(data):
     purchase = Purchase.objects.create(
         user=sub.user, kind=Purchase.Kind.SUBSCRIPTION, subscription=sub, invoice_id=data["invoice_id"],
         description=_("%(plan)s plan, monthly") % {"plan": sub.plan.name}, amount=amount,
-        currency=(data.get("currency") or settings.CURRENCY_CODE).upper(), status=Purchase.Status.PAID, paid_at=now,
+        currency=(data.get("currency") or site_settings.get("currency_code")).upper(), status=Purchase.Status.PAID, paid_at=now,
     )
     if data.get("period_end"):
         sub.current_period_end = _ts(data["period_end"])
@@ -284,14 +285,14 @@ def fulfil_purchase(purchase, payment_intent_id=""):
     purchase.paid_at = now
     purchase.payment_intent_id = payment_intent_id or purchase.payment_intent_id
     if purchase.kind == Purchase.Kind.EXTRA_LISTING:
-        purchase.expires_at = now + timedelta(days=settings.EXTRA_LISTING_DAYS)
+        purchase.expires_at = now + timedelta(days=site_settings.get("extra_listing_days"))
     purchase.save()
     if purchase.kind == Purchase.Kind.FEATURED and purchase.listing_id:
         # Stack after any placement still running, so buying twice extends rather than overlaps.
         current_end = FeaturedPlacement.objects.filter(listing_id=purchase.listing_id, ends_at__gt=now).aggregate(m=Max("ends_at"))["m"]
         start = max(now, current_end) if current_end else now
         FeaturedPlacement.objects.create(listing_id=purchase.listing_id, purchase=purchase, starts_at=start,
-                                         ends_at=start + timedelta(days=settings.FEATURED_DAYS))
+                                         ends_at=start + timedelta(days=site_settings.get("featured_days")))
         Listing.objects.filter(pk=purchase.listing_id).update(is_featured=True)
     _send_receipt(purchase)
     return purchase

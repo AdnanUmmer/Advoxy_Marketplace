@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import config_views, views
 
 app_name = "staff"
 
@@ -18,4 +18,8 @@ urlpatterns = [
     path("verifications/", views.verifications, name="verifications"),
     path("verifications/<int:pk>/review/", views.verification_review, name="verification_review"),
     path("verifications/<int:pk>/file/", views.verification_file, name="verification_file"),
+    path("settings/", config_views.settings_page, name="settings"),
+    path("audit/", config_views.audit_log, name="audit"),
+    path("emails/", config_views.email_previews, name="emails"),
+    path("emails/<str:name>/preview/", config_views.email_preview_html, name="email_preview"),
 ]

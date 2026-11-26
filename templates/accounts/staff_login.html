@@ -7,7 +7,7 @@
 <div class="w-full max-w-[420px] px-5">
   <div class="panel panel-pad">
     <div class="flex items-center gap-2.5">
-      <img src="{% static brand.logo_mark %}" alt="" class="h-8 w-8" width="32" height="32">
+      <img src="{{ brand.mark_url }}" alt="" class="h-8 w-8" width="32" height="32">
       <span class="font-display text-xl">{{ brand.name }}</span>
       <span class="badge badge-neutral ml-auto">{% translate "Staff" %}</span>
     </div>

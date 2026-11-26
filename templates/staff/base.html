@@ -24,7 +24,7 @@
          x-data="{ theme: document.documentElement.getAttribute('data-theme') }">
     <div class="flex h-full flex-col gap-1 p-3 lg:p-4">
       <div class="flex items-center gap-2.5 px-2 py-1.5 lg:mb-4">
-        <img src="{% static brand.logo_mark %}" alt="" class="h-8 w-8" width="32" height="32">
+        <img src="{{ brand.mark_url }}" alt="" class="h-8 w-8" width="32" height="32">
         <span class="text-lg font-extrabold">{{ brand.name }}</span>
         <span class="badge badge-neutral">{% translate "Admin" %}</span>
         <button type="button" class="ml-auto grid h-9 w-9 place-items-center rounded-full border hairline text-ink hover:bg-sand/60 lg:hidden"
@@ -39,9 +39,12 @@
         <a class="admin-nav-link shrink-0 {% active 'staff:overview' %}" href="{% url 'staff:overview' %}">{% include "partials/icon.html" with name="home" %}{% translate "Overview" %}</a>
         <a class="admin-nav-link shrink-0 {% active 'staff:moderation' %}" href="{% url 'staff:moderation' %}">{% include "partials/icon.html" with name="check" %}{% translate "Moderation" %}{% if nav.pending_listings %}<span class="admin-count">{{ nav.pending_listings }}</span>{% endif %}</a>
         <a class="admin-nav-link shrink-0 {% active 'staff:listings' %}" href="{% url 'staff:listings' %}">{% include "partials/icon.html" with name="list" %}{% translate "Listings" %}</a>
-        <a class="admin-nav-link shrink-0 {% active 'staff:user' %}" href="{% url 'staff:users' %}">{% include "partials/icon.html" with name="sliders" %}{% translate "Users" %}</a>
+        <a class="admin-nav-link shrink-0 {% active 'staff:user' %}" href="{% url 'staff:users' %}">{% include "partials/icon.html" with name="users" %}{% translate "Users" %}</a>
         <a class="admin-nav-link shrink-0 {% active 'staff:payments' %}" href="{% url 'staff:payments' %}">{% include "partials/icon.html" with name="area" %}{% translate "Payments" %}</a>
         <a class="admin-nav-link shrink-0 {% active 'staff:verification' %}" href="{% url 'staff:verifications' %}">{% include "partials/icon.html" with name="bell" %}{% translate "Verifications" %}{% if nav.pending_verifications %}<span class="admin-count">{{ nav.pending_verifications }}</span>{% endif %}</a>
+        <a class="admin-nav-link shrink-0 {% active 'staff:audit' %}" href="{% url 'staff:audit' %}">{% include "partials/icon.html" with name="clock" %}{% translate "Audit log" %}</a>
+        <a class="admin-nav-link shrink-0 {% active 'staff:email' %}" href="{% url 'staff:emails' %}">{% include "partials/icon.html" with name="mail" %}{% translate "Emails" %}</a>
+        <a class="admin-nav-link shrink-0 {% active 'staff:settings' %}" href="{% url 'staff:settings' %}">{% include "partials/icon.html" with name="cog" %}{% translate "Settings" %}</a>
       </nav>
       <div class="mt-auto hidden space-y-1 border-t hairline pt-3 lg:block">
         <button type="button" class="admin-nav-link w-full"

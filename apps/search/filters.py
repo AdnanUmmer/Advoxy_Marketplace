@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.listings.forms import RESIDENTIAL_TYPES
 from apps.listings.geo import within_polygon, within_radius
 from apps.listings.models import Amenity, Listing, PropertyType, Purpose
+from apps.core import site_settings
 
 SORTS = [
     ("featured", _("Featured first")),
@@ -248,7 +249,7 @@ def short_price(amount):
     from django.conf import settings
 
     amount = Decimal(amount)
-    sym = settings.CURRENCY_SYMBOL
+    sym = site_settings.get("currency_symbol")
     if amount >= 1_000_000:
         return f"{sym}{(amount / 1_000_000).quantize(Decimal('0.01')).normalize():f}M"
     if amount >= 100_000:

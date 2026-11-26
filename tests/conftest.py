@@ -27,6 +27,11 @@ def _test_env(settings, _media_root):
     settings.MEDIA_ROOT = str(_media_root)
     settings.PRIVATE_MEDIA_ROOT = str(_media_root / "private")
     settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+    from apps.core import site_settings
+
+    site_settings.clear_cache()
+    yield
+    site_settings.clear_cache()
 
 
 @pytest.fixture

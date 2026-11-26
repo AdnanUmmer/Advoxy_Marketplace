@@ -25,6 +25,7 @@ from apps.listings.models import Amenity, Listing, ListingLocation, ListingPhoto
 from apps.search import filters as search_filters
 from apps.messaging.models import Inquiry, Message, MessageRead, Thread
 from apps.search.models import Favorite, SavedSearch
+from apps.core import site_settings
 
 DEMO_DOMAIN = "demo.example.com"
 DEMO_PASSWORD = "AdvoxyDemo2026!"
@@ -315,7 +316,7 @@ class Command(BaseCommand):
                 paid = now - timedelta(days=30 * months_ago + 12)
                 p = Purchase.objects.create(user=users[key], kind=Purchase.Kind.SUBSCRIPTION, subscription=sub,
                                             description=f"{plan.name} plan, monthly", amount=plan.price_monthly,
-                                            currency=settings.CURRENCY_CODE, status=Purchase.Status.PAID, paid_at=paid,
+                                            currency=site_settings.get("currency_code"), status=Purchase.Status.PAID, paid_at=paid,
                                             invoice_id=f"demo_inv_{key}_{months_ago}")
                 Purchase.objects.filter(pk=p.pk).update(created_at=paid)
 
@@ -332,11 +333,11 @@ class Command(BaseCommand):
 
             paid = now - timedelta(days=3)
             p = Purchase.objects.create(user=users["agent"], kind=Purchase.Kind.FEATURED, listing=listing,
-                                        description=f"Featured placement for {settings.FEATURED_DAYS} days: {listing.title}"[:200],
-                                        amount=Decimal(settings.FEATURED_PRICE), currency=settings.CURRENCY_CODE,
+                                        description=f"Featured placement for {site_settings.get("featured_days")} days: {listing.title}"[:200],
+                                        amount=site_settings.get("featured_price"), currency=site_settings.get("currency_code"),
                                         status=Purchase.Status.PAID, paid_at=paid)
             FeaturedPlacement.objects.create(listing=listing, purchase=p, starts_at=paid,
-                                             ends_at=paid + timedelta(days=settings.FEATURED_DAYS))
+                                             ends_at=paid + timedelta(days=site_settings.get("featured_days")))
             Listing.objects.filter(pk=listing.pk).update(is_featured=True)
 
     def _admin_queue(self, users):
