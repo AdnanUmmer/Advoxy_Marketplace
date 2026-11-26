@@ -1,6 +1,6 @@
 # Advoxy build progress
 
-**Overall: 64% complete** (33 of 51 items)
+**Overall: 74% complete** (38 of 51 items)
 
 Percentage = completed items / total items, rounded down. Items are every milestone and every task from SPEC.md section 13. A milestone is checked only when all its tasks work, its tests pass, and the seeded demo runs.
 
@@ -48,11 +48,11 @@ Percentage = completed items / total items, rounded down. Items are every milest
 - [x] Listings table
 
 ## Milestone 6: Payments
-- [ ] **Milestone 6 complete**
-- [ ] Stripe checkout for paid listings and featured placement
-- [ ] Subscriptions for agents and agencies
-- [ ] Webhooks
-- [ ] Billing pages
+- [x] **Milestone 6 complete** (225 tests passing; extra slot purchase and Agent subscription paid end to end in Stripe test mode)
+- [x] Stripe checkout for paid listings and featured placement
+- [x] Subscriptions for agents and agencies
+- [x] Webhooks
+- [x] Billing pages
 
 ## Milestone 7: Agencies and agents
 - [ ] **Milestone 7 complete**

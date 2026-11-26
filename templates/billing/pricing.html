@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n ui %}
+{% block title %}{% translate "Pricing" %}{% endblock %}
+
+{% block content %}
+<section class="container-page pb-6 pt-12 text-center">
+  <p class="eyebrow">{% translate "Pricing" %}</p>
+  <h1 class="display-lg mx-auto mt-3 max-w-2xl">{% translate "Simple prices for listing your property" %}</h1>
+  <p class="lede mx-auto mt-3 max-w-xl">{% blocktranslate with c=CURRENCY_CODE %}Searching and contacting owners is always free. All prices are in {{ c }}. We never take payment for the sale or rental itself.{% endblocktranslate %}</p>
+</section>
+
+{# Owners #}
+<section class="container-page py-8" aria-labelledby="owners-h">
+  <h2 id="owners-h" class="text-xl font-bold">{% translate "Owners, sellers and landlords" %}</h2>
+  <div class="mt-4 grid gap-4 md:grid-cols-3">
+    <div class="rounded-brand border hairline bg-surface p-6">
+      <p class="stat-label">{% translate "Free" %}</p>
+      <p class="mt-2 text-3xl font-extrabold">{{ CURRENCY_SYMBOL }}0</p>
+      <ul class="mt-4 space-y-2 text-sm">
+        <li class="flex gap-2">{% include "partials/icon.html" with name="check" %}{% translate "Sellers: 1 active listing" %}</li>
+        <li class="flex gap-2">{% include "partials/icon.html" with name="check" %}{% translate "Landlords: 2 active listings" %}</li>
+        <li class="flex gap-2">{% include "partials/icon.html" with name="check" %}{% translate "Unlimited drafts and photos" %}</li>
+      </ul>
+    </div>
+    <div class="rounded-brand border hairline bg-surface p-6">
+      <p class="stat-label">{% translate "Extra listing" %}</p>
+      <p class="mt-2 text-3xl font-extrabold">{{ extra_price|money }} <span class="text-base font-medium text-muted">/ {% blocktranslate count n=extra_days %}{{ n }} day{% plural %}{{ n }} days{% endblocktranslate %}</span></p>
+      <p class="mt-4 text-sm text-muted">{% translate "One more active listing slot on top of your free allowance or plan." %}</p>
+    </div>
+    <div class="rounded-brand border hairline bg-surface p-6">
+      <p class="stat-label">{% translate "Featured placement" %}</p>
+      <p class="mt-2 text-3xl font-extrabold">{{ featured_price|money }} <span class="text-base font-medium text-muted">/ {% blocktranslate count n=featured_days %}{{ n }} day{% plural %}{{ n }} days{% endblocktranslate %}</span></p>
+      <p class="mt-4 text-sm text-muted">{% translate "Your listing shows first in search and on the home page, with a Featured badge." %}</p>
+    </div>
+  </div>
+</section>
+
+{# Plans #}
+<section class="container-page py-8" aria-labelledby="plans-h">
+  <h2 id="plans-h" class="text-xl font-bold">{% translate "Agents and agencies" %}</h2>
+  <p class="mt-1 text-sm text-muted">{% translate "Monthly plans. Cancel any time; you keep access until the end of the paid month." %}</p>
+  <div class="mt-4 grid gap-4 md:grid-cols-3">
+    {% for group in agent_plans %}{% include "billing/_plan_card.html" with plan=group %}{% endfor %}
+    {% for group in agency_plans %}{% include "billing/_plan_card.html" with plan=group highlight=forloop.last %}{% endfor %}
+  </div>
+</section>
+{% endblock %}

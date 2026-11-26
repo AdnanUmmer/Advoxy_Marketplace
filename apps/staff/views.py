@@ -23,6 +23,10 @@ from apps.listings import rules
 from apps.listings.models import Listing, ListingStatus, PropertyType, Purpose
 from apps.messaging.models import Inquiry
 
+from apps.billing import services as billing
+from apps.billing.models import Purchase, Subscription
+from apps.billing.providers import get_provider
+
 from .tables import Table
 
 
@@ -104,6 +108,8 @@ def overview(request):
             "new_users_week": members.filter(date_joined__gte=week_ago).count(),
             "inquiries_week": inquiries_week,
             "inquiries_delta": inquiries_week - inquiries_prev,
+            "revenue_month": billing.revenue_between(billing.month_start(), now + timedelta(seconds=1)),
+            "mrr": billing.monthly_recurring_revenue(),
         },
         "roles": roles,
         "roles_peak": max([n for _r, n in roles] + [1]),
@@ -362,3 +368,46 @@ def verification_file(request, pk):
     response["Cache-Control"] = "private, no-store"
     response["Content-Security-Policy"] = "sandbox"
     return response
+
+
+# ---------------------------------------------------------------------------
+# Payments and subscriptions
+# ---------------------------------------------------------------------------
+PURCHASE_COLUMNS = {"date": "created_at", "amount": "amount", "user": "user__full_name", "status": "status", "kind": "kind"}
+
+
+@staff_required
+def payments(request):
+    now = timezone.now()
+    provider = get_provider()
+    qs = Purchase.objects.exclude(status=Purchase.Status.PENDING).select_related("user", "listing")
+    g = request.GET
+    if g.get("kind") in Purchase.Kind.values:
+        qs = qs.filter(kind=g["kind"])
+    if g.get("status") in Purchase.Status.values:
+        qs = qs.filter(status=g["status"])
+    if g.get("q"):
+        qs = qs.filter(Q(user__email__icontains=g["q"]) | Q(user__full_name__icontains=g["q"]) | Q(description__icontains=g["q"]))
+    table = Table(request, qs, PURCHASE_COLUMNS, default="-date")
+    for p in table.page.object_list:
+        p.dashboard_url = provider.dashboard_url("payment", p.payment_intent_id) if p.payment_intent_id else             provider.dashboard_url("invoice", p.invoice_id or "")
+    subs = Subscription.objects.exclude(status__in=(Subscription.Status.INCOMPLETE, Subscription.Status.INCOMPLETE_EXPIRED))         .select_related("user", "plan").order_by("status", "-created_at")
+    for s in subs:
+        s.dashboard_url = provider.dashboard_url("subscription", s.provider_subscription_id or "")
+    month = billing.month_start(now)
+    prev_month = billing.month_start(month - timedelta(days=1))
+    context = {
+        "table": table, "subscriptions": subs,
+        "kinds": Purchase.Kind.choices, "statuses": [s for s in Purchase.Status.choices if s[0] != "pending"],
+        "filtered": any(g.get(k) for k in ("kind", "status", "q")),
+        "summary": {
+            "revenue_month": billing.revenue_between(month, now + timedelta(seconds=1)),
+            "revenue_prev": billing.revenue_between(prev_month, month),
+            "mrr": billing.monthly_recurring_revenue(),
+            "active_subs": subs.filter(status__in=Subscription.GRANTS_ACCESS).count(),
+            "refunded": Purchase.objects.filter(status=Purchase.Status.REFUNDED).count(),
+        },
+        "test_mode": getattr(provider, "test_mode", False),
+    }
+    return render_staff(request, "staff/payments.html", context, partial="staff/_payments_table.html")
+

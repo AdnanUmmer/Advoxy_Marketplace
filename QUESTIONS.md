@@ -42,9 +42,8 @@ SPEC section 1 asks for consent, data export, deletion, and minimal data collect
 SPEC says moderation gates publishing but not what happens when an owner edits a published listing.
 **Default:** content edits to a published listing send it back to "pending review"; it stays hidden until approved again. Saving without changes keeps it live. Photo changes do not trigger re-review.
 
-## Q12. Agents and agencies before billing (milestone 6)
-Agents and agencies need an active subscription to list. Plans and subscriptions arrive in milestone 6.
-**Default:** until then their capacity is 0: they can create and edit drafts, but cannot submit for review. Seeded agent listings stay published.
+## Q12. Agents and agencies need a plan (resolved in milestone 6)
+Agents and agencies publish under a monthly plan. Without one they can prepare drafts but not submit. Agents in an agency share the agency owner's plan and its listing limit. Extra paid slots add to a plan; they don't replace it.
 
 ## Q13. Mapbox token (resolved)
 A real public token is now in `.env`. The search map, listing-form pin picker and listing-page map are verified. For production, restrict the token to the live domain in the Mapbox dashboard (URL restrictions).
@@ -79,3 +78,12 @@ Done, see Q6. The home page hero image is a brand setting (`BRAND["hero_image"]`
 - **Role changes:** staff can change public roles; only superusers can change another superuser; nobody changes their own account from the dashboard. Granting staff access stays in `/django-admin/`.
 - **Revenue this month** shows $0 until payments (milestone 6). **Audit log** of admin actions comes in milestone 8.
 
+## Q20. Payments defaults (milestone 6)
+- **Prices** (placeholders from Q4): Agent $29/month (15 listings), Agency Starter $99/month (3 seats, 50 listings), Agency Pro $249/month (10 seats, 200 listings); extra listing slot $10 for 30 days; featured placement $25 for 14 days. One-time prices are env settings; plans are database rows. Both become editable in the admin settings page in milestone 8.
+- **No Stripe products to set up:** Checkout sends the price with each request, so nothing needs creating in the Stripe dashboard.
+- **Switching plans:** cancel first, then choose another (no mid-month upgrades or proration in phase 1). Tell me if you want instant upgrades.
+- **Cancelling** keeps access to the end of the paid month. Past-due subscriptions keep access while Stripe retries the card.
+- **Featured placements** bought twice stack (the second starts when the first ends).
+- **Refunds** are issued in the Stripe dashboard (linked from the admin Payments page); the refund webhook marks the payment refunded.
+- **Webhooks for production:** add the endpoint `https://YOUR-DOMAIN/billing/webhook/stripe/` in the Stripe dashboard with events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid` and `charge.refunded`, and put its signing secret in `STRIPE_WEBHOOK_SECRET`. Locally, the success page confirms payments directly with Stripe, so webhooks are optional (renewals and refunds need them).
+- **Countries Stripe doesn't support:** the payment adapter (`apps/billing/providers/`) is ready for a second provider such as Flutterwave or Paystack (SPEC section 1 risk).

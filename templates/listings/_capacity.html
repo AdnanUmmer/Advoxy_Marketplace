@@ -3,7 +3,8 @@
 <section class="panel p-6" aria-labelledby="cap-h">
   <h2 id="cap-h" class="font-display text-lg">{% translate "Active listings" %}</h2>
   {% if capacity.needs_subscription %}
-    <p class="mt-3 text-sm text-muted">{% translate "Agents and agencies list under a subscription plan. You can prepare drafts now; plans open with billing." %}</p>
+    <p class="mt-3 text-sm text-muted">{% translate "Agents and agencies list under a monthly plan. You can prepare drafts now and publish once your plan is active." %}</p>
+    {% if request.resolver_match.view_name != "billing:account" %}<a class="btn btn-primary mt-4 w-full" href="{% url 'billing:account' %}">{% translate "Choose a plan" %}</a>{% endif %}
     <p class="mt-3 text-sm"><span class="font-display text-2xl">{{ capacity.used }}</span> <span class="text-muted">{% translate "active" %}</span></p>
   {% else %}
     <p class="mt-3"><span class="font-display text-3xl">{{ capacity.used }}</span><span class="text-muted"> / {{ capacity.total }}</span></p>
@@ -12,7 +13,8 @@
     </div>
     <p class="mt-3 text-sm text-muted">
       {% if capacity.can_activate %}{% blocktranslate count n=capacity.remaining %}{{ n }} slot free. Drafts don't count.{% plural %}{{ n }} slots free. Drafts don't count.{% endblocktranslate %}
-      {% else %}{% translate "All slots in use. Close a listing to free one; extra paid slots arrive with billing." %}{% endif %}
+      {% else %}{% translate "All slots in use. Close a listing to free one, or add a slot." %}{% endif %}
     </p>
+    {% if request.resolver_match.view_name != "billing:account" %}<a class="btn btn-quiet mt-4 w-full" href="{% url 'billing:account' %}">{% if capacity.plan %}{% translate "Plan and extra slots" %}{% else %}{% translate "Buy an extra slot" %}{% endif %}</a>{% endif %}
   {% endif %}
 </section>

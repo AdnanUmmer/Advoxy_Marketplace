@@ -106,7 +106,9 @@ class Command(BaseCommand):
             self.photo_pool = self._build_photo_pool()
             amenities = self._amenities()
             users = self._accounts()
+            self._billing(users)
             count = self._listings(users, amenities)
+            self._paid_feature(users)
             self._shortlists(users)
             self._conversations(users)
             self._admin_queue(users)
@@ -189,7 +191,8 @@ class Command(BaseCommand):
         rnd = self.rnd
         now = timezone.now()
         agency = users["_agency"]
-        pro_owners = ["agent", "agency_agent1", "agency_agent2", "agency_agent3"]
+        # The independent agent gets about 1 in 7 listings so they stay within the 15-listing Agent plan.
+        pro_owners = ["agent", "agency_agent1", "agency_agent2", "agency_agent3", "agency_agent1", "agency_agent2", "agency_agent3"]
         # Individual owners within their free limits (seller 1, landlord 2), plus one draft each.
         fixed = {
             ("Nairobi", 0): ("seller", "sale", ListingStatus.PUBLISHED),
@@ -266,6 +269,45 @@ class Command(BaseCommand):
                     photo.save()
                 created += 1
         return created
+
+    def _billing(self, users):
+        """Demo plans and payment history (no Stripe ids: these are local demo records)."""
+        from decimal import Decimal
+
+        from apps.billing.models import Plan, Purchase, Subscription
+
+        now = timezone.now()
+        for key, code in (("agency", "agency-pro"), ("agent", "agent")):
+            plan = Plan.objects.get(code=code)
+            sub = Subscription.objects.create(user=users[key], plan=plan, status=Subscription.Status.ACTIVE,
+                                              current_period_end=now + timedelta(days=18))
+            for months_ago in (2, 1, 0):
+                paid = now - timedelta(days=30 * months_ago + 12)
+                p = Purchase.objects.create(user=users[key], kind=Purchase.Kind.SUBSCRIPTION, subscription=sub,
+                                            description=f"{plan.name} plan, monthly", amount=plan.price_monthly,
+                                            currency=settings.CURRENCY_CODE, status=Purchase.Status.PAID, paid_at=paid,
+                                            invoice_id=f"demo_inv_{key}_{months_ago}")
+                Purchase.objects.filter(pk=p.pk).update(created_at=paid)
+
+    def _paid_feature(self, users):
+        """A featured placement bought by the independent agent."""
+        from decimal import Decimal
+
+        from apps.billing.models import Purchase
+
+        now = timezone.now()
+        listing = Listing.objects.filter(owner=users["agent"], status=ListingStatus.PUBLISHED).order_by("pk").first()
+        if listing:
+            from apps.billing.models import FeaturedPlacement
+
+            paid = now - timedelta(days=3)
+            p = Purchase.objects.create(user=users["agent"], kind=Purchase.Kind.FEATURED, listing=listing,
+                                        description=f"Featured placement for {settings.FEATURED_DAYS} days: {listing.title}"[:200],
+                                        amount=Decimal(settings.FEATURED_PRICE), currency=settings.CURRENCY_CODE,
+                                        status=Purchase.Status.PAID, paid_at=paid)
+            FeaturedPlacement.objects.create(listing=listing, purchase=p, starts_at=paid,
+                                             ends_at=paid + timedelta(days=settings.FEATURED_DAYS))
+            Listing.objects.filter(pk=listing.pk).update(is_featured=True)
 
     def _admin_queue(self, users):
         """Work for the admin dashboard: listings awaiting review and a license to check."""

@@ -1,0 +1,24 @@
+{% load i18n ui %}
+<div class="relative flex flex-col rounded-brand border {% if highlight %}border-primary{% else %}hairline{% endif %} bg-surface p-6">
+  {% if highlight %}<span class="badge badge-featured absolute right-4 top-4">{% translate "For growing teams" %}</span>{% endif %}
+  <p class="stat-label">{{ plan.get_audience_display }}</p>
+  <h3 class="mt-1 text-xl font-bold">{{ plan.name }}</h3>
+  <p class="mt-2 text-3xl font-extrabold">{{ plan.price_monthly|money }} <span class="text-base font-medium text-muted">/ {% translate "month" %}</span></p>
+  <ul class="mt-4 flex-1 space-y-2 text-sm">
+    <li class="flex gap-2">{% include "partials/icon.html" with name="check" %}{% blocktranslate count n=plan.listing_limit %}{{ n }} active listing{% plural %}{{ n }} active listings{% endblocktranslate %}</li>
+    {% if plan.audience == "agency" %}<li class="flex gap-2">{% include "partials/icon.html" with name="check" %}{% blocktranslate count n=plan.seats %}{{ n }} agent seat{% plural %}{{ n }} agent seats{% endblocktranslate %}</li>{% endif %}
+    <li class="flex gap-2">{% include "partials/icon.html" with name="check" %}{% translate "Verified badge after license review" %}</li>
+    <li class="flex gap-2">{% include "partials/icon.html" with name="check" %}{% translate "Inquiries and messaging" %}</li>
+  </ul>
+  {% if current and current.plan_id == plan.pk %}
+    <a class="btn btn-quiet mt-6 w-full" href="{% url 'billing:account' %}">✓ {% translate "Your current plan" %}</a>
+  {% elif user.is_authenticated and plan.audience == "agent" and user.is_agent and not current %}
+    <form method="post" action="{% url 'billing:subscribe' plan.code %}" class="mt-6">{% csrf_token %}<button class="btn btn-primary w-full" type="submit">{% translate "Choose plan" %}</button></form>
+  {% elif user.is_authenticated and plan.audience == "agency" and user.is_agency and not current %}
+    <form method="post" action="{% url 'billing:subscribe' plan.code %}" class="mt-6">{% csrf_token %}<button class="btn btn-primary w-full" type="submit">{% translate "Choose plan" %}</button></form>
+  {% elif not user.is_authenticated %}
+    <a class="btn btn-primary mt-6 w-full" href="{% url 'accounts:signup' %}">{% translate "Create an account" %}</a>
+  {% else %}
+    <p class="mt-6 text-center text-xs text-muted">{% if current %}{% translate "Cancel your current plan to switch." %}{% elif plan.audience == "agency" %}{% translate "For agency accounts." %}{% else %}{% translate "For agent accounts." %}{% endif %}</p>
+  {% endif %}
+</div>

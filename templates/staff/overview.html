@@ -1,5 +1,5 @@
 {% extends "staff/base.html" %}
-{% load i18n humanize staff_ui %}
+{% load i18n humanize staff_ui ui %}
 {% block title %}{% translate "Overview" %}{% endblock %}
 {% block page_title %}{% translate "Overview" %}{% endblock %}
 {% block page_subtitle %}<p class="mt-1 text-sm text-muted">{% now "l j F Y" %}</p>{% endblock %}
@@ -25,11 +25,11 @@
     <p class="stat-value tabular-nums">{{ metrics.users_total|intcomma }}</p>
     <p class="mt-2 text-sm text-muted">{% blocktranslate with n=metrics.new_users_week %}+{{ n }} this week{% endblocktranslate %}</p>
   </a>
-  <div class="stat-tile">
+  <a href="{% url 'staff:payments' %}" class="stat-tile hover:border-stone">
     <p class="stat-label">{% translate "Revenue this month" %}</p>
-    <p class="stat-value tabular-nums">{{ CURRENCY_SYMBOL }}0</p>
-    <p class="mt-2 text-sm text-muted">{% translate "Payments arrive in milestone 6" %}</p>
-  </div>
+    <p class="stat-value tabular-nums">{{ metrics.revenue_month|money }}</p>
+    <p class="mt-2 text-sm text-muted">{% blocktranslate with mrr=metrics.mrr|money %}{{ mrr }} monthly from plans{% endblocktranslate %}</p>
+  </a>
   <div class="stat-tile">
     <p class="stat-label">{% translate "New inquiries (7 days)" %}</p>
     <p class="stat-value tabular-nums">{{ metrics.inquiries_week }}</p>

@@ -40,6 +40,7 @@
         <a class="admin-nav-link shrink-0 {% active 'staff:moderation' %}" href="{% url 'staff:moderation' %}">{% include "partials/icon.html" with name="check" %}{% translate "Moderation" %}{% if nav.pending_listings %}<span class="admin-count">{{ nav.pending_listings }}</span>{% endif %}</a>
         <a class="admin-nav-link shrink-0 {% active 'staff:listings' %}" href="{% url 'staff:listings' %}">{% include "partials/icon.html" with name="list" %}{% translate "Listings" %}</a>
         <a class="admin-nav-link shrink-0 {% active 'staff:user' %}" href="{% url 'staff:users' %}">{% include "partials/icon.html" with name="sliders" %}{% translate "Users" %}</a>
+        <a class="admin-nav-link shrink-0 {% active 'staff:payments' %}" href="{% url 'staff:payments' %}">{% include "partials/icon.html" with name="area" %}{% translate "Payments" %}</a>
         <a class="admin-nav-link shrink-0 {% active 'staff:verification' %}" href="{% url 'staff:verifications' %}">{% include "partials/icon.html" with name="bell" %}{% translate "Verifications" %}{% if nav.pending_verifications %}<span class="admin-count">{{ nav.pending_verifications }}</span>{% endif %}</a>
       </nav>
       <div class="mt-auto hidden space-y-1 border-t hairline pt-3 lg:block">

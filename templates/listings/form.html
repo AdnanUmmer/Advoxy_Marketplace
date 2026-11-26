@@ -119,6 +119,20 @@
 
     <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
       {% include "listings/_capacity.html" %}
+      {% if listing and listing.status == "published" %}
+      <section class="panel p-6" aria-labelledby="feat-h">
+        <h2 id="feat-h" class="text-lg font-bold">{% translate "Featured placement" %}</h2>
+        {% if featured_until %}
+          <p class="mt-2"><span class="badge badge-featured">{% translate "Featured" %}</span></p>
+          <p class="mt-2 text-sm text-muted">{% blocktranslate with d=featured_until|date:"j F Y" %}Featured until {{ d }}. Buying again extends it.{% endblocktranslate %}</p>
+        {% else %}
+          <p class="mt-2 text-sm text-muted">{% translate "Show first in search and on the home page, with a Featured badge." %}</p>
+        {% endif %}
+        <form method="post" action="{% url 'billing:feature' listing.pk %}" class="mt-4">{% csrf_token %}
+          <button class="btn btn-primary w-full" type="submit">{% blocktranslate with price=featured_price|money count n=featured_days %}Feature for {{ n }} day · {{ price }}{% plural %}Feature for {{ n }} days · {{ price }}{% endblocktranslate %}</button>
+        </form>
+      </section>
+      {% endif %}
       {% if listing %}
       <section class="panel p-6" aria-labelledby="pub-h">
         <h2 id="pub-h" class="font-display text-lg">{% translate "Publishing" %}</h2>

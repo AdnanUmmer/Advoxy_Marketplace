@@ -55,7 +55,8 @@ class Capacity:
 
     @property
     def can_activate(self):
-        return self.remaining > 0
+        # Agents and agencies need a plan; extra slots add to a plan, they don't replace it.
+        return not self.needs_subscription and self.remaining > 0
 
 
 def free_allowance(user):
@@ -68,31 +69,42 @@ def free_allowance(user):
 
 
 def paid_extra_slots(user):
-    """Extra listing slots bought with one-time payments. Implemented in milestone 6."""
-    return 0
+    """Extra listing slots bought with one-time payments (each lasts EXTRA_LISTING_DAYS)."""
+    from apps.billing.services import paid_extra_slots as slots
+
+    return slots(user)
 
 
 def plan_capacity(user):
-    """Active listings allowed by the user's (or their agency's) subscription plan.
+    """Active listings allowed by the user's (or their agency's) subscription plan."""
+    from apps.billing.services import plan_scope
 
-    Agents and agencies need an active subscription to list (SPEC section 2).
-    Plans and subscriptions arrive in milestone 6; until then this is 0.
-    """
-    return 0
+    plan, _scope = plan_scope(user)
+    return plan.listing_limit if plan else 0
 
 
 def active_count(user):
+    """Active listings counted against this user's allowance.
+
+    With an agency plan, every listing in the agency counts towards the shared limit.
+    """
+    from apps.billing.services import plan_scope
+
+    plan, scope = plan_scope(user)
+    if plan and (user.is_agent or user.is_agency):
+        return scope.filter(status__in=ACTIVE_STATUSES).count()
     return Listing.objects.filter(owner=user, status__in=ACTIVE_STATUSES).count()
 
 
 def capacity_for(user):
     professional = user.is_agent or user.is_agency
+    plan = plan_capacity(user) if professional else 0
     return Capacity(
         used=active_count(user),
         free=free_allowance(user),
         paid=paid_extra_slots(user),
-        plan=plan_capacity(user),
-        needs_subscription=professional and plan_capacity(user) == 0,
+        plan=plan,
+        needs_subscription=professional and plan == 0 and free_allowance(user) == 0,
     )
 
 
@@ -162,7 +174,7 @@ def owner_transition(listing, user, action):
         if not cap.can_activate:
             if cap.needs_subscription:
                 raise TransitionError(_("Agents and agencies need an active subscription to publish listings."))
-            raise TransitionError(_("You have used all %(n)s of your active listing slots. Close a listing or buy an extra slot.")
+            raise TransitionError(_("You have used all %(n)s of your active listing slots. Close a listing, buy an extra slot or upgrade your plan.")
                                   % {"n": cap.total})
         listing.moderation_note = ""
     listing.status = target

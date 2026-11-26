@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load i18n ui %}
+{% block title %}{% translate "Billing" %}{% endblock %}
+
+{% block content %}
+<div class="container-page py-10">
+  <p class="eyebrow">{% translate "Account" %}</p>
+  <h1 class="display-md mt-2">{% translate "Billing and plans" %}</h1>
+
+  <div class="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
+    <div class="min-w-0 space-y-6">
+      {# Subscription #}
+      {% if user.is_agent or user.is_agency %}
+      <section class="panel panel-pad" aria-labelledby="plan-h">
+        <h2 id="plan-h" class="text-lg font-bold">{% translate "Your plan" %}</h2>
+        {% if subscription %}
+          <div class="mt-3 flex flex-wrap items-center gap-3">
+            <p class="text-2xl font-extrabold">{{ subscription.plan.name }}</p>
+            {% if subscription.grants_access %}{% if subscription.status == "past_due" %}<span class="badge badge-warning">{{ subscription.get_status_display }}</span>{% else %}<span class="badge badge-success">{{ subscription.get_status_display }}</span>{% endif %}
+            {% else %}<span class="badge badge-danger">{{ subscription.get_status_display }}</span>{% endif %}
+          </div>
+          <p class="mt-1 text-sm text-muted">{{ subscription.plan.price_monthly|money }} / {% translate "month" %} · {% blocktranslate count n=subscription.plan.listing_limit %}{{ n }} active listing{% plural %}{{ n }} active listings{% endblocktranslate %}</p>
+          {% if subscription.grants_access %}
+            <p class="mt-3 text-sm">
+              {% if subscription.cancel_at_period_end %}{% blocktranslate with d=subscription.current_period_end|date:"j F Y" %}Ends on {{ d }}. You keep full access until then.{% endblocktranslate %}
+              {% elif subscription.current_period_end %}{% blocktranslate with d=subscription.current_period_end|date:"j F Y" %}Renews on {{ d }}.{% endblocktranslate %}{% endif %}
+            </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              {% if subscription.cancel_at_period_end %}
+                <form method="post" action="{% url 'billing:resume' %}">{% csrf_token %}<button class="btn btn-primary" type="submit">{% translate "Keep my plan" %}</button></form>
+              {% else %}
+                <form method="post" action="{% url 'billing:cancel' %}" x-data @submit="if (!confirm('{% translate "Cancel your plan? It stays active until the end of the paid month, then your listings beyond the free allowance stop being published." %}')) $event.preventDefault()">
+                  {% csrf_token %}<button class="btn btn-quiet text-danger" type="submit">{% translate "Cancel plan" %}</button></form>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% elif agency_plan_shared %}
+          <p class="mt-3 text-sm text-muted">{% translate "You list under your agency's plan. Your agency owner manages billing." %}</p>
+        {% else %}
+          <p class="mt-3 text-sm text-muted">{% translate "Agents and agencies need a plan to publish listings. Choose one below; you can cancel any time." %}</p>
+        {% endif %}
+      </section>
+
+      {% if not subscription.grants_access and not agency_plan_shared %}
+      <section aria-labelledby="choose-h">
+        <h2 id="choose-h" class="text-lg font-bold">{% translate "Choose a plan" %}</h2>
+        <div class="mt-3 grid gap-4 md:grid-cols-2">
+          {% for plan in plans %}{% include "billing/_plan_card.html" with plan=plan current=None %}{% endfor %}
+        </div>
+      </section>
+      {% endif %}
+      {% endif %}
+
+      {# History #}
+      <section class="overflow-hidden rounded-brand border hairline bg-surface" aria-labelledby="hist-h">
+        <h2 id="hist-h" class="border-b hairline px-6 py-4 text-lg font-bold">{% translate "Payment history" %}</h2>
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead><tr>
+              <th scope="col" class="px-3 py-2.5 text-left">{% translate "Date" %}</th>
+              <th scope="col" class="px-3 py-2.5 text-left">{% translate "Description" %}</th>
+              <th scope="col" class="px-3 py-2.5 text-right">{% translate "Amount" %}</th>
+              <th scope="col" class="px-3 py-2.5 text-left">{% translate "Status" %}</th>
+              <th scope="col" class="px-3 py-2.5 text-left">{% translate "Receipt" %}</th>
+            </tr></thead>
+            <tbody>
+              {% for p in purchases %}
+              <tr>
+                <td class="whitespace-nowrap text-muted">{{ p.paid_at|default:p.created_at|date:"j M Y" }}</td>
+                <td>{{ p.description }}</td>
+                <td class="whitespace-nowrap text-right tabular-nums font-semibold">{{ p.amount|money:2 }}</td>
+                <td>{% if p.status == "paid" %}<span class="badge badge-success">{{ p.get_status_display }}</span>{% elif p.status == "refunded" %}<span class="badge badge-info">{{ p.get_status_display }}</span>{% else %}<span class="badge badge-danger">{{ p.get_status_display }}</span>{% endif %}</td>
+                <td class="whitespace-nowrap text-xs text-muted">ADV-{{ p.pk|stringformat:"06d" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="py-10 text-center text-muted">{% translate "No payments yet." %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <aside class="order-first space-y-6 lg:order-none">
+      {% include "listings/_capacity.html" %}
+      {% if can_buy_slots %}
+      <section class="panel p-6" aria-labelledby="slot-h">
+        <h2 id="slot-h" class="text-lg font-bold">{% translate "Extra listing slot" %}</h2>
+        <p class="mt-2 text-sm text-muted">{% blocktranslate with price=extra_price|money count n=extra_days %}One more active listing for {{ n }} day, {{ price }}.{% plural %}One more active listing for {{ n }} days, {{ price }}.{% endblocktranslate %}</p>
+        <form method="post" action="{% url 'billing:buy_slot' %}" class="mt-4">{% csrf_token %}
+          <button class="btn btn-primary w-full" type="submit" {% if capacity.needs_subscription %}disabled{% endif %}>{% blocktranslate with price=extra_price|money %}Buy for {{ price }}{% endblocktranslate %}</button>
+        </form>
+        {% if capacity.needs_subscription %}<p class="mt-2 text-xs text-muted">{% translate "Choose a plan first; extra slots add to it." %}</p>{% endif %}
+        {% if slots %}
+        <ul class="mt-4 space-y-1 text-sm">
+          {% for s in slots %}<li class="flex justify-between"><span>{% translate "Slot" %} ADV-{{ s.pk|stringformat:"06d" }}</span><span class="text-muted">{% if s.expires_at > now %}{% translate "until" %} {% endif %}{{ s.expires_at|date:"j M Y" }}</span></li>{% endfor %}
+        </ul>
+        {% endif %}
+      </section>
+      {% endif %}
+      <p class="text-xs text-muted">{% translate "Payments are processed securely by Stripe. We never see or store your card details." %}</p>
+    </aside>
+  </div>
+</div>
+{% endblock %}

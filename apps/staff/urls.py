@@ -14,6 +14,7 @@ urlpatterns = [
     path("users/", views.users, name="users"),
     path("users/<int:pk>/", views.user_detail, name="user_detail"),
     path("users/<int:pk>/<str:action>/", views.user_action, name="user_action"),
+    path("payments/", views.payments, name="payments"),
     path("verifications/", views.verifications, name="verifications"),
     path("verifications/<int:pk>/review/", views.verification_review, name="verification_review"),
     path("verifications/<int:pk>/file/", views.verification_file, name="verification_file"),

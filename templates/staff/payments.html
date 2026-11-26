@@ -1,0 +1,63 @@
+{% extends "staff/base.html" %}
+{% load i18n ui %}
+{% block title %}{% translate "Payments" %}{% endblock %}
+{% block page_title %}{% translate "Payments and subscriptions" %}{% endblock %}
+{% block page_subtitle %}{% if test_mode %}<p class="mt-1"><span class="badge badge-warning">{% translate "Stripe test mode" %}</span></p>{% endif %}{% endblock %}
+{% block page_actions %}
+<a class="btn btn-quiet" href="https://dashboard.stripe.com/{% if test_mode %}test/{% endif %}payments" target="_blank" rel="noopener">{% translate "Open Stripe dashboard" %} ↗</a>
+{% endblock %}
+
+{% block staff_content %}
+<section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="{% translate 'Payment summary' %}">
+  <div class="stat-tile"><p class="stat-label">{% translate "Revenue this month" %}</p><p class="stat-value tabular-nums">{{ summary.revenue_month|money:2 }}</p>
+    <p class="mt-2 text-sm text-muted">{% blocktranslate with v=summary.revenue_prev|money:2 %}{{ v }} last month{% endblocktranslate %}</p></div>
+  <div class="stat-tile"><p class="stat-label">{% translate "Monthly recurring" %}</p><p class="stat-value tabular-nums">{{ summary.mrr|money }}</p>
+    <p class="mt-2 text-sm text-muted">{% translate "From active plans" %}</p></div>
+  <div class="stat-tile"><p class="stat-label">{% translate "Active subscriptions" %}</p><p class="stat-value tabular-nums">{{ summary.active_subs }}</p></div>
+  <div class="stat-tile"><p class="stat-label">{% translate "Refunded payments" %}</p><p class="stat-value tabular-nums">{{ summary.refunded }}</p>
+    <p class="mt-2 text-sm text-muted">{% translate "Refunds are issued in Stripe" %}</p></div>
+</section>
+
+<section class="mt-6" aria-labelledby="subs-h">
+  <h2 id="subs-h" class="mb-3 text-lg font-bold">{% translate "Subscriptions" %}</h2>
+  <div class="overflow-auto rounded-brand border hairline bg-surface">
+    <table class="data-table">
+      <thead><tr>
+        <th scope="col" class="px-3 py-2.5 text-left">{% translate "Customer" %}</th>
+        <th scope="col" class="px-3 py-2.5 text-left">{% translate "Plan" %}</th>
+        <th scope="col" class="px-3 py-2.5 text-left">{% translate "Status" %}</th>
+        <th scope="col" class="px-3 py-2.5 text-left">{% translate "Renews / ends" %}</th>
+        <th scope="col" class="px-3 py-2.5 text-right">{% translate "Stripe" %}</th>
+      </tr></thead>
+      <tbody>
+        {% for s in subscriptions %}
+        <tr>
+          <td><a class="font-semibold hover:text-primary hover:underline" href="{% url 'staff:user_detail' s.user_id %}">{{ s.user.full_name }}</a><span class="block text-xs text-muted">{{ s.user.email }}</span></td>
+          <td>{{ s.plan.name }}<span class="block text-xs text-muted">{{ s.plan.price_monthly|money }} / {% translate "month" %}</span></td>
+          <td>{% if s.status == "active" or s.status == "trialing" %}<span class="badge badge-success">{{ s.get_status_display }}</span>{% elif s.status == "past_due" %}<span class="badge badge-warning">{{ s.get_status_display }}</span>{% else %}<span class="badge badge-danger">{{ s.get_status_display }}</span>{% endif %}
+            {% if s.cancel_at_period_end %}<span class="badge badge-neutral">{% translate "Cancels at period end" %}</span>{% endif %}</td>
+          <td class="whitespace-nowrap text-muted">{{ s.current_period_end|date:"j M Y"|default:"–" }}</td>
+          <td class="text-right">{% if s.dashboard_url %}<a class="text-sm font-semibold text-primary hover:underline" href="{{ s.dashboard_url }}" target="_blank" rel="noopener">{% translate "Open" %} ↗</a>{% endif %}</td>
+        </tr>
+        {% empty %}<tr><td colspan="5" class="py-10 text-center text-muted">{% translate "No subscriptions yet." %}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="mt-8" aria-labelledby="pay-h">
+  <h2 id="pay-h" class="mb-3 text-lg font-bold">{% translate "Payments" %}</h2>
+  <form id="filters" method="get" class="mb-4 flex flex-wrap items-end gap-2" role="search" aria-label="{% translate 'Filter payments' %}"
+        hx-get="{% url 'staff:payments' %}" hx-target="#table-region" hx-push-url="true" hx-trigger="change, keyup changed delay:300ms from:#f-q, submit">
+    <div class="min-w-[220px] flex-[2]">
+      <label class="field-label text-xs" for="f-q">{% translate "Search" %}</label>
+      <input id="f-q" name="q" value="{{ request.GET.q }}" class="field-input h-10 py-0" type="search" placeholder="{% translate 'Customer or description' %}">
+    </div>
+    {% include "staff/_select_filter.html" with name="kind" label=_("Type") options=kinds %}
+    {% include "staff/_select_filter.html" with name="status" label=_("Status") options=statuses %}
+    {% include "staff/_table_state.html" %}
+  </form>
+  <div id="table-region">{% include "staff/_payments_table.html" %}</div>
+</section>
+{% endblock %}
+{% block scripts %}{% include "staff/_table_sync.html" %}{% endblock %}

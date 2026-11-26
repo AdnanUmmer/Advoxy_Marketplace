@@ -11,8 +11,8 @@ Create the demo data with `python manage.py seed_demo` (or `--reset` to recreate
 | Renter | `renter@demo.example.com` | Home search defaults to rentals |
 | Individual seller | `seller@demo.example.com` | Also a buyer. 1 published listing + 1 draft |
 | Landlord | `landlord@demo.example.com` | 2 published rentals + 1 draft |
-| Independent agent | `agent@demo.example.com` | Verified |
-| Agency owner | `agency@demo.example.com` | Meridian Homes (verified) |
+| Independent agent | `agent@demo.example.com` | Verified, Agent plan |
+| Agency owner | `agency@demo.example.com` | Meridian Homes (verified), Agency Pro plan |
 | Agency agent 1 | `agency.agent1@demo.example.com` | Verified |
 | Agency agent 2 | `agency.agent2@demo.example.com` | Verified |
 | Agency agent 3 | `agency.agent3@demo.example.com` | Verification pending |
@@ -77,6 +77,17 @@ Sign in at `/accounts/staff/login/` as `admin@demo.example.com`.
 5. **Verifications**: Jean-Paul Habimana (agency agent 3) has a license waiting. **Open license** shows the private file; approve, or reject with a reason (emailed).
 6. **As an agent** (`agent@demo.example.com`): the dashboard has a **Verified badge** panel; when not verified, it offers a license upload (PDF/JPG/PNG).
 7. **Tablet**: at tablet width the sidebar becomes a top bar and tables scroll inside their frame.
+
+## What to try (milestone 6: payments)
+
+Payments run in **Stripe test mode**: use card `4242 4242 4242 4242`, any future expiry, any 3-digit code. No real money moves.
+
+1. **Pricing** (`/pricing/`, also in the header): free allowance, extra listing slot, featured placement and the three plans.
+2. **Extra slot**: sign in as the **landlord** (2/2 slots used), open **Billing and plans** (dashboard link or `/billing/`), **Buy for $10**, pay on Stripe Checkout. You return to "Payment received", capacity becomes 2/3 and the Dakar draft can now be submitted. A receipt prints in the console.
+3. **Featured placement**: on the edit page of any live listing, **Feature for 14 days · $25**. After paying, the listing has the Featured badge and shows first in search. It is unfeatured automatically when the time runs out (hourly task).
+4. **Subscriptions**: sign in as the **agent** (on the Agent plan). To try a real Stripe subscription, **Cancel plan** (demo plans have no Stripe record, so they end immediately) and choose the Agent plan again. Then **Cancel plan** keeps access until the period end and **Keep my plan** undoes it.
+5. **Agency plan sharing**: agency agents publish under Meridian Homes' Agency Pro plan (200 listings shared by the team).
+6. **Admin → Payments** (`/staff/payments/`): revenue this month, monthly recurring revenue, subscriptions and payments with links into the Stripe dashboard for refunds. The overview's revenue tile is now live.
 
 ## Recorded walkthrough
 

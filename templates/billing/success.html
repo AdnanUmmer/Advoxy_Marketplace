@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n ui %}
+{% block title %}{% translate "Payment" %}{% endblock %}
+{% block content %}
+<div class="container-narrow py-16 text-center">
+  {% if outcome and outcome.paid %}
+    <span class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-success/15 text-success">{% include "partials/icon.html" with name="check" size=28 %}</span>
+    <h1 class="display-md mt-5">{% translate "Payment received" %}</h1>
+    {% if purchase %}
+      <p class="lede mt-3">{{ purchase.description }} · {{ purchase.amount|money:2 }}</p>
+      {% if purchase.kind == "featured" and purchase.listing %}
+        <p class="mt-2 text-muted">{% blocktranslate with d=purchase.placement.ends_at|date:"j F Y" %}Your listing is featured until {{ d }}.{% endblocktranslate %}</p>
+        <a class="btn btn-primary mt-8" href="{{ purchase.listing.get_absolute_url }}">{% translate "View listing" %}</a>
+      {% else %}
+        <p class="mt-2 text-muted">{% translate "Your extra listing slot is ready. Submit a draft for review from your dashboard." %}</p>
+        <a class="btn btn-primary mt-8" href="{% url 'accounts:dashboard' %}">{% translate "Go to dashboard" %}</a>
+      {% endif %}
+    {% elif subscription %}
+      <p class="lede mt-3">{% blocktranslate with plan=subscription.plan.name %}Your {{ plan }} plan is active.{% endblocktranslate %}</p>
+      <a class="btn btn-primary mt-8" href="{% url 'accounts:dashboard' %}">{% translate "Start listing" %}</a>
+    {% endif %}
+    <p class="mt-6 text-sm text-muted">{% translate "A receipt is on its way to your email." %}</p>
+  {% else %}
+    <h1 class="display-md">{% translate "We're confirming your payment" %}</h1>
+    <p class="lede mt-3">{% translate "This usually takes a few seconds. You'll get an email receipt once it's done." %}</p>
+    <a class="btn btn-quiet mt-8" href="{% url 'billing:account' %}">{% translate "Go to billing" %}</a>
+  {% endif %}
+</div>
+{% endblock %}

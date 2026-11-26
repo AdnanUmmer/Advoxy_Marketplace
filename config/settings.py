@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "apps.search",
     "apps.messaging",
     "apps.staff",
+    "apps.billing",
 ]
 
 MIDDLEWARE = [
@@ -169,6 +170,7 @@ CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULE = {
     "expire-listings-daily": {"task": "apps.listings.tasks.expire_listings", "schedule": 60 * 60 * 24},
+    "end-featured-placements-hourly": {"task": "apps.billing.tasks.end_featured_placements", "schedule": 60 * 60},
     "saved-search-digest-daily": {
         "task": "apps.search.tasks.send_saved_search_digests",
         "schedule": crontab(hour=6, minute=0),  # 06:00 UTC, morning across most of Africa
@@ -191,6 +193,13 @@ MAPBOX_TOKEN = env("MAPBOX_TOKEN", default="")
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
 STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY", default="")
 STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET", default="")
+PAYMENT_PROVIDER = "stripe"  # the payment adapter in apps/billing/providers; Stripe is the only one in phase 1
+
+# Prices for one-time purchases (in CURRENCY_CODE). Editable in admin settings in milestone 8.
+EXTRA_LISTING_PRICE = env.int("EXTRA_LISTING_PRICE", default=10)
+EXTRA_LISTING_DAYS = env.int("EXTRA_LISTING_DAYS", default=30)
+FEATURED_PRICE = env.int("FEATURED_PRICE", default=25)
+FEATURED_DAYS = env.int("FEATURED_DAYS", default=14)
 
 # ---------------------------------------------------------------------------
 # Security (production)
@@ -212,4 +221,5 @@ LOGGING = {
     "disable_existing_loggers": False,
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "root": {"handlers": ["console"], "level": env("LOG_LEVEL", default="INFO")},
+    "loggers": {"stripe": {"level": "WARNING"}},  # the Stripe library logs every request at INFO
 }

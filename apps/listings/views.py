@@ -116,6 +116,14 @@ def detail(request, pk, slug):
 # ---------------------------------------------------------------------------
 # Owner: create / edit
 # ---------------------------------------------------------------------------
+def featured_until(listing):
+    from django.db.models import Max
+
+    from apps.billing.models import FeaturedPlacement
+
+    return FeaturedPlacement.objects.active().filter(listing=listing).aggregate(m=Max("ends_at"))["m"] if listing.is_featured else None
+
+
 @lister_required
 def create(request):
     form = ListingForm(request.POST or None, request.FILES or None, currency_code=settings.CURRENCY_CODE)
@@ -125,7 +133,10 @@ def create(request):
             listing = form.save(commit=False)
             listing.owner = request.user
             agent_profile = getattr(request.user, "agent_profile", None)
-            if agent_profile and agent_profile.agency_id:
+            owned_agency = getattr(request.user, "owned_agency", None) if request.user.is_agency else None
+            if owned_agency:
+                listing.agency_id = owned_agency.pk
+            elif agent_profile and agent_profile.agency_id:
                 listing.agency_id = agent_profile.agency_id
             listing.status = ListingStatus.DRAFT
             listing.save()
@@ -168,6 +179,9 @@ def edit(request, listing):
         "actions": rules.available_owner_actions(listing),
         "missing": rules.missing_for_review(listing),
         "max_photos": rules.MAX_PHOTOS,
+        "featured_until": featured_until(listing),
+        "featured_price": settings.FEATURED_PRICE,
+        "featured_days": settings.FEATURED_DAYS,
     })
 
 

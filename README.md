@@ -48,6 +48,16 @@ The setup script writes `.env` from `.env.example` with generated secrets. `.env
 
 In local dev, `CELERY_TASK_ALWAYS_EAGER=True` runs background tasks inline. Emails print to the console.
 
+### Stripe (test mode)
+
+Put your test keys (`sk_test_…`, `pk_test_…`) in `.env`. Checkout needs no Stripe dashboard setup, and the success page confirms payments directly with Stripe, so local purchases work without webhooks. To also receive webhooks locally (renewals, refunds), install the [Stripe CLI](https://docs.stripe.com/stripe-cli) and run:
+
+```bash
+stripe listen --forward-to localhost:8000/billing/webhook/stripe/
+```
+
+Then copy the printed `whsec_…` secret into `STRIPE_WEBHOOK_SECRET`. Production webhook setup is in QUESTIONS.md (Q20).
+
 ## Configuration
 
 | What | Where |
@@ -73,6 +83,7 @@ apps/accounts/     custom User with role flags, profiles, agencies, agents, auth
 apps/listings/     listing models, PostGIS location + geo queries, limits, lifecycle
 apps/search/       search filters, map, favorites, saved searches, daily digest
 apps/messaging/    inquiries, threads, messages, unread counts, email throttling
+apps/billing/      payment adapter (Stripe), plans, subscriptions, purchases, featured placements, webhooks
 apps/staff/        admin dashboard at /staff/ (overview, moderation, listings, users, verifications)
 templates/         Django templates (partials/, accounts/, core/, listings/, emails/)
 static/brand/      theme.css + logos (rebrand here)

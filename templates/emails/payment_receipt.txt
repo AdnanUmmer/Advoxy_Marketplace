@@ -1,0 +1,11 @@
+{% autoescape off %}{% load i18n ui %}{% blocktranslate %}Hello {{ user_name }},{% endblocktranslate %}
+
+{% translate "Thank you for your payment." %}
+
+{% translate "Receipt" %}: {{ reference }}
+{% translate "Item" %}: {{ description }}
+{% translate "Amount" %}: {{ amount|money:2 }} {{ currency }}
+{% translate "Date" %}: {{ paid_at|date:"j F Y" }}
+
+{% translate "Your payment history:" %} {{ site_url }}{{ path }}
+{% endautoescape %}

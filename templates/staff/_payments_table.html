@@ -1,0 +1,29 @@
+{% load i18n ui staff_ui %}
+<p class="mb-3 text-sm text-muted">{% blocktranslate count n=table.page.paginator.count %}{{ n }} payment{% plural %}{{ n }} payments{% endblocktranslate %}{% if filtered %} · <a class="font-semibold text-primary hover:underline" href="{% url 'staff:payments' %}">{% translate "Clear filters" %}</a>{% endif %}</p>
+<div class="overflow-auto rounded-brand border hairline bg-surface lg:max-h-[calc(100vh-260px)]">
+  <table class="data-table">
+    <thead><tr>
+      {% translate "Date" as h %}{% sort_th "date" h %}
+      {% translate "Customer" as h %}{% sort_th "user" h %}
+      {% translate "Type" as h %}{% sort_th "kind" h %}
+      <th scope="col" class="px-3 py-2.5 text-left font-semibold">{% translate "Description" %}</th>
+      {% translate "Amount" as h %}{% sort_th "amount" h "right" %}
+      {% translate "Status" as h %}{% sort_th "status" h %}
+      <th scope="col" class="px-3 py-2.5 text-right font-semibold">{% translate "Refund / details" %}</th>
+    </tr></thead>
+    <tbody>
+      {% for p in table.page.object_list %}
+      <tr>
+        <td class="whitespace-nowrap text-muted">{{ p.paid_at|default:p.created_at|date:"j M Y, H:i" }}</td>
+        <td class="whitespace-nowrap"><a class="font-semibold hover:text-primary hover:underline" href="{% url 'staff:user_detail' p.user_id %}">{{ p.user.full_name }}</a></td>
+        <td class="whitespace-nowrap">{{ p.get_kind_display }}</td>
+        <td class="min-w-[220px]">{{ p.description }}<span class="block text-xs text-muted">ADV-{{ p.pk|stringformat:"06d" }}</span></td>
+        <td class="whitespace-nowrap text-right tabular-nums font-semibold">{{ p.amount|money:2 }}</td>
+        <td>{% if p.status == "paid" %}<span class="badge badge-success">{{ p.get_status_display }}</span>{% elif p.status == "refunded" %}<span class="badge badge-info">{{ p.get_status_display }}</span>{% else %}<span class="badge badge-danger">{{ p.get_status_display }}</span>{% endif %}</td>
+        <td class="whitespace-nowrap text-right">{% if p.dashboard_url %}<a class="text-sm font-semibold text-primary hover:underline" href="{{ p.dashboard_url }}" target="_blank" rel="noopener">{% translate "Open in Stripe" %} ↗</a>{% else %}<span class="text-xs text-muted">{% translate "Demo record" %}</span>{% endif %}</td>
+      </tr>
+      {% empty %}<tr><td colspan="7" class="py-14 text-center text-muted">{% translate "No payments match." %}</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "staff/_pagination.html" %}

@@ -1,0 +1,1 @@
+{% autoescape off %}{% load i18n %}{% blocktranslate %}Your receipt {{ reference }}{% endblocktranslate %}{% endautoescape %}

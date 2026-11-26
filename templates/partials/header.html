@@ -10,6 +10,7 @@
     <nav class="hidden items-center gap-1 md:flex" aria-label="{% translate 'Main' %}">
       <a class="nav-link {% if request.resolver_match.view_name == 'search:results' and request.GET.purpose == 'sale' %}is-active{% endif %}" href="{% url 'search:results' %}?purpose=sale">{% translate "Buy" %}</a>
       <a class="nav-link {% if request.resolver_match.view_name == 'search:results' and request.GET.purpose == 'rent' %}is-active{% endif %}" href="{% url 'search:results' %}?purpose=rent">{% translate "Rent" %}</a>
+      <a class="nav-link {% active 'billing:pricing' %}" href="{% url 'billing:pricing' %}">{% translate "Pricing" %}</a>
       <a class="nav-link {% active 'core:about' %}" href="{% url 'core:about' %}">{% translate "About" %}</a>
       <a class="nav-link {% active 'core:help' %}" href="{% url 'core:help' %}">{% translate "Help" %}</a>
     </nav>
@@ -42,6 +43,7 @@
     <div class="container-page flex flex-col gap-1 py-4">
       <a class="nav-link" href="{% url 'search:results' %}?purpose=sale">{% translate "Buy" %}</a>
       <a class="nav-link" href="{% url 'search:results' %}?purpose=rent">{% translate "Rent" %}</a>
+      <a class="nav-link" href="{% url 'billing:pricing' %}">{% translate "Pricing" %}</a>
       <a class="nav-link" href="{% url 'core:about' %}">{% translate "About" %}</a>
       <a class="nav-link" href="{% url 'core:help' %}">{% translate "Help" %}</a>
       <hr class="my-2 hairline">
