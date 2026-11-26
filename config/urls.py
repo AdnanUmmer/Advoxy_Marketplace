@@ -10,6 +10,7 @@ urlpatterns = [
     path("", include("apps.search.urls")),
     path("", include("apps.messaging.urls")),
     path("", include("apps.billing.urls")),
+    path("", include("apps.agencies.urls")),
     path("staff/", include("apps.staff.urls")),
     path("django-admin/", admin.site.urls),
 ]

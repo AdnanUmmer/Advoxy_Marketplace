@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Find an agent" %}{% endblock %}
+{% block content %}
+<section class="container-page pb-4 pt-10">
+  <p class="eyebrow">{% translate "Directory" %}</p>
+  <h1 class="display-lg mt-2">{% translate "Find an agent" %}</h1>
+  <p class="lede mt-2 max-w-2xl">{% translate "Agents with the Verified badge have had their license checked by our team." %} <a class="btn-link text-base" href="{% url 'agencies:agencies' %}">{% translate "Browse agencies" %}</a></p>
+
+  <form method="get" class="mt-6 flex flex-wrap items-end gap-2" role="search" aria-label="{% translate 'Filter agents' %}">
+    <div class="min-w-[220px] flex-[2]">
+      <label class="field-label text-xs" for="a-q">{% translate "Name, agency or speciality" %}</label>
+      <input id="a-q" name="q" value="{{ request.GET.q }}" class="field-input h-11 py-0" type="search">
+    </div>
+    <div class="min-w-[150px] flex-1">
+      <label class="field-label text-xs" for="a-city">{% translate "City" %}</label>
+      <select id="a-city" name="city" class="field-input h-11 py-0" onchange="this.form.submit()">
+        <option value="">{% translate "All cities" %}</option>
+        {% for c in cities %}<option value="{{ c }}" {% if request.GET.city == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="min-w-[150px] flex-1">
+      <label class="field-label text-xs" for="a-agency">{% translate "Agency" %}</label>
+      <select id="a-agency" name="agency" class="field-input h-11 py-0" onchange="this.form.submit()">
+        <option value="">{% translate "Any agency" %}</option>
+        {% for ag in agencies %}<option value="{{ ag.slug }}" {% if request.GET.agency == ag.slug %}selected{% endif %}>{{ ag.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <label class="flex h-11 items-center gap-2 text-sm"><input type="checkbox" name="verified" value="1" class="check" onchange="this.form.submit()" {% if request.GET.verified %}checked{% endif %}>{% translate "Verified only" %}</label>
+    <button class="btn btn-primary h-11" type="submit">{% translate "Search" %}</button>
+  </form>
+</section>
+
+<section class="container-page pb-16 pt-4">
+  <p class="mb-4 text-sm text-muted">{% blocktranslate count n=page.paginator.count %}{{ n }} agent{% plural %}{{ n }} agents{% endblocktranslate %}{% if filtered %} · <a class="font-semibold text-primary hover:underline" href="{% url 'agencies:agents' %}">{% translate "Clear filters" %}</a>{% endif %}</p>
+  <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    {% for a in page.object_list %}{% include "agencies/_agent_card.html" %}
+    {% empty %}<p class="text-muted">{% translate "No agents match these filters." %}</p>{% endfor %}
+  </div>
+  {% include "agencies/_pager.html" %}
+</section>
+{% endblock %}

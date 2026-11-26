@@ -83,6 +83,7 @@ apps/accounts/     custom User with role flags, profiles, agencies, agents, auth
 apps/listings/     listing models, PostGIS location + geo queries, limits, lifecycle
 apps/search/       search filters, map, favorites, saved searches, daily digest
 apps/messaging/    inquiries, threads, messages, unread counts, email throttling
+apps/agencies/     agent and agency directory, public profiles, team invitations
 apps/billing/      payment adapter (Stripe), plans, subscriptions, purchases, featured placements, webhooks
 apps/staff/        admin dashboard at /staff/ (overview, moderation, listings, users, verifications)
 templates/         Django templates (partials/, accounts/, core/, listings/, emails/)

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Agencies" %}{% endblock %}
+{% block content %}
+<section class="container-page pb-16 pt-10">
+  <p class="eyebrow">{% translate "Directory" %}</p>
+  <h1 class="display-lg mt-2">{% translate "Agencies" %}</h1>
+  <p class="lede mt-2 max-w-2xl">{% translate "Teams of agents working across Africa." %} <a class="btn-link text-base" href="{% url 'agencies:agents' %}">{% translate "Browse agents" %}</a></p>
+  <form method="get" class="mt-6 flex max-w-xl gap-2" role="search" aria-label="{% translate 'Search agencies' %}">
+    <label class="sr-only" for="ag-q">{% translate "Agency name or city" %}</label>
+    <input id="ag-q" name="q" value="{{ q }}" class="field-input h-11 py-0" type="search" placeholder="{% translate 'Agency name or city' %}">
+    <button class="btn btn-primary h-11" type="submit">{% translate "Search" %}</button>
+  </form>
+  <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    {% for ag in agencies %}
+    <a href="{% url 'agencies:agency' ag.slug %}" class="group flex gap-4 rounded-brand border hairline bg-surface p-5 transition-shadow hover:shadow-[0_14px_34px_-18px_rgba(26,26,23,0.35)]">
+      {% if ag.logo %}<img src="{{ ag.logo.url }}" alt="" class="h-16 w-16 shrink-0 rounded-brand-sm object-cover" loading="lazy" width="64" height="64">
+      {% else %}<span class="grid h-16 w-16 shrink-0 place-items-center rounded-brand-sm bg-ink text-xl font-extrabold text-paper" aria-hidden="true">{{ ag.name|make_list|first|upper }}</span>{% endif %}
+      <span class="min-w-0 flex-1">
+        <span class="flex flex-wrap items-center gap-2"><span class="font-bold group-hover:text-primary group-hover:underline">{{ ag.name }}</span>{% if ag.is_verified %}{% include "partials/verified_badge.html" %}{% endif %}</span>
+        {% if ag.city %}<span class="block text-sm text-muted">{{ ag.city }}{% if ag.country %}, {{ ag.country }}{% endif %}</span>{% endif %}
+        <span class="mt-2 flex gap-4 text-xs text-muted">
+          <span><strong class="text-ink">{{ ag.agent_count }}</strong> {% blocktranslate count n=ag.agent_count %}agent{% plural %}agents{% endblocktranslate %}</span>
+          <span><strong class="text-ink">{{ ag.live }}</strong> {% blocktranslate count n=ag.live %}live listing{% plural %}live listings{% endblocktranslate %}</span>
+        </span>
+      </span>
+    </a>
+    {% empty %}<p class="text-muted">{% translate "No agencies found." %}</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

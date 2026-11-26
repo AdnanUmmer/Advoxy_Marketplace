@@ -1,0 +1,7 @@
+{% autoescape off %}{% load i18n %}{% blocktranslate %}{{ inviter_name }} invited you to join {{ agency_name }} as an agent on {{ brand.name }}.{% endblocktranslate %}
+
+{% translate "Accept or decline here (the link works for 14 days):" %}
+{{ site_url }}{{ path }}
+
+{% translate "If you don't have an account yet, create one with this email address first." %}
+{% endautoescape %}

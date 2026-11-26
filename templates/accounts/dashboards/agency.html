@@ -5,7 +5,8 @@
 <section class="panel overflow-hidden" aria-labelledby="team-h">
   <div class="flex items-center justify-between border-b hairline px-6 py-4">
     <h2 id="team-h" class="font-display text-lg">{% translate "Your team" %}</h2>
-    <span class="text-sm text-muted">{% blocktranslate count n=agency.agents.count %}{{ n }} agent{% plural %}{{ n }} agents{% endblocktranslate %}</span>
+    <span class="flex items-center gap-3 text-sm text-muted">{% blocktranslate count n=agency.agents.count %}{{ n }} agent{% plural %}{{ n }} agents{% endblocktranslate %}
+      <a class="btn btn-quiet px-3.5 py-1.5 text-sm" href="{% url 'agencies:team' %}">{% translate "Manage team" %}</a></span>
   </div>
   <ul class="divide-y divide-sand">
     {% for agent in agency.agents.all %}
@@ -32,6 +33,7 @@
     <div><dt class="text-muted">{% translate "Verification" %}</dt><dd class="mt-1">{% include "partials/status_badge.html" with status=agency.verification_status label=agency.get_verification_status_display %}</dd></div>
     {% if agency.city %}<div><dt class="text-muted">{% translate "Based in" %}</dt><dd class="mt-0.5">{{ agency.city }}, {{ agency.country }}</dd></div>{% endif %}
   </dl>
+  <a class="btn-link mt-4 block text-sm" href="{% url 'agencies:agency' agency.slug %}">{% translate "View public page" %} →</a>
 </section>
 {% endif %}
 {% endblock %}

@@ -31,7 +31,8 @@
             <dd class="mt-1 flex flex-wrap gap-1">{% for role in user.roles %}<span class="badge badge-neutral">{{ role.label }}</span>{% endfor %}</dd></div>
           <div><dt class="text-muted">{% translate "Member since" %}</dt><dd class="mt-0.5">{{ user.date_joined|date:"F Y" }}</dd></div>
         </dl>
-        <a class="btn-link mt-4 text-sm" href="{% url 'billing:account' %}">{% translate "Billing and plans" %} →</a>
+        <a class="btn-link mt-4 block text-sm" href="{% url 'accounts:profile' %}">{% translate "Edit profile" %} →</a>
+        <a class="btn-link mt-2 block text-sm" href="{% url 'billing:account' %}">{% translate "Billing and plans" %} →</a>
       </section>
       {% block dash_aside %}{% endblock %}
     </aside>

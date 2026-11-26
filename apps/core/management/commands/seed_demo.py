@@ -85,6 +85,23 @@ DESCRIPTION = (
 )
 
 
+PROFILE_PLACES = {
+    "agent": ("Nairobi", "Kenya", "+254 711 204 880"),
+    "agency_agent1": ("Lagos", "Nigeria", "+234 803 555 0101"),
+    "agency_agent2": ("Nairobi", "Kenya", "+254 722 555 0102"),
+    "agency_agent3": ("Johannesburg", "South Africa", "+27 82 555 0103"),
+    "agency": ("Nairobi", "Kenya", "+254 709 555 010"),
+}
+
+AGENT_BIOS = {
+    "agent": "Independent agent in Nairobi for eight years. I focus on family homes in Westlands and Kilimani "
+             "and answer every inquiry the same day.",
+    "agency_agent1": "Lagos agent with Meridian Homes, covering Lekki, Ikoyi and Victoria Island.",
+    "agency_agent2": "I help renters and buyers find new-build apartments across Nairobi.",
+    "agency_agent3": "Johannesburg agent helping first-time buyers through every step of their purchase.",
+}
+
+
 class Command(BaseCommand):
     help = "Seed demo accounts and listings for every role."
 
@@ -170,20 +187,33 @@ class Command(BaseCommand):
                 email=f"{local}@{DEMO_DOMAIN}", password=DEMO_PASSWORD, full_name=name,
                 email_verified_at=now, terms_accepted_at=now, **flags,
             )
-            Profile.objects.create(user=user, city="Nairobi", country="Kenya", phone="+254 700 000 000")
+            city, country, phone = PROFILE_PLACES.get(key, ("Nairobi", "Kenya", "+254 700 000 000"))
+            Profile.objects.create(user=user, city=city, country=country, phone=phone, bio=AGENT_BIOS.get(key, ""))
             users[key] = user
 
         agency = AgencyTeam.objects.create(
             owner=users["agency"], name="Meridian Homes", city="Nairobi", country="Kenya",
-            description="A pan-African agency with offices in Lagos, Nairobi and Johannesburg.",
+            description=(
+                "Meridian Homes is a pan-African agency with offices in Lagos, Nairobi and Johannesburg. "
+                "Our agents handle family homes, new developments and long lets, and every one of them "
+                "lives in the city they sell in."
+            ),
+            phone="+254 709 555 010", website="https://example.com/meridian",
             verification_status=VerificationStatus.VERIFIED,
         )
         AgentProfile.objects.create(user=users["agent"], license_number="EARB-2291", years_experience=8,
+                                    specialties="Family homes, Westlands, Kilimani",
                                     verification_status=VerificationStatus.VERIFIED)
         statuses = [VerificationStatus.VERIFIED, VerificationStatus.VERIFIED, VerificationStatus.PENDING]
+        specialties = ["Luxury villas, Lekki", "Rentals, new developments", "First-time buyers"]
         for i, status in enumerate(statuses, start=1):
             AgentProfile.objects.create(user=users[f"agency_agent{i}"], agency=agency, license_number=f"MH-{100 + i}",
-                                        years_experience=3 + i, verification_status=status)
+                                        years_experience=3 + i, specialties=specialties[i - 1],
+                                        verification_status=status)
+        # One open invitation so the team page shows a pending seat.
+        from apps.agencies.models import AgencyInvitation
+
+        AgencyInvitation.objects.create(agency=agency, email=f"new.agent@{DEMO_DOMAIN}", invited_by=users["agency"])
         users["_agency"] = agency
         return users
 

@@ -1,0 +1,18 @@
+{% load i18n %}
+{# Agent directory card. Needs `a` (AgentProfile annotated with `live`). #}
+<a href="{% url 'agencies:agent' a.user_id %}" class="group flex gap-4 rounded-brand border hairline bg-surface p-5 transition-shadow hover:shadow-[0_14px_34px_-18px_rgba(26,26,23,0.35)]">
+  {% if a.user.profile.avatar %}<img src="{{ a.user.profile.avatar.url }}" alt="" class="h-16 w-16 shrink-0 rounded-full object-cover" loading="lazy" width="64" height="64">
+  {% else %}<span class="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-primary text-lg font-bold text-on-primary" aria-hidden="true">{{ a.user.initials }}</span>{% endif %}
+  <span class="min-w-0 flex-1">
+    <span class="flex flex-wrap items-center gap-2">
+      <span class="font-bold group-hover:text-primary group-hover:underline">{{ a.user.full_name }}</span>
+      {% if a.is_verified %}{% include "partials/verified_badge.html" %}{% endif %}
+    </span>
+    <span class="block text-sm text-muted">{% if a.agency %}{{ a.agency.name }}{% else %}{% translate "Independent agent" %}{% endif %}{% if a.user.profile.city %} · {{ a.user.profile.city }}{% endif %}</span>
+    {% if a.specialties %}<span class="mt-1 line-clamp-1 block text-sm">{{ a.specialties }}</span>{% endif %}
+    <span class="mt-2 flex flex-wrap gap-x-4 text-xs text-muted">
+      <span><strong class="text-ink">{{ a.live }}</strong> {% blocktranslate count n=a.live %}live listing{% plural %}live listings{% endblocktranslate %}</span>
+      {% if a.years_experience %}<span><strong class="text-ink">{{ a.years_experience }}</strong> {% blocktranslate count n=a.years_experience %}year experience{% plural %}years experience{% endblocktranslate %}</span>{% endif %}
+    </span>
+  </span>
+</a>

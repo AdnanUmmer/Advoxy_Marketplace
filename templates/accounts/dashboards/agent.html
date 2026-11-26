@@ -1,6 +1,19 @@
 {% extends "accounts/dashboards/base.html" %}
 {% load i18n %}
 {% block dash_main %}
+{% if team_invitations %}
+<section class="panel overflow-hidden" aria-labelledby="tinv-h">
+  <h2 id="tinv-h" class="border-b hairline px-6 py-4 font-display text-lg">{% translate "Team invitations" %}</h2>
+  <ul class="divide-y divide-sand">
+    {% for inv in team_invitations %}
+    <li class="flex flex-wrap items-center gap-3 px-6 py-3 text-sm">
+      <span class="flex-1">{% blocktranslate with name=inv.agency.name %}<strong>{{ name }}</strong> invited you to join their team.{% endblocktranslate %}</span>
+      <a class="btn btn-primary px-4 py-1.5 text-sm" href="{% url 'agencies:invitation' inv.token %}">{% translate "Review" %}</a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 {% include "accounts/dashboards/_listing_manager.html" %}
 {% endblock %}
 {% block dash_aside %}
@@ -11,8 +24,15 @@
   <h2 class="font-display text-lg">{% translate "Agent profile" %}</h2>
   <dl class="mt-4 space-y-3 text-sm">
     <div><dt class="text-muted">{% translate "Verification" %}</dt><dd class="mt-1">{% include "partials/status_badge.html" with status=agent_profile.verification_status label=agent_profile.get_verification_status_display %}</dd></div>
-    <div><dt class="text-muted">{% translate "Agency" %}</dt><dd class="mt-0.5">{% if agent_profile.agency %}{{ agent_profile.agency }}{% else %}{% translate "Independent" %}{% endif %}</dd></div>
+    <div><dt class="text-muted">{% translate "Agency" %}</dt><dd class="mt-0.5">{% if agent_profile.agency %}<a class="hover:underline" href="{% url 'agencies:agency' agent_profile.agency.slug %}">{{ agent_profile.agency }}</a>{% else %}{% translate "Independent" %}{% endif %}</dd></div>
   </dl>
+  <a class="btn-link mt-4 block text-sm" href="{% url 'agencies:agent' user.pk %}">{% translate "View public profile" %} →</a>
+  {% if agent_profile.agency %}
+  <form method="post" action="{% url 'agencies:team_leave' %}" class="mt-3" x-data
+        @submit="if (!confirm($el.dataset.confirm)) $event.preventDefault()" data-confirm="{% translate 'Leave this agency? Your listings stay with you.' %}">
+    {% csrf_token %}<button class="btn btn-quiet w-full text-sm text-danger" type="submit">{% translate "Leave agency" %}</button>
+  </form>
+  {% endif %}
 </section>
 {% endif %}
 {% endblock %}

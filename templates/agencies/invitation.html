@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Team invitation" %}{% endblock %}
+{% block content %}
+<div class="container-narrow py-16 text-center">
+  <p class="eyebrow">{% translate "Team invitation" %}</p>
+  <h1 class="display-md mt-3">{% blocktranslate with name=inv.agency.name %}Join {{ name }}{% endblocktranslate %}</h1>
+  {% if not inv.is_open %}
+    <p class="lede mt-3">{% translate "This invitation is no longer valid. Ask the agency to send a new one." %}</p>
+  {% elif not user.is_authenticated %}
+    <p class="lede mt-3">{% blocktranslate with email=inv.email %}This invitation is for {{ email }}. Sign in or create an agent account with that email to accept it.{% endblocktranslate %}</p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a class="btn btn-primary" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}">{% translate "Sign in" %}</a>
+      <a class="btn btn-quiet" href="{% url 'accounts:signup' %}">{% translate "Create an account" %}</a>
+    </div>
+  {% elif wrong_account %}
+    <p class="lede mt-3">{% blocktranslate with email=inv.email %}This invitation was sent to {{ email }}. Sign in with that account to accept it.{% endblocktranslate %}</p>
+  {% else %}
+    <p class="lede mt-3">{% translate "As a team member you list under the agency's plan and appear on its public page. You can leave at any time." %}</p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <form method="post">{% csrf_token %}<input type="hidden" name="decision" value="accept"><button class="btn btn-primary btn-lg" type="submit">{% translate "Accept invitation" %}</button></form>
+      <form method="post">{% csrf_token %}<input type="hidden" name="decision" value="decline"><button class="btn btn-quiet btn-lg" type="submit">{% translate "Decline" %}</button></form>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

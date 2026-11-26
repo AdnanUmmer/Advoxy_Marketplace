@@ -128,6 +128,10 @@ def dashboard(request):
         "agency": getattr(user, "owned_agency", None) if user.is_agency else None,
         "agent_profile": getattr(user, "agent_profile", None) if user.is_agent else None,
     }
+    if role == Role.AGENT:
+        from apps.agencies.services import invitations_for
+
+        context["team_invitations"] = invitations_for(user)
     if role in (Role.BUYER, Role.RENTER):
         from apps.search.models import Favorite, SavedSearch
 
@@ -168,3 +172,31 @@ def verification_upload(request):
         else:
             messages.success(request, _("License uploaded. Our team reviews it within two working days."))
     return redirect("accounts:dashboard")
+
+
+@login_required
+def profile_edit(request):
+    """Edit your own details; agents and agency owners get extra sections."""
+    from .forms import AgencyForm, AgentDetailsForm, ProfileForm
+    from .models import AgentProfile, Profile
+
+    user = request.user
+    profile, _created = Profile.objects.get_or_create(user=user)
+    agent = AgentProfile.objects.get_or_create(user=user)[0] if user.is_agent else None
+    agency = getattr(user, "owned_agency", None) if user.is_agency else None
+    section = request.POST.get("section") if request.method == "POST" else None
+
+    profile_form = ProfileForm(request.POST if section == "profile" else None,
+                               request.FILES if section == "profile" else None, instance=profile, user=user)
+    agent_form = AgentDetailsForm(request.POST if section == "agent" else None, instance=agent) if agent else None
+    agency_form = AgencyForm(request.POST if section == "agency" else None,
+                             request.FILES if section == "agency" else None, instance=agency) if agency else None
+
+    form = {"profile": profile_form, "agent": agent_form, "agency": agency_form}.get(section)
+    if form is not None and form.is_valid():
+        form.save()
+        messages.success(request, _("Saved."))
+        return redirect("accounts:profile")
+    return render(request, "accounts/profile_edit.html", {
+        "profile_form": profile_form, "agent_form": agent_form, "agency_form": agency_form, "agency": agency,
+    })

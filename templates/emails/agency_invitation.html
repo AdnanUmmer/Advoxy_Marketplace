@@ -1,0 +1,6 @@
+{% extends "emails/base.html" %}{% load i18n %}
+{% block body %}
+<p>{% blocktranslate %}<strong>{{ inviter_name }}</strong> invited you to join <strong>{{ agency_name }}</strong> as an agent on {{ brand.name }}.{% endblocktranslate %}</p>
+<p style="margin:28px 0;"><a href="{{ site_url }}{{ path }}" style="background:#1e3a2f;color:#f6f2ea;text-decoration:none;padding:12px 22px;border-radius:999px;display:inline-block;">{% translate "View invitation" %}</a></p>
+<p style="font-size:13px;color:#5b574f;">{% translate "The link works for 14 days. If you don't have an account yet, create one with this email address first." %}</p>
+{% endblock %}

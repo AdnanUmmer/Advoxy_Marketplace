@@ -106,3 +106,62 @@ class QueuedPasswordResetForm(PasswordResetForm):
 
     def get_users(self, email):
         return User.objects.filter(email__iexact=email, is_active=True, is_suspended=False)
+
+
+# ---------------------------------------------------------------------------
+# Profile editing (milestone 7)
+# ---------------------------------------------------------------------------
+class _ImageCleanMixin:
+    """Re-encode uploaded images (drops EXIF/GPS data, downscales)."""
+
+    def _clean_image(self, field):
+        upload = self.cleaned_data.get(field)
+        if upload and hasattr(upload, "content_type"):
+            from apps.listings.photos import normalize_image
+
+            return normalize_image(upload)
+        return upload
+
+
+class ProfileForm(_ImageCleanMixin, forms.ModelForm):
+    full_name = forms.CharField(label=_("Full name"), max_length=150)
+
+    class Meta:
+        model = Profile
+        fields = ["phone", "city", "country", "bio", "avatar"]
+        widgets = {"bio": forms.Textarea(attrs={"rows": 4})}
+        help_texts = {"phone": _("Shown to people you reply to and on your public agent profile.")}
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        self.fields["full_name"].initial = user.full_name
+        self.order_fields(["full_name", "phone", "city", "country", "bio", "avatar"])
+
+    def clean_avatar(self):
+        return self._clean_image("avatar")
+
+    def save(self, commit=True):
+        profile = super().save(commit)
+        self.user.full_name = self.cleaned_data["full_name"].strip()
+        self.user.save(update_fields=["full_name"])
+        return profile
+
+
+class AgentDetailsForm(forms.ModelForm):
+    class Meta:
+        model = AgentProfile
+        fields = ["license_number", "specialties", "years_experience"]
+        help_texts = {"specialties": _("For example: rentals in Westlands, luxury villas, first-time buyers.")}
+
+
+class AgencyForm(_ImageCleanMixin, forms.ModelForm):
+    website = forms.URLField(label=_("Website"), required=False, assume_scheme="https")
+
+    class Meta:
+        model = AgencyTeam
+        fields = ["name", "logo", "description", "city", "country", "phone", "website"]
+        widgets = {"description": forms.Textarea(attrs={"rows": 5})}
+
+    def clean_logo(self):
+        return self._clean_image("logo")

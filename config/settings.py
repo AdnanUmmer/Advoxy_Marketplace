@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "apps.messaging",
     "apps.staff",
     "apps.billing",
+    "apps.agencies",
 ]
 
 MIDDLEWARE = [

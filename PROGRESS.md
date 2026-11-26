@@ -1,6 +1,6 @@
 # Advoxy build progress
 
-**Overall: 74% complete** (38 of 51 items)
+**Overall: 84% complete** (43 of 51 items)
 
 Percentage = completed items / total items, rounded down. Items are every milestone and every task from SPEC.md section 13. A milestone is checked only when all its tasks work, its tests pass, and the seeded demo runs.
 
@@ -55,11 +55,11 @@ Percentage = completed items / total items, rounded down. Items are every milest
 - [x] Billing pages
 
 ## Milestone 7: Agencies and agents
-- [ ] **Milestone 7 complete**
-- [ ] Agency teams
-- [ ] Agent directory
-- [ ] Verified badges
-- [ ] Agency profiles
+- [x] **Milestone 7 complete** (252 tests passing, seed verified, directory, profiles and team flow checked in browser)
+- [x] Agency teams
+- [x] Agent directory
+- [x] Verified badges
+- [x] Agency profiles
 
 ## Milestone 8: Polish and launch
 - [ ] **Milestone 8 complete**

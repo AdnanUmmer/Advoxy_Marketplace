@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Your profile" %}{% endblock %}
+{% block content %}
+<div class="container-page py-10">
+  <nav class="text-sm text-muted" aria-label="{% translate 'Breadcrumb' %}"><a class="hover:underline" href="{% url 'accounts:dashboard' %}">{% translate "Dashboard" %}</a> / {% translate "Profile" %}</nav>
+  <h1 class="display-md mt-3">{% translate "Your profile" %}</h1>
+  {% if user.is_agent %}<p class="mt-2 text-sm text-muted">{% translate "Your name, photo, city and about text appear on your public agent profile." %} <a class="btn-link" href="{% url 'agencies:agent' user.pk %}">{% translate "View public profile" %}</a></p>{% endif %}
+
+  <div class="mt-8 max-w-3xl space-y-6">
+    <form method="post" enctype="multipart/form-data" class="panel panel-pad space-y-5" novalidate aria-labelledby="pf-h">
+      {% csrf_token %}<input type="hidden" name="section" value="profile">
+      <h2 id="pf-h" class="text-lg font-bold">{% translate "Personal details" %}</h2>
+      {% include "partials/form_errors.html" with form=profile_form %}
+      <div class="flex items-center gap-4">
+        {% if profile_form.instance.avatar %}<img src="{{ profile_form.instance.avatar.url }}" alt="" class="h-16 w-16 rounded-full object-cover">
+        {% else %}<span class="grid h-16 w-16 place-items-center rounded-full bg-primary text-lg font-bold text-on-primary" aria-hidden="true">{{ user.initials }}</span>{% endif %}
+        <div class="flex-1">
+          <label class="field-label" for="{{ profile_form.avatar.auto_id }}">{% translate "Photo" %}</label>
+          <input type="file" name="avatar" id="{{ profile_form.avatar.auto_id }}" accept="image/jpeg,image/png,image/webp" class="block w-full text-sm file:mr-3 file:rounded-full file:border-0 file:bg-sand file:px-4 file:py-2 file:text-sm file:font-medium">
+          {% if profile_form.avatar.errors %}<p class="field-error">{{ profile_form.avatar.errors|join:" " }}</p>{% endif %}
+        </div>
+      </div>
+      <div class="grid gap-5 sm:grid-cols-2">
+        {% include "partials/field.html" with field=profile_form.full_name %}
+        {% include "partials/field.html" with field=profile_form.phone %}
+        {% include "partials/field.html" with field=profile_form.city %}
+        {% include "partials/field.html" with field=profile_form.country %}
+      </div>
+      {% include "partials/field.html" with field=profile_form.bio %}
+      <button class="btn btn-primary" type="submit">{% translate "Save details" %}</button>
+    </form>
+
+    {% if agent_form %}
+    <form method="post" class="panel panel-pad space-y-5" novalidate aria-labelledby="ag-h">
+      {% csrf_token %}<input type="hidden" name="section" value="agent">
+      <h2 id="ag-h" class="text-lg font-bold">{% translate "Agent details" %}</h2>
+      <div class="grid gap-5 sm:grid-cols-2">
+        {% include "partials/field.html" with field=agent_form.license_number %}
+        {% include "partials/field.html" with field=agent_form.years_experience %}
+      </div>
+      {% include "partials/field.html" with field=agent_form.specialties %}
+      <button class="btn btn-primary" type="submit">{% translate "Save agent details" %}</button>
+    </form>
+    {% endif %}
+
+    {% if agency_form %}
+    <form method="post" enctype="multipart/form-data" class="panel panel-pad space-y-5" novalidate aria-labelledby="agc-h">
+      {% csrf_token %}<input type="hidden" name="section" value="agency">
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id="agc-h" class="text-lg font-bold">{% translate "Agency profile" %}</h2>
+        <a class="btn-link text-sm" href="{% url 'agencies:agency' agency.slug %}">{% translate "View public page" %}</a>
+      </div>
+      {% include "partials/form_errors.html" with form=agency_form %}
+      <div class="flex items-center gap-4">
+        {% if agency.logo %}<img src="{{ agency.logo.url }}" alt="" class="h-16 w-16 rounded-brand-sm object-cover">{% endif %}
+        <div class="flex-1">
+          <label class="field-label" for="{{ agency_form.logo.auto_id }}">{% translate "Logo" %}</label>
+          <input type="file" name="logo" id="{{ agency_form.logo.auto_id }}" accept="image/jpeg,image/png,image/webp" class="block w-full text-sm file:mr-3 file:rounded-full file:border-0 file:bg-sand file:px-4 file:py-2 file:text-sm file:font-medium">
+          {% if agency_form.logo.errors %}<p class="field-error">{{ agency_form.logo.errors|join:" " }}</p>{% endif %}
+        </div>
+      </div>
+      {% include "partials/field.html" with field=agency_form.name %}
+      {% include "partials/field.html" with field=agency_form.description %}
+      <div class="grid gap-5 sm:grid-cols-2">
+        {% include "partials/field.html" with field=agency_form.city %}
+        {% include "partials/field.html" with field=agency_form.country %}
+        {% include "partials/field.html" with field=agency_form.phone %}
+        {% include "partials/field.html" with field=agency_form.website %}
+      </div>
+      <button class="btn btn-primary" type="submit">{% translate "Save agency profile" %}</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

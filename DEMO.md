@@ -89,6 +89,15 @@ Payments run in **Stripe test mode**: use card `4242 4242 4242 4242`, any future
 5. **Agency plan sharing**: agency agents publish under Meridian Homes' Agency Pro plan (200 listings shared by the team).
 6. **Admin → Payments** (`/staff/payments/`): revenue this month, monthly recurring revenue, subscriptions and payments with links into the Stripe dashboard for refunds. The overview's revenue tile is now live.
 
+## What to try (milestone 7: agencies and agents)
+
+1. **Agent directory** (`/agents/`, **Agents** in the header): search by name, speciality or agency, filter by city, agency or **Verified only**. Verified agents are listed first.
+2. **Agent profile**: open any agent for their bio, contact details, stats and live listings. Listing pages link the agent's name and agency to these pages.
+3. **Agencies** (`/agencies/`) and **Meridian Homes'** public page: description, contact, team and all team listings.
+4. **Team management**: sign in as the **agency** and choose **Manage team** on the dashboard (`/my/team/`). Seats come from the plan (Agency Pro: 10). A demo invitation to `new.agent@demo.example.com` is pending. Invite any email: the invitation email prints in the console with its link. **Revoke** frees the seat; **Remove** takes an agent off the team (their listings stay with them).
+5. **Joining**: sign in as the independent **agent**, then as the agency invite `agent@demo.example.com`. The agent's dashboard shows the invitation; accepting moves them and their listings under Meridian Homes. **Leave agency** on the dashboard undoes it.
+6. **Edit profile** (dashboard link, `/accounts/profile/`): name, phone, city, bio and photo for everyone; licence, specialities and experience for agents; name, logo, description and contact for agencies. Photos are re-encoded so location data is removed.
+
 ## Recorded walkthrough
 
 A scripted shot list for the recorded walkthrough is added in milestone 8 (see QUESTIONS.md, Q7).

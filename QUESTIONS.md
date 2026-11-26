@@ -68,7 +68,7 @@ Done, see Q6. The home page hero image is a brand setting (`BRAND["hero_image"]`
 - **Spam guard:** at most 20 inquiries per person per day.
 - **Email throttling:** new-message emails go out at most once every 15 minutes per conversation while the recipient still has unread messages; reading the conversation resets this.
 - **Polling:** the open conversation, the conversation list and the header unread badge refresh every 5 seconds, only while the browser tab is visible.
-- **Agency owners** do not see their agents' conversations yet. Tell me if they should (milestone 7, agency teams).
+- **Agency owners** do not see their agents' conversations (kept private in milestone 7 too). Tell me if they should.
 
 ## Q19. Admin dashboard defaults (milestone 5)
 - **Admin URL:** `/staff/` (separate staff sign-in at `/accounts/staff/login/`). Django's raw database admin stays at `/django-admin/` for superusers only.
@@ -87,3 +87,12 @@ Done, see Q6. The home page hero image is a brand setting (`BRAND["hero_image"]`
 - **Refunds** are issued in the Stripe dashboard (linked from the admin Payments page); the refund webhook marks the payment refunded.
 - **Webhooks for production:** add the endpoint `https://YOUR-DOMAIN/billing/webhook/stripe/` in the Stripe dashboard with events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid` and `charge.refunded`, and put its signing secret in `STRIPE_WEBHOOK_SECRET`. Locally, the success page confirms payments directly with Stripe, so webhooks are optional (renewals and refunds need them).
 - **Countries Stripe doesn't support:** the payment adapter (`apps/billing/providers/`) is ready for a second provider such as Flutterwave or Paystack (SPEC section 1 risk).
+
+## Q21. Agency team defaults (milestone 7)
+- **Seats:** agents plus open invitations count towards the plan's seats (Agency Starter 3, Agency Pro 10). Without a plan an agency can't invite.
+- **Invitations** are by email, expire after 14 days and must be accepted from an account with that email. Accepting turns a buyer or renter account into an agent account.
+- **Listings follow the agent:** joining moves an agent's listings under the agency's plan; leaving or being removed takes them back to the agent (who then needs their own plan to keep publishing beyond the free limit).
+- **One agency per agent:** agents must leave their current agency before joining another. Agency owners can't join other agencies.
+- **Directory order:** verified first, then the most live listings. Suspended accounts are hidden.
+- **Agency owners can't edit their agents' listings** yet; tell me if they should.
+

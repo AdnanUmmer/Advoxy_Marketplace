@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ agency.name }}{% endblock %}
+{% block meta_description %}{% if agency.description %}{{ agency.description|truncatewords:30 }}{% else %}{{ agency.name }}{% endif %}{% endblock %}
+{% block content %}
+<div class="border-b hairline bg-surface">
+  <div class="container-page py-10">
+    <nav class="text-sm text-muted" aria-label="{% translate 'Breadcrumb' %}"><a class="hover:underline" href="{% url 'agencies:agencies' %}">{% translate "Agencies" %}</a> / {{ agency.name }}</nav>
+    <div class="mt-5 flex flex-wrap items-start gap-6">
+      {% if agency.logo %}<img src="{{ agency.logo.url }}" alt="{{ agency.name }}" class="h-24 w-24 rounded-brand object-cover" width="96" height="96">
+      {% else %}<span class="grid h-24 w-24 place-items-center rounded-brand bg-ink text-4xl font-extrabold text-paper" aria-hidden="true">{{ agency.name|make_list|first|upper }}</span>{% endif %}
+      <div class="min-w-0 flex-1">
+        <h1 class="display-md flex flex-wrap items-center gap-3">{{ agency.name }} {% if agency.is_verified %}{% include "partials/verified_badge.html" with size="md" %}{% endif %}</h1>
+        <p class="mt-1 text-muted">{% if agency.city %}{{ agency.city }}{% if agency.country %}, {{ agency.country }}{% endif %} · {% endif %}{% blocktranslate count n=team|length %}{{ n }} agent{% plural %}{{ n }} agents{% endblocktranslate %} · {% blocktranslate count n=live_count %}{{ n }} live listing{% plural %}{{ n }} live listings{% endblocktranslate %}</p>
+        {% if agency.description %}<div class="prose-calm mt-4 max-w-3xl">{{ agency.description|linebreaks }}</div>{% endif %}
+        <p class="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+          {% if agency.phone %}<a class="font-semibold text-primary hover:underline" href="tel:{{ agency.phone }}">{{ agency.phone }}</a>{% endif %}
+          {% if agency.website %}<a class="font-semibold text-primary hover:underline" href="{{ agency.website }}" target="_blank" rel="noopener nofollow">{% translate "Website" %} ↗</a>{% endif %}
+          {% if cities %}<span class="text-muted">{% translate "Active in" %} {{ cities|join:", " }}</span>{% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-page py-10">
+  {% if team %}
+  <section aria-labelledby="team-h">
+    <h2 id="team-h" class="display-md">{% translate "Our agents" %}</h2>
+    <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {% for a in team %}{% include "agencies/_agent_card.html" %}{% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="mt-12" aria-labelledby="ag-l-h">
+    <h2 id="ag-l-h" class="display-md">{% translate "Listings" %}</h2>
+    {% if page.object_list %}
+    <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {% for listing in page.object_list %}{% include "partials/listing_card.html" with listing=listing %}{% endfor %}
+    </div>
+    {% include "agencies/_pager.html" %}
+    {% else %}<p class="mt-4 text-muted">{% translate "No live listings right now." %}</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -116,10 +116,10 @@
             <span class="grid h-14 w-14 place-items-center rounded-full bg-primary font-semibold text-on-primary" aria-hidden="true">{{ listing.owner.initials }}</span>
           {% endif %}
           <div>
-            <h2 id="contact-h" class="font-display text-xl">{{ listing.owner.full_name }}</h2>
+            <h2 id="contact-h" class="font-display text-xl">{% if agent_profile %}<a class="hover:text-primary hover:underline" href="{% url 'agencies:agent' listing.owner_id %}">{{ listing.owner.full_name }}</a>{% else %}{{ listing.owner.full_name }}{% endif %}</h2>
             <p class="flex flex-wrap items-center gap-1.5 text-sm text-muted">
-              {% if agent_profile %}{% translate "Agent" %}{% if listing.agency %} · {{ listing.agency.name }}{% endif %}
-                {% if agent_profile.is_verified %}<span class="badge badge-success">✓ {% translate "Verified" %}</span>{% endif %}
+              {% if agent_profile %}{% translate "Agent" %}{% if listing.agency %} · <a class="hover:text-ink hover:underline" href="{% url 'agencies:agency' listing.agency.slug %}">{{ listing.agency.name }}</a>{% endif %}
+                {% if agent_profile.is_verified %}{% include "partials/verified_badge.html" %}{% endif %}
               {% elif listing.purpose == "rent" %}{% translate "Landlord" %}{% else %}{% translate "Owner" %}{% endif %}
             </p>
           </div>
