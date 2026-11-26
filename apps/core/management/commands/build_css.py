@@ -17,7 +17,10 @@ from django.core.management.base import BaseCommand
 TAILWIND_VERSION = "v4.3.4"
 SCAN_GLOBS = [("templates", "**/*.html"), ("apps", "**/*.html"), ("apps", "**/*.py"), ("static/js", "**/*.js")]
 QUOTED = re.compile(r"\"([^\"\n]*)\"|'([^'\n]*)'")
-SAFE_TOKEN = re.compile(r"^[A-Za-z0-9_:/\[\]().#!@*&>+~=,\-]+$")
+SAFE_TOKEN = re.compile(r"^[A-Za-z0-9_:/\[\]().#!@*&>+~=,%\-]+$")
+# Django tags/variables are replaced by spaces first, so a class written right
+# next to one (e.g. `lg:grid{% endif %}`) is still collected.
+TEMPLATE_TAG = re.compile(r"{%.*?%}|{{.*?}}|{#.*?#}", re.S)
 
 
 def _balanced(token):
@@ -39,8 +42,14 @@ def collect_candidates(base_dir):
     for folder, pattern in SCAN_GLOBS:
         for path in (base_dir / folder).glob(pattern):
             text = path.read_text(encoding="utf-8", errors="ignore")
+            if path.suffix == ".html":
+                text = TEMPLATE_TAG.sub(" ", text)
             for match in QUOTED.finditer(text):
                 for token in (match.group(1) or match.group(2) or "").split():
+                    # Alpine/JS expressions nest quotes: :class="x ? 'block h-4' : 'hidden'"
+                    token = token.strip("'\"`,;")
+                    if not token:
+                        continue
                     starts_ok = token[0].isalpha() or token[0] in "-!@"
                     if SAFE_TOKEN.match(token) and starts_ok and _balanced(token):
                         tokens.add(token)

@@ -118,7 +118,7 @@
       {% include "search/_results.html" %}
     </div>
     {% if mapbox_token %}
-    <div class="relative lg:sticky lg:top-[143px] lg:h-[calc(100vh-143px)]" :class="view === 'list' ? 'hidden lg:block' : 'block h-[calc(100vh-143px)]'">
+    <div class="relative lg:sticky lg:top-[143px] lg:h-[calc(100vh-143px)]" :class="view === 'list' ? 'hidden lg:block' : 'block h-[78svh]'">
       <div id="search-map" class="h-full w-full bg-sand" role="region" aria-label="{% translate 'Map of results' %}"></div>
       <div class="pointer-events-none absolute inset-x-0 top-4 flex justify-center">
         <button type="button" id="search-area-btn" hidden class="btn btn-primary pointer-events-auto shadow-lg">{% translate "Search this area" %}</button>

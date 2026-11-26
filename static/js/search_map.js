@@ -78,6 +78,7 @@
 
   function init(el) {
     map = new mapboxgl.Map({ container: el, style: STYLE, bounds: AFRICA, cooperativeGestures: false });
+    el.mapInstance = map; // handy for debugging and browser tests
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
 
     draw = new MapboxDraw({ displayControlsDefault: false, controls: { polygon: true, trash: true } });

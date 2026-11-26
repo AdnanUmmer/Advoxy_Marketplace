@@ -39,7 +39,7 @@ The seed creates 64 listings across Nairobi, Lagos, Accra, Cape Town, Kigali, Ad
 6. **Preview**: owners can open their own drafts. Everyone else gets a 404 until the listing is published.
 7. **Agents** can prepare drafts but can't submit until subscriptions arrive in milestone 6 (QUESTIONS.md Q12).
 
-The map pin picker and the map on the listing page appear once `MAPBOX_TOKEN` holds a real public token. Until then, the form takes latitude and longitude as numbers.
+Without a `MAPBOX_TOKEN`, the form takes latitude and longitude as numbers and the listing page shows coordinates instead of a map.
 
 ## What to try (milestone 3: search and map)
 
@@ -50,7 +50,13 @@ The map pin picker and the map on the listing page appear once `MAPBOX_TOKEN` ho
 5. **Daily digest**: run `python manage.py shell -c "from apps.search.digest import send_digests; print(send_digests())"` after publishing a new matching listing. The email prints in the console.
 6. **Renters** land on rentals by default.
 
-**Map (needs `MAPBOX_TOKEN`)**: with a real token the search page becomes a split view: results on the left and a map on the right with price-bubble pins. Clicking a pin opens a preview card, hovering a card highlights its pin, you can draw an area or use **Search this area**, distance is measured from the map centre, and on phones a **Show map / Show list** button switches views.
+7. **Map**: on desktop the search page is a split view, with results on the left and a map with price-bubble pins on the right.
+   - Click a pin for a preview card. Hover a result card to highlight its pin.
+   - Use the polygon tool (top left of the map) to draw an area, or pan the map and click **Search this area**.
+   - The **Distance** filter measures from the map centre.
+   - On phones, the **Show map / Show list** button switches views.
+   - Links keep the drawn area, so a shared link opens the same search.
+8. **Listing form**: click the map or drag the pin to set the location. The listing page shows the location on a map.
 
 ## Recorded walkthrough
 

@@ -25,6 +25,7 @@
     // Default view: the African continent.
     const center = hasValue ? [parseFloat(lngInput.value), parseFloat(latInput.value)] : [20, 2];
     const map = new mapboxgl.Map({ container: el, style: STYLE, center, zoom: hasValue ? 14 : 2.4, cooperativeGestures: true });
+    el.mapInstance = map; // handy for debugging and browser tests
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
     const marker = new mapboxgl.Marker({ element: pinElement(), draggable: true, anchor: "bottom" });
 
@@ -55,6 +56,7 @@
   function initView(el) {
     const lngLat = [parseFloat(el.dataset.lng), parseFloat(el.dataset.lat)];
     const map = new mapboxgl.Map({ container: el, style: STYLE, center: lngLat, zoom: 13.5, cooperativeGestures: true });
+    el.mapInstance = map;
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
     new mapboxgl.Marker({ element: pinElement(), anchor: "bottom" }).setLngLat(lngLat).addTo(map);
   }

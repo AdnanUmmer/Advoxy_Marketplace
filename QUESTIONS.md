@@ -47,8 +47,8 @@ SPEC says moderation gates publishing but not what happens when an owner edits a
 Agents and agencies need an active subscription to list. Plans and subscriptions arrive in milestone 6.
 **Default:** until then their capacity is 0: they can create and edit drafts, but cannot submit for review. Seeded agent listings stay published.
 
-## Q13. Mapbox token needed
-`MAPBOX_TOKEN` in `.env` is still the placeholder. Without a real public token (starts with `pk.`), the listing form asks for coordinates as numbers and the detail page shows coordinates instead of a map. Milestone 3 (search and map) needs a real token. Please create a free Mapbox account and put the public token in `.env`. **Blocked item:** the Mapbox split view in milestone 3 is built (price pins, preview cards, draw-an-area, "search this area", distance from map centre, mobile list/map toggle) but cannot be tested or checked off until a token is set. Everything else in milestone 3 works without it.
+## Q13. Mapbox token (resolved)
+A real public token is now in `.env`. The search map, listing-form pin picker and listing-page map are verified. For production, restrict the token to the live domain in the Mapbox dashboard (URL restrictions).
 
 ## Q14. Saved-search digest timing
 SPEC asks for a daily digest but not when.
