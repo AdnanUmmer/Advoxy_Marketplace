@@ -125,9 +125,11 @@
           </div>
         </div>
         <div class="mt-6 border-t hairline pt-6">
-          {% block inquiry %}
-          <p class="text-sm text-muted">{% translate "Inquiries and messaging open in milestone 4." %}</p>
-          {% endblock %}
+          {% if preview %}
+            <p class="text-sm text-muted">{% translate "Inquiries open once the listing is published." %}</p>
+          {% else %}
+            {% include "messaging/_inquiry_form.html" with form=inquiry_form %}
+          {% endif %}
         </div>
       </section>
       {% if is_owner %}<a class="btn btn-quiet mt-4 w-full" href="{% url 'listings:edit' listing.pk %}">{% translate "Edit this listing" %}</a>{% endif %}

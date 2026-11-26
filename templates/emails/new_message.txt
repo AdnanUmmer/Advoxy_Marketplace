@@ -1,0 +1,8 @@
+{% autoescape off %}{% load i18n %}{% blocktranslate %}Hello {{ recipient_name }},{% endblocktranslate %}
+
+{% blocktranslate %}{{ sender_name }} sent you a message about "{{ listing_title }}":{% endblocktranslate %}
+
+{{ preview }}
+
+{% translate "Read and reply:" %} {{ site_url }}{{ thread_path }}
+{% endautoescape %}

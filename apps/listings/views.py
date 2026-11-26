@@ -103,6 +103,13 @@ def detail(request, pk, slug):
         "similar": similar_listings(listing) if listing.status == ListingStatus.PUBLISHED else [],
         "mapbox_token": mapbox_token(),
     }
+    from apps.messaging.models import Thread
+    from apps.messaging.views import inquiry_form_for
+
+    context["inquiry_form"] = inquiry_form_for(request.user, listing)
+    context["existing_thread"] = (
+        Thread.objects.filter(listing=listing, buyer=request.user).first() if request.user.is_authenticated else None
+    )
     return render(request, "listings/detail.html", context)
 
 

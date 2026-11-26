@@ -62,3 +62,12 @@ On the owner's request: switched to a single sans-serif font (Plus Jakarta Sans,
 
 ## Q17. Real photos for demo listings (resolved)
 Done, see Q6. The home page hero image is a brand setting (`BRAND["hero_image"]`, file `static/brand/hero.jpg`).
+
+## Q18. Messaging defaults (milestone 4)
+- **Who can send inquiries:** signed-in users with a verified email (Q2). Visitors see a "Sign in to contact" button. The form is prefilled from their account; name, email, phone and message are shared with the lister.
+- **One conversation per listing per person:** a second inquiry on the same listing continues the same thread.
+- **Spam guard:** at most 20 inquiries per person per day.
+- **Email throttling:** new-message emails go out at most once every 15 minutes per conversation while the recipient still has unread messages; reading the conversation resets this.
+- **Polling:** the open conversation, the conversation list and the header unread badge refresh every 5 seconds, only while the browser tab is visible.
+- **Agency owners** do not see their agents' conversations yet. Tell me if they should (milestone 7, agency teams).
+

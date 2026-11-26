@@ -1,0 +1,13 @@
+{% autoescape off %}{% load i18n %}{% blocktranslate %}Hello {{ owner_name }},{% endblocktranslate %}
+
+{% blocktranslate %}{{ name }} sent an inquiry about "{{ listing_title }}":{% endblocktranslate %}
+
+{{ message }}
+
+{% translate "Name" %}: {{ name }}
+{% translate "Email" %}: {{ email }}{% if phone %}
+{% translate "Phone" %}: {{ phone }}{% endif %}
+
+{% translate "Reply in your messages:" %} {{ site_url }}{{ thread_path }}
+{% translate "Listing:" %} {{ site_url }}{{ listing_path }}
+{% endautoescape %}

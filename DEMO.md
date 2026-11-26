@@ -58,6 +58,14 @@ Without a `MAPBOX_TOKEN`, the form takes latitude and longitude as numbers and t
    - Links keep the drawn area, so a shared link opens the same search.
 8. **Listing form**: click the map or drag the pin to set the location. The listing page shows the location on a map.
 
+## What to try (milestone 4: inquiries and messaging)
+
+1. **Inquiry**: sign in as the **buyer**, open any listing and use **Send an inquiry** in the contact card (or click **Contact** on a search result). It is prefilled from your account. After sending, the card confirms and links to the conversation. The owner's email (with your contact details) prints in the `runserver` console.
+2. **Messages** (`/messages/`, or **Messages** in the header): the buyer, renter and independent agent each start with an unread reply, shown as a badge in the header and on the conversation.
+3. **Live updates**: keep a conversation open as the buyer while someone replies (another browser signed in as `agency.agent1@demo.example.com`, or run `python manage.py shell -c "from apps.messaging.models import Thread; from apps.messaging.services import post_message; t = Thread.objects.first(); post_message(t, t.owner, 'Hello!')"`). The reply appears within 5 seconds without a refresh.
+4. **Owners** see the inquirer's contact details at the top of the conversation.
+5. **Email throttling**: several quick messages produce one email; the next one is sent after the recipient reads the conversation or 15 minutes pass.
+
 ## Recorded walkthrough
 
 A scripted shot list for the recorded walkthrough is added in milestone 8 (see QUESTIONS.md, Q7).

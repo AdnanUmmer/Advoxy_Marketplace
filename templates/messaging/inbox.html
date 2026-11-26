@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Messages" %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="mx-auto grid h-[calc(100svh-72px)] max-w-[1240px] grid-rows-1 border-x hairline bg-surface lg:grid-cols-[360px_minmax(0,1fr)]">
+  <aside class="{% if active %}hidden lg:flex{% else %}flex{% endif %} min-h-0 flex-col border-r hairline" aria-label="{% translate 'Conversations' %}">
+    <div class="flex items-center justify-between border-b hairline px-5 py-4">
+      <h1 class="text-xl font-bold">{% translate "Messages" %}</h1>
+    </div>
+    <div id="thread-list" class="min-h-0 flex-1 overflow-y-auto"
+         hx-get="{% url 'messaging:thread_list' %}{% if active %}?active={{ active.pk }}{% endif %}"
+         hx-trigger="every 5s [document.visibilityState === 'visible']" hx-swap="innerHTML">
+      {% include "messaging/_thread_list.html" with active_id=active.pk %}
+    </div>
+  </aside>
+
+  <section class="{% if active %}flex{% else %}hidden lg:flex{% endif %} min-h-0 min-w-0 flex-col" aria-label="{% translate 'Conversation' %}">
+    {% block conversation %}
+    <div class="grid flex-1 place-items-center p-10 text-center">
+      <div>
+        <span class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-paper text-primary">{% include "partials/icon.html" with name="mail" size=24 %}</span>
+        <p class="mt-4 text-lg font-bold">{% translate "Select a conversation" %}</p>
+        <p class="mt-1 text-sm text-muted">{% translate "Messages about listings appear here. New messages show up automatically." %}</p>
+      </div>
+    </div>
+    {% endblock %}
+  </section>
+</div>
+{% endblock %}

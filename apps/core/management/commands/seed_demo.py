@@ -23,6 +23,7 @@ from apps.core import placeholder
 from apps.listings.geo import make_point
 from apps.listings.models import Amenity, Listing, ListingLocation, ListingPhoto, ListingStatus
 from apps.search import filters as search_filters
+from apps.messaging.models import Inquiry, Message, MessageRead, Thread
 from apps.search.models import Favorite, SavedSearch
 
 DEMO_DOMAIN = "demo.example.com"
@@ -103,6 +104,7 @@ class Command(BaseCommand):
             users = self._accounts()
             count = self._listings(users, amenities)
             self._shortlists(users)
+            self._conversations(users)
         self.stdout.write(self.style.SUCCESS(f"Seeded {len(ACCOUNTS)} demo accounts and {count} listings."))
         self.stdout.write(f"Password for every demo account: {DEMO_PASSWORD}")
 
@@ -255,6 +257,47 @@ class Command(BaseCommand):
                     photo.save()
                 created += 1
         return created
+
+    def _conversations(self, users):
+        """Sample inquiries and threads so every inbox has something in it."""
+        now = timezone.now()
+        published = Listing.objects.published()
+        scripts = [
+            # (buyer, owner key, purpose, [(sender 'b'|'o', text, hours ago)], read state)
+            ("buyer", "agency_agent1", "sale", [
+                ("b", "Hello, I'm interested in this home. Is it still available, and is the price negotiable?", 50),
+                ("o", "Hi Kwame, yes it is available. The seller is open to reasonable offers. Would you like to view it this week?", 47),
+                ("b", "Thursday afternoon would work for me.", 30),
+                ("o", "Thursday at 3pm is confirmed. I'll send the address details here the day before.", 3),
+            ]),
+            ("renter", "landlord", "rent", [
+                ("b", "Good morning, is this flat available from next month? I'd like a 12-month lease.", 26),
+                ("o", "Good morning Zanele, yes it is. A 12-month lease is fine. Deposit is one month's rent.", 2),
+            ]),
+            ("buyer", "agent", "sale", [
+                ("b", "Hello, could you share the service charge and whether there is backup power?", 5),
+            ]),
+        ]
+        for buyer_key, owner_key, purpose, lines in scripts:
+            buyer, owner = users[buyer_key], users[owner_key]
+            listing = published.filter(owner=owner, purpose=purpose).order_by("pk").first()
+            if not listing:
+                continue
+            first_at = now - timedelta(hours=lines[0][2])
+            thread = Thread.objects.create(listing=listing, buyer=buyer, owner=owner, last_message_at=first_at)
+            Inquiry.objects.create(listing=listing, sender=buyer, thread=thread, name=buyer.full_name,
+                                   email=buyer.email, phone="+234 800 000 0000", message=lines[0][1])
+            for who, text, hours in lines:
+                sender = buyer if who == "b" else owner
+                msg = Message.objects.create(thread=thread, sender=sender, body=text)
+                Message.objects.filter(pk=msg.pk).update(created_at=now - timedelta(hours=hours))
+            last_at = now - timedelta(hours=lines[-1][2])
+            Thread.objects.filter(pk=thread.pk).update(last_message_at=last_at, created_at=first_at)
+            # Everyone has read up to their own last message, so the latest reply shows as unread.
+            for person, key in ((buyer, "b"), (owner, "o")):
+                own = [h for w, _t, h in lines if w == key]
+                if own:
+                    MessageRead.objects.create(thread=thread, user=person, last_read_at=now - timedelta(hours=min(own)))
 
     def _shortlists(self, users):
         """Favorites and saved searches for the buyer and renter demo accounts."""

@@ -1,0 +1,6 @@
+{% load i18n %}
+<div id="inquiry" class="rounded-brand-sm border border-success/30 bg-success/8 p-4" role="status">
+  <p class="flex items-center gap-2 font-bold text-success">{% include "partials/icon.html" with name="check" size=18 %}{% translate "Message sent" %}</p>
+  <p class="mt-1 text-sm text-ink/80">{% translate "We've emailed the lister. Their reply will appear in your messages." %}</p>
+  <a class="btn btn-primary mt-4 w-full" href="{{ thread.get_absolute_url }}">{% translate "View conversation" %}</a>
+</div>

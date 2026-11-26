@@ -1,0 +1,32 @@
+{% load i18n ui humanize %}
+{% if threads %}
+<ul class="divide-y divide-sand">
+  {% for t in threads %}
+  <li>
+    <a href="{{ t.get_absolute_url }}" class="flex gap-3 px-5 py-3.5 transition-colors hover:bg-paper {% if t.pk == active_id %}bg-paper{% endif %}"
+       {% if t.pk == active_id %}aria-current="page"{% endif %}>
+      <span class="h-12 w-14 shrink-0 overflow-hidden rounded-brand-sm bg-sand">
+        {% with cover=t.listing.cover %}{% if cover %}<img src="{{ cover.image.url }}" alt="" class="h-full w-full object-cover" loading="lazy" width="56" height="48">{% endif %}{% endwith %}
+      </span>
+      <span class="min-w-0 flex-1">
+        <span class="flex items-baseline justify-between gap-2">
+          <span class="truncate text-sm {% if t.unread %}font-extrabold{% else %}font-semibold{% endif %}">{{ t.other_person.full_name }}</span>
+          <span class="shrink-0 text-xs text-muted">{{ t.last_message_at|naturaltime }}</span>
+        </span>
+        <span class="block truncate text-xs text-muted">{{ t.listing.title }}</span>
+        <span class="mt-0.5 flex items-center justify-between gap-2">
+          <span class="truncate text-sm {% if t.unread %}text-ink{% else %}text-muted{% endif %}">{% if t.last_message.sender_id == user.pk %}{% translate "You:" %} {% endif %}{{ t.last_message.body|truncatechars:70 }}</span>
+          {% if t.unread %}<span class="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-accent px-1.5 text-[0.7rem] font-bold text-white">{{ t.unread }}<span class="sr-only"> {% translate "unread" %}</span></span>{% endif %}
+        </span>
+      </span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="px-6 py-14 text-center">
+  <p class="font-bold">{% translate "No conversations yet" %}</p>
+  <p class="mt-1 text-sm text-muted">{% translate "Send an inquiry from any listing to start one." %}</p>
+  <a class="btn btn-primary mt-5" href="{% url 'search:results' %}">{% translate "Browse homes" %}</a>
+</div>
+{% endif %}

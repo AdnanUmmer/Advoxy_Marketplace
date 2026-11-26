@@ -1,0 +1,82 @@
+{% extends "messaging/inbox.html" %}
+{% load i18n ui %}
+{% block title %}{% blocktranslate with name=other.full_name %}Conversation with {{ name }}{% endblocktranslate %}{% endblock %}
+
+{% block conversation %}
+{# Header: who and which listing #}
+<div class="flex items-center gap-3 border-b hairline px-4 py-3 sm:px-5">
+  <a href="{% url 'messaging:inbox' %}" class="grid h-9 w-9 place-items-center rounded-full hover:bg-paper lg:hidden" aria-label="{% translate 'Back to messages' %}">←</a>
+  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-on-primary" aria-hidden="true">{{ other.initials }}</span>
+  <div class="min-w-0 flex-1">
+    <p class="truncate font-bold">{{ other.full_name }}</p>
+    <p class="truncate text-xs text-muted">{% if is_owner %}{% translate "Interested in your listing" %}{% else %}{% if other.is_agent %}{% translate "Agent" %}{% else %}{% translate "Listing owner" %}{% endif %}{% endif %}</p>
+  </div>
+  <a href="{{ thread.listing.get_absolute_url }}" class="hidden max-w-[280px] items-center gap-2.5 rounded-brand-sm border hairline p-1.5 pr-3 hover:border-stone sm:flex">
+    <span class="h-10 w-12 shrink-0 overflow-hidden rounded-[6px] bg-sand">{% with cover=thread.listing.cover %}{% if cover %}<img src="{{ cover.image.url }}" alt="" class="h-full w-full object-cover" width="48" height="40">{% endif %}{% endwith %}</span>
+    <span class="min-w-0 leading-tight">
+      <span class="block truncate text-sm font-semibold">{{ thread.listing.title }}</span>
+      <span class="block text-xs text-muted">{{ thread.listing.price|money }} {{ thread.listing|price_suffix }}</span>
+    </span>
+  </a>
+</div>
+
+{% if is_owner and inquiries %}
+{% with inq=inquiries.0 %}
+<div class="flex flex-wrap items-center gap-x-5 gap-y-1 border-b hairline bg-paper px-5 py-2.5 text-sm">
+  <span class="font-semibold">{% translate "Contact details" %}</span>
+  <span>{{ inq.name }}</span>
+  <a class="text-primary hover:underline" href="mailto:{{ inq.email }}">{{ inq.email }}</a>
+  {% if inq.phone %}<a class="text-primary hover:underline" href="tel:{{ inq.phone }}">{{ inq.phone }}</a>{% endif %}
+</div>
+{% endwith %}
+{% endif %}
+
+{# Messages #}
+<div id="scroller" class="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+  <ol id="messages" class="space-y-2" aria-live="polite" aria-label="{% translate 'Messages' %}">
+    {% include "messaging/_messages.html" %}
+  </ol>
+  <div id="poller" hx-get="{% url 'messaging:poll' thread.pk %}?after={{ last_id }}"
+       hx-trigger="every 5s [document.visibilityState === 'visible']" hx-target="#messages" hx-swap="beforeend"></div>
+</div>
+
+{# Reply #}
+<form method="post" action="{% url 'messaging:send' thread.pk %}" hx-post="{% url 'messaging:send' thread.pk %}" hx-target="#messages" hx-swap="beforeend"
+      class="flex items-end gap-2 border-t hairline bg-surface p-3 sm:p-4"
+      hx-on::after-request="if (event.detail.successful) { this.reset(); document.getElementById('reply-error').innerHTML = '' } else { document.getElementById('reply-error').innerHTML = event.detail.xhr.responseText }">
+  {% csrf_token %}
+  <div class="flex-1">
+    <label for="reply-body" class="sr-only">{% translate "Write a message" %}</label>
+    <textarea id="reply-body" name="body" rows="1" maxlength="3000" required class="field-input max-h-40 min-h-[46px] resize-none py-2.5"
+              placeholder="{% translate 'Write a message…' %}"
+              @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+              @keydown.enter="if (!$event.shiftKey) { $event.preventDefault(); $el.form.requestSubmit() }" x-data></textarea>
+    <div id="reply-error"></div>
+  </div>
+  <button type="submit" class="btn btn-primary h-[46px] px-5">{% translate "Send" %}</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const scroller = document.getElementById("scroller");
+    const list = document.getElementById("messages");
+    const nearBottom = () => scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 120;
+    const toBottom = () => { scroller.scrollTop = scroller.scrollHeight; };
+    let stick = true;
+    scroller.addEventListener("scroll", () => { stick = nearBottom(); });
+    toBottom();
+    // Remove duplicates (a poll can race a send) and repeated day separators.
+    document.body.addEventListener("htmx:afterSwap", (e) => {
+      if (e.detail.target !== list) return;
+      const seen = new Set();
+      list.querySelectorAll("li[id^='msg-']").forEach((li) => { if (seen.has(li.id)) li.remove(); else seen.add(li.id); });
+      const days = new Set();
+      list.querySelectorAll("li[data-day]").forEach((li) => { if (days.has(li.dataset.day)) li.remove(); else days.add(li.dataset.day); });
+      const mine = e.detail.requestConfig && e.detail.requestConfig.verb === "post";
+      if (stick || mine) toBottom();
+    });
+  })();
+</script>
+{% endblock %}

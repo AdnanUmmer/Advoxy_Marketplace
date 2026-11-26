@@ -1,0 +1,1 @@
+{% load i18n %}{% if unread_count %}<span class="grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 text-[0.7rem] font-bold text-white" aria-label="{% blocktranslate count n=unread_count %}{{ n }} unread message{% plural %}{{ n }} unread messages{% endblocktranslate %}">{{ unread_count }}</span>{% endif %}

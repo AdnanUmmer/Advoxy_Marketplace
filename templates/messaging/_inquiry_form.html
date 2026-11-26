@@ -1,0 +1,35 @@
+{% load i18n %}
+{# Inquiry form inside the listing contact card. Swapped in place by HTMX. #}
+<div id="inquiry">
+  {% if not user.is_authenticated %}
+    <p class="text-sm text-muted">{% translate "Sign in to message the owner or agent. Your details are shared only with them." %}</p>
+    <a class="btn btn-primary mt-4 w-full" href="{% url 'accounts:login' %}?next={{ listing.get_absolute_url|urlencode }}%23contact">{% translate "Sign in to contact" %}</a>
+    <a class="btn btn-quiet mt-2 w-full" href="{% url 'accounts:signup' %}">{% translate "Create an account" %}</a>
+  {% elif user.pk == listing.owner_id %}
+    <p class="text-sm text-muted">{% translate "This is your listing. Inquiries from interested people appear in your messages." %}</p>
+    <a class="btn btn-quiet mt-4 w-full" href="{% url 'messaging:inbox' %}">{% translate "Open messages" %}</a>
+  {% elif not user.is_email_verified %}
+    <p class="text-sm text-muted">{% translate "Verify your email address to send inquiries." %}</p>
+    <a class="btn btn-primary mt-4 w-full" href="{% url 'accounts:verify_email_sent' %}">{% translate "Verify email" %}</a>
+  {% else %}
+    {% if existing_thread %}
+      <p class="mb-4 flex items-center justify-between gap-2 rounded-brand-sm bg-paper px-3 py-2 text-sm">
+        {% translate "You've already contacted them." %}
+        <a class="font-semibold text-primary hover:underline" href="{{ existing_thread.get_absolute_url }}">{% translate "View conversation" %}</a>
+      </p>
+    {% endif %}
+    <form method="post" action="{% url 'messaging:inquire' listing.pk %}" hx-post="{% url 'messaging:inquire' listing.pk %}" hx-target="#inquiry" hx-swap="outerHTML" class="space-y-3" novalidate>
+      {% csrf_token %}
+      {% if error %}<p class="flash flash-error" role="alert">{{ error }}</p>{% endif %}
+      <h3 class="text-[0.95rem] font-bold">{% translate "Send an inquiry" %}</h3>
+      {% include "partials/field.html" with field=form.name %}
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+        {% include "partials/field.html" with field=form.email %}
+        {% include "partials/field.html" with field=form.phone %}
+      </div>
+      {% include "partials/field.html" with field=form.message %}
+      <button class="btn btn-primary w-full" type="submit">{% include "partials/icon.html" with name="mail" %}{% translate "Send message" %}</button>
+      <p class="text-xs text-muted">{% translate "Your name, email and phone are shared with the lister so they can reply." %}</p>
+    </form>
+  {% endif %}
+</div>

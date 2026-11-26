@@ -1,0 +1,19 @@
+{% load i18n %}
+{# Message bubbles. With `poll`/HTMX responses an out-of-band poller replaces the current one with the new `after` id. #}
+{% for m in messages_list %}
+{% ifchanged m.created_at|date:"Y-m-d" %}
+<li class="my-3 text-center text-xs font-semibold uppercase tracking-wider text-muted" data-day="{{ m.created_at|date:'Y-m-d' }}">{{ m.created_at|date:"j F Y" }}</li>
+{% endifchanged %}
+<li id="msg-{{ m.pk }}" class="flex {% if m.sender_id == user.pk %}justify-end{% else %}justify-start{% endif %}">
+  <div class="max-w-[78%] rounded-2xl px-4 py-2.5 text-[0.95rem] leading-relaxed {% if m.sender_id == user.pk %}rounded-br-md bg-primary text-on-primary{% else %}rounded-bl-md border hairline bg-paper text-ink{% endif %}">
+    <p class="whitespace-pre-line break-words">{{ m.body }}</p>
+    <p class="mt-1 text-right text-[0.7rem] {% if m.sender_id == user.pk %}text-on-primary/70{% else %}text-muted{% endif %}">
+      <span class="sr-only">{% if m.sender_id == user.pk %}{% translate "You" %}{% else %}{{ m.sender.full_name }}{% endif %}, </span>{{ m.created_at|time:"H:i" }}
+    </p>
+  </div>
+</li>
+{% endfor %}
+{% if request.htmx %}
+<div id="poller" hx-swap-oob="true" hx-get="{% url 'messaging:poll' thread.pk %}?after={{ last_id }}"
+     hx-trigger="every 5s [document.visibilityState === 'visible']" hx-target="#messages" hx-swap="beforeend"></div>
+{% endif %}

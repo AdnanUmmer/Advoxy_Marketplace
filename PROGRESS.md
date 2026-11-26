@@ -1,6 +1,6 @@
 # Advoxy build progress
 
-**Overall: 43% complete** (22 of 51 items)
+**Overall: 52% complete** (27 of 51 items)
 
 Percentage = completed items / total items, rounded down. Items are every milestone and every task from SPEC.md section 13. A milestone is checked only when all its tasks work, its tests pass, and the seeded demo runs.
 
@@ -33,11 +33,11 @@ Percentage = completed items / total items, rounded down. Items are every milest
 - [x] Saved searches
 
 ## Milestone 4: Inquiries and messaging
-- [ ] **Milestone 4 complete**
-- [ ] Inquiry form
-- [ ] Threads
-- [ ] Polling messages
-- [ ] Email notifications
+- [x] **Milestone 4 complete** (167 tests passing; inquiry, inbox, live polling and emails verified in the browser)
+- [x] Inquiry form
+- [x] Threads
+- [x] Polling messages
+- [x] Email notifications
 
 ## Milestone 5: Admin core
 - [ ] **Milestone 5 complete**
