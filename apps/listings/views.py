@@ -46,7 +46,7 @@ def owned_listing(view):
 # ---------------------------------------------------------------------------
 # Public
 # ---------------------------------------------------------------------------
-def similar_listings(listing, limit=3):
+def similar_listings(listing, limit=4):
     base = (
         Listing.objects.published()
         .exclude(pk=listing.pk)

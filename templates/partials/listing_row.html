@@ -1,0 +1,66 @@
+{% load i18n ui humanize %}
+{# Detail-rich horizontal card for search results. Needs listing with photos, owner, agency prefetched. #}
+{% with photos=listing.photos.all %}
+<article class="group relative grid overflow-hidden rounded-brand border hairline bg-surface transition-shadow hover:shadow-[0_14px_34px_-18px_rgba(26,26,23,0.35)] sm:grid-cols-[minmax(0,40%)_1fr]"
+         data-listing-id="{{ listing.pk }}" x-data="{ i: 0, n: {{ photos|length }} }">
+  {# Photo carousel #}
+  <div class="relative aspect-[4/3] overflow-hidden bg-sand sm:aspect-auto sm:min-h-[230px]">
+    <a href="{{ listing.get_absolute_url }}" class="block h-full" tabindex="-1" aria-hidden="true">
+      {% for photo in photos|slice:":6" %}
+        <img src="{{ photo.image.url }}" alt="" width="640" height="480" class="absolute inset-0 h-full w-full object-cover"
+             {% if not forloop.first %}loading="lazy" x-cloak x-show="i === {{ forloop.counter0 }}"{% else %}x-show="i === 0"{% endif %}>
+      {% endfor %}
+    </a>
+    <div class="pointer-events-none absolute left-2.5 top-2.5 flex gap-1.5">
+      {% if listing.is_featured %}<span class="badge badge-featured">{% translate "Featured" %}</span>{% endif %}
+      <span class="badge bg-surface/95 text-ink">{{ listing.get_purpose_display }}</span>
+    </div>
+    <div class="absolute right-2.5 top-2.5 z-10">{% include "search/_favorite_button.html" with is_favorite=listing.pk|is_in:favorite_ids %}</div>
+    {% if photos|length > 1 %}
+    <button type="button" class="absolute left-2 top-1/2 z-10 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full bg-surface/90 text-ink opacity-0 shadow transition group-hover:opacity-100 focus:opacity-100"
+            @click="i = (i - 1 + Math.min(n, 6)) % Math.min(n, 6)" aria-label="{% translate 'Previous photo' %}">‹</button>
+    <button type="button" class="absolute right-2 top-1/2 z-10 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full bg-surface/90 text-ink opacity-0 shadow transition group-hover:opacity-100 focus:opacity-100"
+            @click="i = (i + 1) % Math.min(n, 6)" aria-label="{% translate 'Next photo' %}">›</button>
+    <div class="pointer-events-none absolute bottom-2.5 left-1/2 flex -translate-x-1/2 gap-1" aria-hidden="true">
+      {% for photo in photos|slice:":6" %}<span class="h-1.5 w-1.5 rounded-full" :class="i === {{ forloop.counter0 }} ? 'bg-white' : 'bg-white/50'"></span>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {# Details #}
+  <div class="flex min-w-0 flex-col gap-2 p-4 sm:p-5">
+    <div class="flex items-start justify-between gap-3">
+      <p class="text-[1.45rem] font-extrabold leading-none tracking-tight">{{ listing.price|money }} <span class="text-sm font-medium text-muted">{{ listing|price_suffix }}</span></p>
+    </div>
+    <p class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink">
+      <span class="font-semibold">{{ listing.get_property_type_display }}</span>
+      {% if listing.bedrooms %}<span class="flex items-center gap-1.5">{% include "partials/icon.html" with name="bed" %}{% blocktranslate count n=listing.bedrooms %}{{ n }} bed{% plural %}{{ n }} beds{% endblocktranslate %}</span>{% endif %}
+      {% if listing.bathrooms %}<span class="flex items-center gap-1.5">{% include "partials/icon.html" with name="bath" %}{% blocktranslate count n=listing.bathrooms %}{{ n }} bath{% plural %}{{ n }} baths{% endblocktranslate %}</span>{% endif %}
+      {% if listing.area_sqm %}<span class="flex items-center gap-1.5">{% include "partials/icon.html" with name="area" %}<span><span class="text-muted">{% translate "Area" %}:</span> {{ listing.area_sqm|intcomma }} m²</span></span>{% endif %}
+      {% if listing.furnished %}<span class="badge badge-neutral">{% translate "Furnished" %}</span>{% endif %}
+    </p>
+    <h3 class="line-clamp-1 text-[1rem] font-semibold">
+      <a href="{{ listing.get_absolute_url }}" class="text-primary hover:underline after:absolute after:inset-0 after:content-[''] sm:after:left-[40%]">{{ listing.title }}</a>
+    </h3>
+    <p class="flex items-center gap-1.5 text-sm text-muted">{% include "partials/icon.html" with name="pin" %}<span class="truncate">{% if listing.address %}{{ listing.address }}, {% endif %}{% if listing.neighborhood %}{{ listing.neighborhood }}, {% endif %}{{ listing.city }}, {{ listing.country }}</span></p>
+    {% with amenities=listing.amenities.all %}{% if amenities %}
+    <p class="line-clamp-1 text-xs text-muted">{% for a in amenities|slice:":4" %}{{ a.name }}{% if not forloop.last %} · {% endif %}{% endfor %}{% if amenities|length > 4 %} · +{{ amenities|length|add:"-4" }}{% endif %}</p>
+    {% endif %}{% endwith %}
+
+    <div class="relative z-10 mt-auto flex flex-wrap items-center justify-between gap-3 border-t hairline pt-3">
+      <div class="flex items-center gap-2.5 text-sm">
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-on-primary" aria-hidden="true">{% if listing.agency %}{{ listing.agency.name|make_list|first|upper }}{% else %}{{ listing.owner.initials }}{% endif %}</span>
+        <span class="min-w-0 leading-tight">
+          <span class="block truncate font-semibold">{% if listing.agency %}{{ listing.agency.name }}{% else %}{{ listing.owner.full_name }}{% endif %}</span>
+          <span class="flex items-center gap-1 text-xs text-muted">
+            {% if listing.owner.is_agent %}{% translate "Agent" %}{% if listing.owner.agent_profile.is_verified %} <span class="inline-flex items-center gap-0.5 font-semibold text-success">{% include "partials/icon.html" with name="check" size=12 %}{% translate "Verified" %}</span>{% endif %}
+            {% elif listing.purpose == "rent" %}{% translate "Landlord" %}{% else %}{% translate "Owner" %}{% endif %}
+            · {% blocktranslate with when=listing.published_at|naturaltime %}Listed {{ when }}{% endblocktranslate %}
+          </span>
+        </span>
+      </div>
+      <a href="{{ listing.get_absolute_url }}#contact" class="btn btn-quiet px-4 py-2 text-sm">{% include "partials/icon.html" with name="mail" %}{% translate "Contact" %}</a>
+    </div>
+  </div>
+</article>
+{% endwith %}

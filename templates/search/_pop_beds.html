@@ -1,0 +1,13 @@
+{% load i18n %}
+<p class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{% translate "Bedrooms" %}</p>
+<div class="flex flex-wrap gap-2">
+  {% for value, label in form.fields.beds.choices %}
+  <label class="pill-option"><input type="radio" name="beds" value="{{ value }}" class="sr-only" {% if form.beds.value|default:"" == value %}checked{% endif %}>{{ label }}</label>
+  {% endfor %}
+</div>
+<p class="mb-2 mt-4 text-xs font-semibold uppercase tracking-wider text-muted">{% translate "Bathrooms" %}</p>
+<div class="flex flex-wrap gap-2">
+  {% for value, label in form.fields.baths.choices %}
+  <label class="pill-option"><input type="radio" name="baths" value="{{ value }}" class="sr-only" {% if form.baths.value|default:"" == value %}checked{% endif %}>{{ label }}</label>
+  {% endfor %}
+</div>

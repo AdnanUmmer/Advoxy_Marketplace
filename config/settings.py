@@ -172,6 +172,10 @@ CELERY_BEAT_SCHEDULE = {
 
 # Listings
 LISTING_LIFETIME_DAYS = env.int("LISTING_LIFETIME_DAYS", default=90)
+# Markets shown first wherever cities/countries are listed (home, search). Others follow by size.
+PRIORITY_COUNTRIES = env.list("PRIORITY_COUNTRIES", default=[
+    "Nigeria", "Kenya", "South Africa", "Ghana", "Ethiopia", "Senegal", "DR Congo", "Somalia", "Sudan",
+])
 LISTING_PHOTO_MAX_MB = 10
 LISTING_PHOTO_MAX_EDGE = 2000  # px; larger uploads are downscaled
 

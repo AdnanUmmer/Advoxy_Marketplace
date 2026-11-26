@@ -1,41 +1,54 @@
 {% extends "base.html" %}
-{% load i18n ui %}
+{% load i18n ui static %}
 {% block title %}{{ brand.tagline }}{% endblock %}
 {% block title_suffix %} · {{ brand.name }}{% endblock %}
 
-{% block content %}
-<section class="container-page grid items-center gap-12 pb-16 pt-10 lg:grid-cols-[1.05fr_1fr] lg:pt-16">
-  <div>
-    <p class="eyebrow">{% translate "Across Africa" %}</p>
-    <h1 class="display-xl mt-5">{% blocktranslate %}Find the place<br class="hidden sm:block"> you'll call <em class="font-normal italic text-primary">home.</em>{% endblocktranslate %}</h1>
-    <p class="lede mt-6 max-w-lg">{% translate "Verified agents, honest listings and calm search, from Lagos to Cape Town." %}</p>
+{% block head %}
+{# Not deferred: must register its Alpine component before Alpine starts. #}
+<script src="{% static 'js/filters.js' %}"></script>
+{% endblock %}
 
-    <form action="{% url 'search:results' %}" method="get" class="mt-9 max-w-xl rounded-[22px] border hairline bg-surface p-2 shadow-[0_18px_50px_-24px_rgba(26,26,23,0.35)]"
-          x-data="{ purpose: '{{ default_purpose }}' }" role="search" aria-label="{% translate 'Search homes' %}">
-      <fieldset class="flex gap-1 px-2 pt-1">
-        <legend class="sr-only">{% translate "Purpose" %}</legend>
-        <label class="cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors" :class="purpose === 'sale' ? 'bg-ink text-paper' : 'text-muted hover:text-ink'">
-          <input type="radio" name="purpose" value="sale" class="sr-only" x-model="purpose">{% translate "Buy" %}
-        </label>
-        <label class="cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors" :class="purpose === 'rent' ? 'bg-ink text-paper' : 'text-muted hover:text-ink'">
-          <input type="radio" name="purpose" value="rent" class="sr-only" x-model="purpose">{% translate "Rent" %}
-        </label>
-      </fieldset>
-      <div class="mt-2 flex flex-col gap-2 sm:flex-row">
-        <label for="hero-city" class="sr-only">{% translate "City" %}</label>
-        <input id="hero-city" name="city" list="hero-cities" class="field-input flex-1 border-transparent bg-paper/60" placeholder="{% translate 'City, e.g. Nairobi' %}" autocomplete="off">
-        <datalist id="hero-cities">{% for a in areas %}<option value="{{ a.city }}">{% endfor %}</datalist>
-        <button class="btn btn-primary btn-lg rounded-[14px]" type="submit">{% translate "Search" %}</button>
+{% block content %}
+<section class="relative isolate overflow-hidden bg-ink">
+  {% with hero=featured.0.cover %}{% if hero %}
+  <img src="{{ hero.image.url }}" alt="" class="absolute inset-0 -z-10 h-full w-full object-cover opacity-60" aria-hidden="true">
+  {% endif %}{% endwith %}
+  <div class="absolute inset-0 -z-10 bg-gradient-to-b from-ink/40 via-ink/30 to-ink/70" aria-hidden="true"></div>
+  <div class="container-page pb-16 pt-14 text-center sm:pb-24 sm:pt-20">
+    <h1 class="display-xl text-paper">{% translate "Find your next home across Africa" %}</h1>
+    <p class="mx-auto mt-3 max-w-xl text-lg text-paper/85">{% translate "Reviewed listings from verified agents and owners, from Lagos to Johannesburg." %}</p>
+
+    <form action="{% url 'search:results' %}" method="get" role="search" aria-label="{% translate 'Search homes' %}"
+          x-data="filterLabels" class="mx-auto mt-8 max-w-[920px] rounded-[18px] bg-surface p-4 text-left shadow-[0_24px_60px_-24px_rgba(0,0,0,0.55)] sm:p-5"
+          data-l-beds="{% translate 'beds' %}" data-l-baths="{% translate 'baths' %}" data-l-from="{% translate 'From' %}"
+          data-l-up-to="{% translate 'Up to' %}" data-l-sym="{{ CURRENCY_SYMBOL }}" data-l-types="{% translate 'types' %}">
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <div class="seg shrink-0 self-start sm:self-stretch" role="radiogroup" aria-label="{% translate 'Purpose' %}">
+          <label class="seg-option flex items-center px-6"><input type="radio" name="purpose" value="sale" class="sr-only" {% if default_purpose == "sale" %}checked{% endif %}>{% translate "Buy" %}</label>
+          <label class="seg-option flex items-center px-6"><input type="radio" name="purpose" value="rent" class="sr-only" {% if default_purpose == "rent" %}checked{% endif %}>{% translate "Rent" %}</label>
+        </div>
+        <div class="relative flex-1">
+          <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-primary">{% include "partials/icon.html" with name="pin" size=18 %}</span>
+          <label for="hero-city" class="sr-only">{% translate "City" %}</label>
+          <input id="hero-city" name="city" list="hero-cities" class="field-input h-12 py-0 pl-11" placeholder="{% translate 'Enter a city, e.g. Lagos' %}" autocomplete="off">
+          <datalist id="hero-cities">{% for a in areas %}<option value="{{ a.city }}">{% endfor %}</datalist>
+        </div>
+        <button class="btn btn-primary h-12 rounded-brand-sm px-10" type="submit">{% include "partials/icon.html" with name="search" size=18 %}{% translate "Search" %}</button>
+      </div>
+      <div class="mt-3 grid gap-3 sm:grid-cols-3">
+        {% translate "Property type" as l %}{% include "search/_filter_popover.html" with label=l summary_js="typeLabel()" body="search/_pop_type.html" %}
+        {% translate "Beds & baths" as l %}{% include "search/_filter_popover.html" with label=l summary_js="bedsLabel()" body="search/_pop_beds.html" %}
+        {% blocktranslate asvar l with c=CURRENCY_CODE %}Price ({{ c }}){% endblocktranslate %}{% include "search/_filter_popover.html" with label=l summary_js="priceLabel()" body="search/_pop_price.html" prefix="h_" panel_class="w-[320px] right-0 left-auto" %}
       </div>
     </form>
-  </div>
 
-  {# Editorial mosaic built from featured listings #}
-  <div class="relative hidden h-[540px] lg:block" aria-hidden="true">
-    {% for listing in featured|slice:":3" %}{% with cover=listing.cover %}{% if cover %}
-      <img src="{{ cover.image.url }}" alt="" class="absolute rounded-[22px] object-cover shadow-[0_30px_60px_-30px_rgba(26,26,23,0.5)]
-        {% if forloop.counter == 1 %}right-0 top-0 h-[360px] w-[78%]{% elif forloop.counter == 2 %}bottom-0 left-0 h-[260px] w-[52%]{% else %}bottom-8 right-6 h-[170px] w-[38%] ring-8 ring-paper{% endif %}">
-    {% endif %}{% endwith %}{% endfor %}
+    {% if areas %}
+    <p class="mx-auto mt-6 flex max-w-[920px] flex-wrap justify-center gap-2 text-sm">
+      {% for a in areas|slice:":6" %}
+        <a class="rounded-full bg-paper/15 px-3.5 py-1.5 font-medium text-paper backdrop-blur hover:bg-paper/25" href="{% url 'search:results' %}?city={{ a.city|urlencode }}">{{ a.city }}</a>
+      {% endfor %}
+    </p>
+    {% endif %}
   </div>
 </section>
 
@@ -48,7 +61,7 @@
     </div>
     <a class="btn-link hidden sm:inline-flex" href="{% url 'search:results' %}">{% translate "View all" %} <span aria-hidden="true">→</span></a>
   </div>
-  <div class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     {% for listing in featured %}{% include "partials/listing_card.html" with listing=listing %}{% endfor %}
   </div>
 </section>

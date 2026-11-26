@@ -8,6 +8,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from apps.accounts.permissions import verified_email_required
+from apps.listings.markets import popular_cities
 from apps.listings.models import Listing, Purpose
 from apps.listings.views import mapbox_token
 
@@ -24,7 +25,7 @@ def results(request):
     if "purpose" not in query and request.user.is_authenticated and request.user.primary_role == "renter":
         query["purpose"] = Purpose.RENT
     form, qs, center = filters.search(query)
-    qs = qs.select_related("location").prefetch_related("photos")
+    qs = qs.select_related("location", "owner", "owner__agent_profile", "agency").prefetch_related("photos", "amenities")
     page = Paginator(qs, PAGE_SIZE).get_page(request.GET.get("page"))
     pins = [p for p in (filters.map_point(l) for l in qs[:MAP_LIMIT]) if p]
     clean_qs = filters.clean_querystring(query)
@@ -36,6 +37,8 @@ def results(request):
         "center": center,
         "querystring": clean_qs,
         "summary": filters.describe(form),
+        "heading": filters.heading(form),
+        "popular": popular_cities(limit=10, purpose=form.cleaned_data.get("purpose") or None),
         "active_more": filters.count_more_filters(form.cleaned_data),
         "cities": Listing.objects.published().order_by("city").values_list("city", flat=True).distinct(),
         "mapbox_token": mapbox_token(),

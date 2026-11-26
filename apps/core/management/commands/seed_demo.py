@@ -1,7 +1,7 @@
 """
 python manage.py seed_demo [--reset]
 
-Creates demo accounts for every role and 64 listings across 8 African cities with
+Creates demo accounts for every role and 77 listings across 11 cities in 9 priority countries with
 real coordinates, realistic USD prices and generated placeholder photos.
 Later milestones extend this command (inquiries, threads, subscriptions).
 """
@@ -43,15 +43,19 @@ ACCOUNTS = [
 
 # city, country, price multiplier, [(neighborhood, lat, lng)]
 CITIES = [
-    ("Nairobi", "Kenya", 1.0, [("Westlands", -1.2676, 36.8108), ("Kilimani", -1.2921, 36.7856), ("Karen", -1.3197, 36.7073), ("Lavington", -1.2786, 36.7700)]),
     ("Lagos", "Nigeria", 1.25, [("Ikoyi", 6.4520, 3.4350), ("Victoria Island", 6.4281, 3.4219), ("Lekki Phase 1", 6.4478, 3.4723), ("Yaba", 6.5095, 3.3711)]),
-    ("Accra", "Ghana", 1.05, [("East Legon", 5.6350, -0.1610), ("Airport Residential", 5.6030, -0.1780), ("Cantonments", 5.5786, -0.1736), ("Osu", 5.5560, -0.1820)]),
+    ("Abuja", "Nigeria", 1.1, [("Maitama", 9.0820, 7.4950), ("Asokoro", 9.0430, 7.5260), ("Wuse II", 9.0790, 7.4700), ("Gwarinpa", 9.1100, 7.4030)]),
+    ("Nairobi", "Kenya", 1.0, [("Westlands", -1.2676, 36.8108), ("Kilimani", -1.2921, 36.7856), ("Karen", -1.3197, 36.7073), ("Lavington", -1.2786, 36.7700)]),
+    ("Johannesburg", "South Africa", 1.1, [("Sandton", -26.1076, 28.0567), ("Rosebank", -26.1452, 28.0436), ("Melrose", -26.1350, 28.0640), ("Bryanston", -26.0550, 28.0230)]),
     ("Cape Town", "South Africa", 1.35, [("Sea Point", -33.9180, 18.3870), ("Camps Bay", -33.9510, 18.3780), ("Gardens", -33.9350, 18.4110), ("Constantia", -34.0270, 18.4450)]),
-    ("Kigali", "Rwanda", 0.8, [("Kiyovu", -1.9500, 30.0620), ("Kacyiru", -1.9380, 30.0890), ("Nyarutarama", -1.9410, 30.1090), ("Kimihurura", -1.9530, 30.0930)]),
+    ("Accra", "Ghana", 1.05, [("East Legon", 5.6350, -0.1610), ("Airport Residential", 5.6030, -0.1780), ("Cantonments", 5.5786, -0.1736), ("Osu", 5.5560, -0.1820)]),
     ("Addis Ababa", "Ethiopia", 0.75, [("Bole", 8.9960, 38.7890), ("Kazanchis", 9.0160, 38.7690), ("Old Airport", 8.9880, 38.7380), ("CMC", 9.0220, 38.8380)]),
-    ("Cairo", "Egypt", 0.85, [("Zamalek", 30.0609, 31.2197), ("Maadi", 29.9602, 31.2569), ("Heliopolis", 30.0911, 31.3220), ("New Cairo", 30.0300, 31.4700)]),
-    ("Kampala", "Uganda", 0.7, [("Kololo", 0.3326, 32.5925), ("Naguru", 0.3460, 32.6070), ("Muyenga", 0.2960, 32.6150), ("Bugolobi", 0.3170, 32.6170)]),
+    ("Dakar", "Senegal", 1.0, [("Almadies", 14.7450, -17.5130), ("Plateau", 14.6680, -17.4380), ("Mermoz", 14.7090, -17.4760), ("Ngor", 14.7470, -17.5150)]),
+    ("Kinshasa", "DR Congo", 0.8, [("Gombe", -4.3050, 15.3050), ("Ngaliema", -4.3550, 15.2500), ("Limete", -4.3600, 15.3400), ("Ma Campagne", -4.3500, 15.2700)]),
+    ("Mogadishu", "Somalia", 0.6, [("Hodan", 2.0370, 45.3070), ("Wadajir", 2.0130, 45.2950), ("Hamarweyne", 2.0350, 45.3450), ("Waberi", 2.0270, 45.3200)]),
+    ("Khartoum", "Sudan", 0.55, [("Riyadh", 15.5700, 32.5700), ("Amarat", 15.5800, 32.5450), ("Khartoum 2", 15.5850, 32.5350), ("Manshiya", 15.5950, 32.5800)]),
 ]
+LISTINGS_PER_CITY = 7
 
 AMENITIES = [
     "Swimming pool", "Gym", "Parking", "Garden", "Balcony", "24-hour security", "Backup generator",
@@ -137,7 +141,7 @@ class Command(BaseCommand):
 
         agency = AgencyTeam.objects.create(
             owner=users["agency"], name="Meridian Homes", city="Nairobi", country="Kenya",
-            description="A pan-African agency with offices in Nairobi, Kigali and Kampala.",
+            description="A pan-African agency with offices in Lagos, Nairobi and Johannesburg.",
             verification_status=VerificationStatus.VERIFIED,
         )
         AgentProfile.objects.create(user=users["agent"], license_number="EARB-2291", years_experience=8,
@@ -159,12 +163,12 @@ class Command(BaseCommand):
             ("Nairobi", 0): ("seller", "sale", ListingStatus.PUBLISHED),
             ("Lagos", 0): ("seller", "sale", ListingStatus.DRAFT),
             ("Nairobi", 1): ("landlord", "rent", ListingStatus.PUBLISHED),
-            ("Kampala", 0): ("landlord", "rent", ListingStatus.PUBLISHED),
-            ("Kigali", 0): ("landlord", "rent", ListingStatus.DRAFT),
+            ("Accra", 0): ("landlord", "rent", ListingStatus.PUBLISHED),
+            ("Dakar", 0): ("landlord", "rent", ListingStatus.DRAFT),
         }
         created = 0
         for city, country, mult, hoods in CITIES:
-            for i in range(8):
+            for i in range(LISTINGS_PER_CITY):
                 owner_key, purpose, status = fixed.get((city, i), (None, None, ListingStatus.PUBLISHED))
                 if owner_key is None:
                     owner_key = pro_owners[(created + i) % len(pro_owners)]

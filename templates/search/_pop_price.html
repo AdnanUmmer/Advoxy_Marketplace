@@ -1,0 +1,11 @@
+{% load i18n %}
+<div class="grid grid-cols-2 gap-3">
+  <div>
+    <label class="field-label text-xs" for="{{ prefix }}price_min">{% blocktranslate with c=CURRENCY_CODE %}Minimum ({{ c }}){% endblocktranslate %}</label>
+    <input id="{{ prefix }}price_min" name="price_min" type="number" min="0" step="1" inputmode="numeric" value="{{ form.price_min.value|default:'' }}" class="field-input py-2.5" placeholder="0">
+  </div>
+  <div>
+    <label class="field-label text-xs" for="{{ prefix }}price_max">{% blocktranslate with c=CURRENCY_CODE %}Maximum ({{ c }}){% endblocktranslate %}</label>
+    <input id="{{ prefix }}price_max" name="price_max" type="number" min="0" step="1" inputmode="numeric" value="{{ form.price_max.value|default:'' }}" class="field-input py-2.5" placeholder="{% translate 'Any' %}">
+  </div>
+</div>

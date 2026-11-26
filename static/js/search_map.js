@@ -11,7 +11,7 @@
 
   const STYLE = "mapbox://styles/mapbox/light-v11";
   const AFRICA = [[-20, -36], [55, 38]];
-  let map, draw, markers = new Map(), popup, userMoved = false, programmaticMove = false;
+  let map, draw, markers = new Map(), popup, userMoved = false;
 
   const $ = (sel) => document.querySelector(sel);
   const form = () => $("#search-form");
@@ -63,7 +63,6 @@
       bounds.extend([p.lng, p.lat]);
     });
     if (fit && pins.length) {
-      programmaticMove = true;
       map.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 0 });
     }
   }
@@ -110,8 +109,9 @@
 
     // "Search this area" after the user pans or zooms.
     const areaBtn = $("#search-area-btn");
-    map.on("moveend", () => {
-      if (programmaticMove) { programmaticMove = false; return; }
+    map.on("moveend", (e) => {
+      // Only moves the user made (drag, scroll, zoom buttons) carry an originalEvent.
+      if (!e.originalEvent) return;
       userMoved = true;
       areaBtn.hidden = false;
     });
@@ -126,11 +126,12 @@
     // Distance filter measures from the map centre.
     $("#id_radius").addEventListener("change", (e) => {
       const c = map.getCenter();
-      $("#id_near").value = e.target.value ? c.lat.toFixed(5) + "," + c.lng.toFixed(5) : "";
+      const visible = el.offsetWidth > 0;
+      $("#id_near").value = e.target.value && visible ? c.lat.toFixed(5) + "," + c.lng.toFixed(5) : "";
     }, true);
 
     document.body.addEventListener("htmx:afterSwap", (e) => {
-      if (e.detail.target.id !== "results") return;
+      if (e.detail.target.id !== "results" || !el.offsetWidth) return;
       renderPins(!userMoved && !$("#id_area").value);
       wireCardHover();
       areaBtn.hidden = true;
@@ -142,7 +143,14 @@
     const el = document.getElementById("search-map");
     if (!tokenEl || !el || typeof mapboxgl === "undefined") return;
     mapboxgl.accessToken = tokenEl.dataset.mapboxToken;
-    init(el);
+    // The map is created the first time it becomes visible (list view is the default).
+    const ensure = () => {
+      if (!el.offsetWidth) return;
+      if (!map) init(el);
+      else { map.resize(); renderPins(!userMoved && !$("#id_area").value); wireCardHover(); }
+    };
+    ensure();
+    window.addEventListener("advoxy:map-shown", () => requestAnimationFrame(ensure));
     // Clearing the area also clears the drawing.
     document.body.addEventListener("click", (e) => { if (e.target.closest("[data-clear-area]")) draw && draw.deleteAll(); });
   });

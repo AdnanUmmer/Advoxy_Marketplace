@@ -2,6 +2,8 @@
 {% load i18n static %}
 {% block title %}{% if summary %}{{ summary }}{% else %}{% translate "Search homes" %}{% endif %}{% endblock %}
 {% block head %}
+{# Not deferred: must register its Alpine component before Alpine starts. #}
+<script src="{% static 'js/filters.js' %}"></script>
 {% if mapbox_token %}
 <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.css">
 <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.5.0/mapbox-gl-draw.css">
@@ -14,67 +16,59 @@
 {% block footer %}{% endblock %}
 
 {% block content %}
-<div x-data="{ view: 'list', more: false }" class="relative">
-  {# Filter bar ---------------------------------------------------------- #}
+<div x-data="searchView({{ mapbox_token|yesno:'true,false' }})" @resize.window.debounce.150ms="measure()">
+
+  {# ---------------------------------------------------------------- Filter bar #}
   <form id="search-form" method="get" action="{% url 'search:results' %}" role="search" aria-label="{% translate 'Search filters' %}"
-        hx-get="{% url 'search:results' %}" hx-target="#results" hx-push-url="true" hx-trigger="change delay:150ms, submit"
-        hx-indicator="#results" class="z-30 border-b hairline bg-paper/95 backdrop-blur lg:sticky lg:top-[72px]">
-    <div class="flex flex-wrap items-end gap-2 px-5 py-3 sm:px-8">
-      <div class="w-[130px]">
-        <label class="sr-only" for="id_purpose">{{ form.purpose.label }}</label>
-        <select name="purpose" id="id_purpose" class="field-input py-2.5">
-          {% for value, label in form.fields.purpose.choices %}<option value="{{ value }}" {% if form.purpose.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
-        </select>
+        hx-get="{% url 'search:results' %}" hx-target="#results" hx-push-url="true" hx-trigger="change delay:200ms, submit"
+        hx-indicator="#results" x-data="filterLabels" class="z-30 border-b hairline bg-paper/95 backdrop-blur lg:sticky lg:top-[72px]"
+        data-l-beds="{% translate 'beds' %}" data-l-baths="{% translate 'baths' %}" data-l-from="{% translate 'From' %}"
+        data-l-up-to="{% translate 'Up to' %}" data-l-sym="{{ CURRENCY_SYMBOL }}" data-l-types="{% translate 'types' %}">
+    <div class="mx-auto flex max-w-[1400px] flex-wrap items-center gap-2 px-5 pt-3 sm:px-8">
+      <div class="seg" role="radiogroup" aria-label="{{ form.purpose.label }}">
+        <label class="seg-option"><input type="radio" name="purpose" value="sale" class="sr-only" {% if form.purpose.value == "sale" %}checked{% endif %}>{% translate "Buy" %}</label>
+        <label class="seg-option"><input type="radio" name="purpose" value="rent" class="sr-only" {% if form.purpose.value == "rent" %}checked{% endif %}>{% translate "Rent" %}</label>
+        <label class="seg-option"><input type="radio" name="purpose" value="" class="sr-only" {% if not form.purpose.value %}checked{% endif %}>{% translate "All" %}</label>
       </div>
-      <div class="min-w-[170px] flex-1 sm:max-w-[240px]">
+      <div class="relative min-w-[200px] flex-[2]">
+        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-primary">{% include "partials/icon.html" with name="pin" size=18 %}</span>
         <label class="sr-only" for="id_city">{{ form.city.label }}</label>
-        <input id="id_city" name="city" value="{{ form.city.value|default:'' }}" class="field-input py-2.5" placeholder="{% translate 'City' %}" list="city-options" autocomplete="off">
+        <input id="id_city" name="city" value="{{ form.city.value|default:'' }}" class="field-input h-11 py-0 pl-10" placeholder="{% translate 'City, e.g. Lagos' %}" list="city-options" autocomplete="off">
       </div>
-      <div class="flex items-center gap-1">
-        <label class="sr-only" for="id_price_min">{{ form.price_min.label }}</label>
-        <input id="id_price_min" name="price_min" type="number" min="0" step="1" inputmode="numeric" value="{{ form.price_min.value|default:'' }}" class="field-input w-[120px] py-2.5" placeholder="{% translate 'Min price' %}">
-        <span class="text-muted" aria-hidden="true">–</span>
-        <label class="sr-only" for="id_price_max">{{ form.price_max.label }}</label>
-        <input id="id_price_max" name="price_max" type="number" min="0" step="1" inputmode="numeric" value="{{ form.price_max.value|default:'' }}" class="field-input w-[120px] py-2.5" placeholder="{% translate 'Max price' %}">
-      </div>
-      <div class="w-[110px]">
-        <label class="sr-only" for="id_beds">{{ form.beds.label }}</label>
-        <select name="beds" id="id_beds" class="field-input py-2.5">
-          {% for value, label in form.fields.beds.choices %}<option value="{{ value }}" {% if form.beds.value == value %}selected{% endif %}>{% if value %}{{ label }} {% translate "beds" %}{% else %}{% translate "Beds" %}{% endif %}</option>{% endfor %}
-        </select>
-      </div>
-      <button type="button" class="btn btn-quiet py-2.5" @click="more = !more" :aria-expanded="more.toString()" aria-controls="more-filters">
-        {% translate "More filters" %}{% if active_more %} <span class="badge badge-neutral">{{ active_more }}</span>{% endif %}
+      <div class="min-w-[150px] flex-1">{% translate "Property type" as l %}{% include "search/_filter_popover.html" with label=l summary_js="typeLabel()" body="search/_pop_type.html" %}</div>
+      <div class="min-w-[150px] flex-1">{% translate "Beds & baths" as l %}{% include "search/_filter_popover.html" with label=l summary_js="bedsLabel()" body="search/_pop_beds.html" %}</div>
+      <div class="min-w-[150px] flex-1">{% blocktranslate asvar l with c=CURRENCY_CODE %}Price ({{ c }}){% endblocktranslate %}{% include "search/_filter_popover.html" with label=l summary_js="priceLabel()" body="search/_pop_price.html" prefix="s_" panel_class="w-[320px]" %}</div>
+      <button type="button" class="filter-btn w-auto gap-2" @click="more = !more" :aria-expanded="more.toString()" aria-controls="more-filters">
+        {% include "partials/icon.html" with name="sliders" size=16 %}{% translate "More filters" %}{% if active_more %}<span class="badge badge-neutral">{{ active_more }}</span>{% endif %}
       </button>
-      <div class="ml-auto w-[190px]">
-        <label class="sr-only" for="id_sort">{{ form.sort.label }}</label>
-        <select name="sort" id="id_sort" class="field-input py-2.5">
-          {% for value, label in form.fields.sort.choices %}<option value="{{ value }}" {% if form.sort.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
-        </select>
-      </div>
       <noscript><button class="btn btn-primary" type="submit">{% translate "Search" %}</button></noscript>
     </div>
 
-    {# More filters panel #}
+    <div class="mx-auto flex max-w-[1400px] flex-wrap items-center gap-2 px-5 py-2.5 sm:px-8">
+      <div class="flex gap-1.5" role="radiogroup" aria-label="{{ form.furnished.label }}">
+        {% for value, label in form.fields.furnished.choices %}
+        <label class="pill-option py-1 text-[0.85rem]"><input type="radio" name="furnished" value="{{ value }}" class="sr-only" {% if form.furnished.value|default:"" == value %}checked{% endif %}>{% if value %}{{ label }}{% else %}{% translate "All" %}{% endif %}</label>
+        {% endfor %}
+      </div>
+      <div class="ml-auto flex items-center gap-2">
+        <label class="sr-only" for="id_sort">{{ form.sort.label }}</label>
+        <select name="sort" id="id_sort" class="field-input h-9 w-auto py-0 pr-8 text-sm">
+          {% for value, label in form.fields.sort.choices %}<option value="{{ value }}" {% if form.sort.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        {% if mapbox_token %}
+        <div class="seg hidden lg:inline-flex" role="group" aria-label="{% translate 'View' %}">
+          <button type="button" class="seg-option flex items-center gap-1.5" :class="view === 'list' && 'is-active'" @click="setView('list')" :aria-pressed="(view === 'list').toString()">{% include "partials/icon.html" with name="list" size=15 %}{% translate "List" %}</button>
+          <button type="button" class="seg-option flex items-center gap-1.5" :class="view !== 'list' && 'is-active'" @click="setView('map')" :aria-pressed="(view !== 'list').toString()">{% include "partials/icon.html" with name="map" size=15 %}{% translate "Map" %}</button>
+        </div>
+        {% endif %}
+        <a class="hidden text-sm font-semibold text-primary hover:underline sm:inline" href="{% url 'search:results' %}">{% translate "Clear filters" %}</a>
+      </div>
+    </div>
+
+    {# More filters #}
     <div id="more-filters" x-cloak x-show="more" x-transition.opacity @keydown.escape="more = false" class="border-t hairline bg-surface">
-      <div class="grid gap-6 px-5 py-6 sm:px-8 md:grid-cols-2 xl:grid-cols-4">
-        <fieldset>
-          <legend class="field-label">{{ form.type.label }}</legend>
-          <div class="flex flex-wrap gap-2">{% for box in form.type %}<label class="choice-pill">{{ box.tag }} {{ box.choice_label }}</label>{% endfor %}</div>
-        </fieldset>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="field-label" for="id_baths">{{ form.baths.label }}</label>
-            <select name="baths" id="id_baths" class="field-input">
-              {% for value, label in form.fields.baths.choices %}<option value="{{ value }}" {% if form.baths.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
-            </select>
-          </div>
-          <div>
-            <label class="field-label" for="id_furnished">{{ form.furnished.label }}</label>
-            <select name="furnished" id="id_furnished" class="field-input">
-              {% for value, label in form.fields.furnished.choices %}<option value="{{ value }}" {% if form.furnished.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
-            </select>
-          </div>
+      <div class="mx-auto grid max-w-[1400px] gap-6 px-5 py-6 sm:px-8 md:grid-cols-3">
+        <div class="grid grid-cols-2 gap-3 self-start">
           <div>
             <label class="field-label" for="id_area_min">{{ form.area_min.label }}</label>
             <input id="id_area_min" name="area_min" type="number" min="0" value="{{ form.area_min.value|default:'' }}" class="field-input">
@@ -94,16 +88,19 @@
             <select name="radius" id="id_radius" class="field-input" aria-describedby="radius-help">
               {% for value, label in form.fields.radius.choices %}<option value="{{ value }}" {% if form.radius.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
             </select>
-            <p id="radius-help" class="field-help">{% if mapbox_token %}{% translate "Measured from the map centre." %}{% else %}{% translate "Measured from the centre of the city you chose." %}{% endif %}</p>
+            <p id="radius-help" class="field-help">{% if mapbox_token %}{% translate "Measured from the map centre when the map is open, otherwise from the city centre." %}{% else %}{% translate "Measured from the centre of the city you chose." %}{% endif %}</p>
           </div>
         </div>
         <fieldset>
           <legend class="field-label">{{ form.amenities.label }}</legend>
-          <div class="flex max-h-[190px] flex-wrap gap-2 overflow-y-auto">{% for box in form.amenities %}<label class="choice-pill">{{ box.tag }} {{ box.choice_label }}</label>{% endfor %}</div>
+          <div class="flex max-h-[200px] flex-wrap gap-2 overflow-y-auto">
+            {% for value, label in form.fields.amenities.choices %}
+            <label class="pill-option"><input type="checkbox" name="amenities" value="{{ value }}" class="sr-only" {% if value in form.amenities.value %}checked{% endif %}>{{ label }}</label>
+            {% endfor %}
+          </div>
         </fieldset>
       </div>
-      <div class="flex flex-wrap justify-between gap-3 border-t hairline px-5 py-3 sm:px-8">
-        <a class="btn-link text-sm" href="{% url 'search:results' %}">{% translate "Clear all filters" %}</a>
+      <div class="mx-auto flex max-w-[1400px] justify-end border-t hairline px-5 py-3 sm:px-8">
         <button type="button" class="btn btn-primary" @click="more = false">{% translate "Show results" %}</button>
       </div>
     </div>
@@ -112,21 +109,30 @@
   </form>
   <datalist id="city-options">{% for c in cities %}<option value="{{ c }}">{% endfor %}</datalist>
 
-  {# Split view ----------------------------------------------------------- #}
-  <div class="{% if mapbox_token %}lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,46%)]{% endif %}">
-    <div id="results" class="min-w-0 px-5 pb-24 pt-6 sm:px-8 [&.htmx-request]:opacity-60 transition-opacity" :class="view === 'map' && 'hidden lg:block'" aria-live="polite">
+  {# ---------------------------------------------------------------- Results + map #}
+  <div :class="view === 'list' ? 'mx-auto max-w-[1400px]' : 'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,48%)]'">
+    <div id="results" class="min-w-0 px-5 pb-24 pt-6 transition-opacity sm:px-8 [&.htmx-request]:opacity-60"
+         x-show="view === 'list' || (view === 'map' && wide)" aria-live="polite">
       {% include "search/_results.html" %}
     </div>
+
     {% if mapbox_token %}
-    <div class="relative lg:sticky lg:top-[143px] lg:h-[calc(100vh-143px)]" :class="view === 'list' ? 'hidden lg:block' : 'block h-[78svh]'">
+    <div x-cloak x-show="view !== 'list'" class="max-lg:fixed max-lg:inset-x-0 max-lg:z-20 lg:relative lg:sticky" :class="view === 'full' && 'lg:col-span-2'"
+         :style="`top: ${barBottom}px; height: calc(100vh - ${barBottom}px)`">
       <div id="search-map" class="h-full w-full bg-sand" role="region" aria-label="{% translate 'Map of results' %}"></div>
-      <div class="pointer-events-none absolute inset-x-0 top-4 flex justify-center">
+      <div class="pointer-events-none absolute inset-x-0 top-3 flex justify-center">
         <button type="button" id="search-area-btn" hidden class="btn btn-primary pointer-events-auto shadow-lg">{% translate "Search this area" %}</button>
       </div>
+      <div class="absolute bottom-8 left-3 hidden flex-col gap-2 lg:flex">
+        <button type="button" class="btn btn-quiet bg-surface px-3.5 py-2 text-sm shadow-md" x-show="view === 'map'" @click="setView('full')">{% include "partials/icon.html" with name="expand" size=15 %}{% translate "Expand map" %}</button>
+        <button type="button" class="btn btn-quiet bg-surface px-3.5 py-2 text-sm shadow-md" x-show="view === 'full'" x-cloak @click="setView('map')">{% include "partials/icon.html" with name="collapse" size=15 %}{% translate "Show listings" %}</button>
+      </div>
     </div>
+    {# Phone: one button switches between list and map #}
     <div class="fixed bottom-5 left-1/2 z-30 -translate-x-1/2 lg:hidden">
-      <button type="button" class="btn btn-primary shadow-lg" @click="view = view === 'list' ? 'map' : 'list'; $nextTick(() => window.dispatchEvent(new Event('resize')))">
-        <span x-show="view === 'list'">{% translate "Show map" %}</span><span x-show="view === 'map'" x-cloak>{% translate "Show list" %}</span>
+      <button type="button" class="btn btn-primary shadow-lg" @click="setView(view === 'list' ? 'map' : 'list')">
+        <span x-show="view === 'list'" class="flex items-center gap-2">{% include "partials/icon.html" with name="map" %}{% translate "Show map" %}</span>
+        <span x-show="view !== 'list'" x-cloak class="flex items-center gap-2">{% include "partials/icon.html" with name="list" %}{% translate "Show list" %}</span>
       </button>
     </div>
     {% endif %}
@@ -136,6 +142,28 @@
 
 {% block scripts %}
 <script>
+  // Page layout: list (default), map (listings left, map right) or full (map only).
+  document.addEventListener("alpine:init", () => {
+    Alpine.data("searchView", (hasMap) => ({
+      view: "list", more: false, wide: window.matchMedia("(min-width: 1024px)").matches, barBottom: 190,
+      init() {
+        let saved = null;
+        try { saved = localStorage.getItem("advoxy.searchView"); } catch (e) {}
+        if (hasMap && this.wide && ["map", "full"].includes(saved)) this.setView(saved, false);
+        this.$nextTick(() => this.measure());
+      },
+      measure() {
+        this.wide = window.matchMedia("(min-width: 1024px)").matches;
+        this.barBottom = this.wide ? Math.round(72 + document.getElementById("search-form").offsetHeight) : 72;
+      },
+      setView(v, remember = true) {
+        this.view = v;
+        if (remember) { try { localStorage.setItem("advoxy.searchView", v); } catch (e) {} }
+        this.$nextTick(() => { this.measure(); window.dispatchEvent(new CustomEvent("advoxy:map-shown", { detail: { view: v } })); });
+        if (v !== "list") window.scrollTo({ top: 0 });
+      },
+    }));
+  });
   // Clearing a map area works with or without the map.
   document.body.addEventListener("click", function (e) {
     if (!e.target.closest("[data-clear-area]")) return;

@@ -54,3 +54,13 @@ A real public token is now in `.env`. The search map, listing-form pin picker an
 SPEC asks for a daily digest but not when.
 **Default:** 06:00 UTC daily (morning across most of Africa). One email per user covering all their saved searches, only listings published since the last digest, up to 6 per search with a "see all" link.
 
+## Q15. Call and WhatsApp buttons on listing cards
+Bayut's cards have Email, Call and WhatsApp buttons. SPEC only covers the inquiry form and in-app messaging, and showing phone numbers raises privacy questions.
+**Default:** cards show one **Contact** button that opens the listing's contact section (inquiry form arrives in milestone 4). Tell me if you want Call / WhatsApp buttons (phone number shown only if the owner or agent opts in).
+
+## Q16. Look and feel changes (decided, Nov 26)
+On the owner's request: switched to a single sans-serif font (Plus Jakarta Sans, set in `config/brand.py` + `static/brand/theme.css`); search results use detail-rich horizontal cards like Bayut; the search page opens as a list, with a List/Map toggle (listings left, map right) and an "Expand map" full-width view; the home hero has Buy/Rent, location, Property type, Beds & baths and Price dropdowns. Seed data and city lists focus on priority markets in this order (setting `PRIORITY_COUNTRIES`): Nigeria, Kenya, South Africa, Ghana, Ethiopia, Senegal, DR Congo, Somalia, Sudan. Bayut's "Yearly rent" and "Ready / Off-plan" options are not included because the data model has monthly rent only and no completion status; say if you want them.
+
+## Q17. Real photos for demo listings
+Placeholder images are generated drawings. Real building photos are possible at modest cost if they come from a free-to-use source (for example Unsplash, whose license allows this use). **Waiting for your go-ahead.**
+

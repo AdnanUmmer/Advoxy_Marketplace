@@ -1,0 +1,14 @@
+{% load i18n %}
+{# Save-search control. `compact` renders a small header button. #}
+{% if user.is_authenticated %}
+  {% if already_saved %}
+    <a class="btn btn-quiet text-sm {% if not compact %}w-full{% endif %}" href="{% url 'search:saved' %}">✓ {% translate "Search saved" %}</a>
+  {% else %}
+    <form method="post" action="{% url 'search:saved_create' %}">{% csrf_token %}
+      <input type="hidden" name="query" value="{{ querystring }}">
+      <button class="btn {% if compact %}btn-quiet{% else %}btn-primary w-full{% endif %} text-sm" type="submit">{% translate "Save search" %}</button>
+    </form>
+  {% endif %}
+{% else %}
+  <a class="btn {% if compact %}btn-quiet{% else %}btn-primary w-full{% endif %} text-sm" href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}">{% if compact %}{% translate "Save search" %}{% else %}{% translate "Sign in to get alerts" %}{% endif %}</a>
+{% endif %}

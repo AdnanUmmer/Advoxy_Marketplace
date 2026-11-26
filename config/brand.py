@@ -12,11 +12,7 @@ BRAND = {
     "logo_mark": "brand/mark.svg",     # square mark, used for favicon and compact headers
     "favicon": "brand/mark.svg",
     # Web fonts. Family names must match --brand-font-* in theme.css.
-    "fonts_url": (
-        "https://fonts.googleapis.com/css2?"
-        "family=Fraunces:opsz,wght@9..144,300..600&"
-        "family=Instrument+Sans:wght@400..600&display=swap"
-    ),
+    "fonts_url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap",
     "support_email": "hello@example.com",
     "legal_name": "Advoxy Ltd.",
 }

@@ -231,3 +231,37 @@ def test_digest_skips_disabled_and_unverified(catalogue, make_user, make_listing
 def test_htmx_pushes_clean_url(client, catalogue):
     response = client.get(URL, {"city": "Lagos", "beds": "", "sort": "featured", "area": ""}, HTTP_HX_REQUEST="true")
     assert response["HX-Push-Url"] == "/search/?city=Lagos"
+
+
+# --- layout and priority markets ---------------------------------------------------------
+def test_popular_cities_follow_priority_countries(make_user, make_listing, settings):
+    from apps.listings.markets import popular_cities
+
+    settings.PRIORITY_COUNTRIES = ["Nigeria", "Kenya"]
+    owner = make_user(is_agent=True)
+    for _ in range(3):
+        make_listing(owner, city="Cairo", country="Egypt")  # biggest, but not a priority market
+    make_listing(owner, city="Nairobi", country="Kenya")
+    make_listing(owner, city="Lagos", country="Nigeria")
+    assert [c["city"] for c in popular_cities()] == ["Lagos", "Nairobi", "Cairo"]
+
+
+@pytest.mark.parametrize("params, heading", [
+    ({"purpose": "rent", "city": "lagos"}, "Properties for rent in Lagos"),
+    ({"purpose": "sale"}, "Properties for sale"),
+    ({}, "Properties across Africa"),
+])
+def test_search_heading(client, catalogue, params, heading):
+    assert client.get(URL, params).context["heading"] == heading
+
+
+def test_result_cards_show_full_details(client, catalogue):
+    html = client.get(URL, {"city": "Nairobi", "type": "villa"}).content.decode()
+    for text in ("Karen villa", "$900,000", "Villa", "5 beds", "4 baths", "420 m²", "Karen, Nairobi, Kenya", "Swimming pool", "#contact"):
+        assert text in html, text
+
+
+def test_home_hero_has_bayut_style_filters(client, catalogue):
+    html = client.get("/").content.decode()
+    for text in ("Property type", "Beds & baths", "Price (USD)", 'name="beds"', 'name="price_max"', 'name="type"'):
+        assert text in html, text

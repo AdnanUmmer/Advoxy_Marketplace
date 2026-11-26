@@ -106,7 +106,7 @@ class SearchForm(forms.Form):
         return data
 
 
-MORE_FILTER_FIELDS = ("type", "baths", "furnished", "area_min", "area_max", "neighborhood", "radius", "amenities")
+MORE_FILTER_FIELDS = ("area_min", "area_max", "neighborhood", "radius", "amenities")
 
 
 def count_more_filters(data):
@@ -209,6 +209,24 @@ def describe(form):
     if d.get("radius"):
         parts.append(str(_("within %(km)s km") % {"km": d["radius"]}))
     return " · ".join(parts)[:120]
+
+
+def heading(form):
+    """Page heading such as 'Properties for rent in Lagos'."""
+    d = getattr(form, "cleaned_data", {}) or {}
+    place = d.get("neighborhood") or ""
+    if d.get("city"):
+        city = d["city"].strip()
+        city = city.title() if city.islower() else city
+        place = f"{place.title()}, {city}" if place else city
+    if not place and d.get("area"):
+        place = str(_("the map area"))
+    purpose = d.get("purpose")
+    if purpose == Purpose.RENT:
+        return str(_("Properties for rent in %(place)s") % {"place": place}) if place else str(_("Properties for rent"))
+    if purpose == Purpose.SALE:
+        return str(_("Properties for sale in %(place)s") % {"place": place}) if place else str(_("Properties for sale"))
+    return str(_("Properties in %(place)s") % {"place": place}) if place else str(_("Properties across Africa"))
 
 
 def clean_querystring(query):

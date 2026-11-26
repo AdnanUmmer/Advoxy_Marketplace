@@ -1,0 +1,12 @@
+{# Dropdown button + panel for the filter bar. Usage: {% include "search/_filter_popover.html" with label=... summary_js=... body=template %} #}
+{% load i18n %}
+<div class="relative" x-data="{ open: false }" @click.outside="open = false" @keydown.escape.stop="open = false">
+  <button type="button" class="filter-btn" @click="open = !open" :aria-expanded="open.toString()" :class="open && 'is-open'">
+    <span class="truncate" x-text="{{ summary_js }} || '{{ label|escapejs }}'">{{ label }}</span>
+    {% include "partials/icon.html" with name="chevron" size=16 %}
+  </button>
+  <div x-cloak x-show="open" x-transition.opacity.duration.100ms class="filter-popover {{ panel_class|default:'w-[300px]' }}" role="group" aria-label="{{ label }}">
+    {% include body %}
+    <div class="mt-4 flex justify-end"><button type="button" class="btn btn-primary px-4 py-2 text-sm" @click="open = false">{% translate "Done" %}</button></div>
+  </div>
+</div>

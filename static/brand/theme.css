@@ -28,8 +28,8 @@
   --brand-info: #2b5c84;
 
   /* Type */
-  --brand-font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
-  --brand-font-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --brand-font-display: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  --brand-font-body: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
 
   /* Shape */
   --brand-radius: 14px;

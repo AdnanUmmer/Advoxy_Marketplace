@@ -29,7 +29,7 @@ bash scripts/dev_setup_ubuntu.sh        # Postgres 16 + PostGIS, Redis, GDAL, Py
 source ~/.venvs/advoxy/bin/activate
 python manage.py migrate
 python manage.py build_css              # Tailwind standalone CLI, no Node needed
-python manage.py seed_demo              # demo accounts + 64 listings (add --reset to recreate)
+python manage.py seed_demo              # demo accounts + 77 listings (add --reset to recreate)
 python manage.py runserver 0.0.0.0:8000
 ```
 

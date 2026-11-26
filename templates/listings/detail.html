@@ -108,7 +108,7 @@
 
     {# Contact card --------------------------------------------------- #}
     <aside class="lg:sticky lg:top-24 lg:self-start">
-      <section class="panel panel-pad" aria-labelledby="contact-h">
+      <section id="contact" class="panel panel-pad scroll-mt-28" aria-labelledby="contact-h">
         <div class="flex items-center gap-4">
           {% if listing.owner.profile.avatar %}
             <img src="{{ listing.owner.profile.avatar.url }}" alt="" class="h-14 w-14 rounded-full object-cover">
@@ -140,7 +140,7 @@
       <p class="eyebrow">{% translate "You might also like" %}</p>
       <h2 id="similar-h" class="display-md mt-2">{% translate "Similar homes" %}</h2>
     </div>
-    <div class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {% for s in similar %}{% include "partials/listing_card.html" with listing=s %}{% endfor %}
     </div>
   </section>
