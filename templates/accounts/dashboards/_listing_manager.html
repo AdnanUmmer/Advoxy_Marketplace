@@ -20,7 +20,7 @@
     <li class="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center">
       <a href="{% url 'listings:edit' listing.pk %}" class="flex min-w-0 flex-1 items-center gap-4 group">
         <span class="h-16 w-20 shrink-0 overflow-hidden rounded-brand-sm bg-sand">
-          {% with cover=listing.cover %}{% if cover %}<img src="{{ cover.image.url }}" alt="" class="h-full w-full object-cover" loading="lazy" width="80" height="64">{% endif %}{% endwith %}
+          {% with cover=listing.cover %}{% if cover %}<img src="{{ cover.thumb_url }}" alt="" class="h-full w-full object-cover" loading="lazy" width="80" height="64">{% endif %}{% endwith %}
         </span>
         <span class="min-w-0">
           <span class="block truncate font-medium group-hover:underline">{{ listing.title }}</span>

@@ -6,7 +6,7 @@
     <a href="{{ t.get_absolute_url }}" class="flex gap-3 px-5 py-3.5 transition-colors hover:bg-paper {% if t.pk == active_id %}bg-paper{% endif %}"
        {% if t.pk == active_id %}aria-current="page"{% endif %}>
       <span class="h-12 w-14 shrink-0 overflow-hidden rounded-brand-sm bg-sand">
-        {% with cover=t.listing.cover %}{% if cover %}<img src="{{ cover.image.url }}" alt="" class="h-full w-full object-cover" loading="lazy" width="56" height="48">{% endif %}{% endwith %}
+        {% with cover=t.listing.cover %}{% if cover %}<img src="{{ cover.thumb_url }}" alt="" class="h-full w-full object-cover" loading="lazy" width="56" height="48">{% endif %}{% endwith %}
       </span>
       <span class="min-w-0 flex-1">
         <span class="flex items-baseline justify-between gap-2">

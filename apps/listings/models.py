@@ -123,11 +123,60 @@ class ListingLocation(models.Model):
 class ListingPhoto(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="photos")
     image = models.ImageField(_("photo"), upload_to="listings/%Y/%m/")
+    # Smaller copy for cards, rows and tables (performance pass, milestone 8). Made on save.
+    thumbnail = models.ImageField(upload_to="listings/thumbs/%Y/%m/", blank=True, editable=False)
     alt_text = models.CharField(_("description for screen readers"), max_length=200, blank=True)
     position = models.PositiveSmallIntegerField(default=0)
+
+    THUMB_EDGE = 800
 
     class Meta:
         ordering = ["position", "id"]
 
     def __str__(self):
         return f"Photo {self.position} of {self.listing_id}"
+
+    @property
+    def thumb_url(self):
+        return self.thumbnail.url if self.thumbnail else self.image.url
+
+    def make_thumbnail(self):
+        """Create the thumbnail from the main image. Returns False if the image can't be read."""
+        from io import BytesIO
+        from pathlib import PurePath
+
+        from django.core.files.base import ContentFile
+        from PIL import Image, UnidentifiedImageError
+
+        try:
+            self.image.open("rb")
+            with Image.open(self.image) as img:
+                img = img.convert("RGB")
+                img.thumbnail((self.THUMB_EDGE, self.THUMB_EDGE), Image.LANCZOS)
+                buf = BytesIO()
+                img.save(buf, "JPEG", quality=78, optimize=True, progressive=True)
+        except (FileNotFoundError, UnidentifiedImageError, OSError, ValueError):
+            return False
+        finally:
+            try:
+                self.image.close()
+            except Exception:  # noqa: BLE001 (closing a missing file)
+                pass
+        self.thumbnail.save(f"{PurePath(self.image.name).stem}.jpg", ContentFile(buf.getvalue()), save=False)
+        return True
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.thumbnail:
+            self.make_thumbnail()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        thumb = self.thumbnail.name if self.thumbnail else None
+        result = super().delete(*args, **kwargs)
+        # Demo photos share thumbnails; remove the file only when nothing else uses it.
+        if thumb and not ListingPhoto.objects.filter(thumbnail=thumb).exists():
+            from django.db import transaction
+
+            storage = self.thumbnail.storage
+            transaction.on_commit(lambda: storage.delete(thumb))
+        return result

@@ -22,7 +22,7 @@
     {% for photo in photos %}
     <li class="group relative overflow-hidden rounded-brand-sm border hairline bg-surface" data-id="{{ photo.pk }}"
         draggable="true" @dragstart="dragging = $el" @dragover.prevent @drop.prevent="drop($el)">
-      <img src="{{ photo.image.url }}" alt="{{ photo.alt_text }}" class="aspect-[4/3] w-full cursor-grab object-cover" loading="lazy" width="400" height="300">
+      <img src="{{ photo.thumb_url }}" alt="{{ photo.alt_text }}" class="aspect-[4/3] w-full cursor-grab object-cover" loading="lazy" width="400" height="300">
       {% if forloop.first %}<span class="badge badge-featured absolute left-2 top-2">{% translate "Cover" %}</span>{% endif %}
       <div class="flex items-center justify-between gap-1 px-2 py-1.5 text-xs">
         <span class="text-muted">{{ forloop.counter }}</span>

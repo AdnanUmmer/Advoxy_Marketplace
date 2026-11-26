@@ -37,7 +37,7 @@
     <button type="button" @click="show({{ forloop.counter0 }})"
             class="group relative overflow-hidden bg-sand {{ layout }} {% if forloop.first %}aspect-[4/3] rounded-brand sm:aspect-auto{% else %}hidden rounded-brand-sm sm:block{% endif %}"
             aria-label="{% blocktranslate with n=forloop.counter total=photos|length %}Open photo {{ n }} of {{ total }}{% endblocktranslate %}">
-      <img src="{{ photo.image.url }}" alt="{{ photo.alt_text|default:listing.title }}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+      <img src="{% if forloop.first %}{{ photo.image.url }}{% else %}{{ photo.thumb_url }}{% endif %}" alt="{{ photo.alt_text|default:listing.title }}" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
            {% if not forloop.first %}loading="lazy"{% endif %} width="1200" height="900">
       {% if forloop.counter == 5 and photos|length > 5 %}
         <span class="absolute inset-0 grid place-items-center bg-ink/45 font-medium text-paper">+{{ photos|length|add:"-5" }} {% translate "photos" %}</span>

@@ -269,7 +269,7 @@ def map_point(listing):
         "price": short_price(listing.price),
         "title": listing.title,
         "url": listing.get_absolute_url(),
-        "photo": cover.image.url if cover else "",
+        "photo": cover.thumb_url if cover else "",
         "beds": listing.bedrooms,
         "baths": listing.bathrooms,
         "featured": listing.is_featured,

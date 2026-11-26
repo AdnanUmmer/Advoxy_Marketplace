@@ -5,7 +5,7 @@
   <a href="{{ listing.get_absolute_url }}" class="block">
     <div class="relative aspect-[16/10] overflow-hidden bg-sand">
       {% with cover=listing.cover %}{% if cover %}
-        <img src="{{ cover.image.url }}" alt="{{ cover.alt_text|default:listing.title }}" loading="lazy" width="640" height="400" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]">
+        <img src="{{ cover.thumb_url }}" alt="{{ cover.alt_text|default:listing.title }}" loading="lazy" width="640" height="400" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]">
       {% endif %}{% endwith %}
       <div class="absolute left-2.5 top-2.5 flex gap-1.5">
         {% if listing.is_featured %}<span class="badge badge-featured">{% translate "Featured" %}</span>{% endif %}

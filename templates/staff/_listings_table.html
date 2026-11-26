@@ -41,7 +41,7 @@
           <td><input type="checkbox" class="check" name="ids" value="{{ l.pk }}" data-row-id x-model="selected" aria-label="{% blocktranslate with t=l.title %}Select {{ t }}{% endblocktranslate %}"></td>
           <td class="min-w-[260px]">
             <div class="flex items-center gap-3">
-              <span class="h-10 w-14 shrink-0 overflow-hidden rounded-[6px] bg-sand">{% with c=l.cover %}{% if c %}<img src="{{ c.image.url }}" alt="" class="h-full w-full object-cover" loading="lazy" width="56" height="40">{% endif %}{% endwith %}</span>
+              <span class="h-10 w-14 shrink-0 overflow-hidden rounded-[6px] bg-sand">{% with c=l.cover %}{% if c %}<img src="{{ c.thumb_url }}" alt="" class="h-full w-full object-cover" loading="lazy" width="56" height="40">{% endif %}{% endwith %}</span>
               <span class="min-w-0">
                 <a class="line-clamp-1 font-semibold hover:text-primary hover:underline" href="{{ l.get_absolute_url }}" target="_blank" rel="noopener">{{ l.title }}</a>
                 <span class="text-xs text-muted">#{{ l.pk }} · {{ l.get_purpose_display }} · {{ l.get_property_type_display }}{% if l.is_featured %} · <span class="font-semibold text-gold">★ {% translate "Featured" %}</span>{% endif %}</span>

@@ -6,6 +6,7 @@
   <p class="eyebrow">{% translate "Your shortlist" %}</p>
   <h1 class="display-md mt-2">{% translate "Saved homes" %}</h1>
   {% if listings %}
+  <h2 class="sr-only">{% translate "Your saved homes" %}</h2>
   <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     {% for listing in listings %}{% include "partials/listing_card.html" with listing=listing %}{% endfor %}
   </div>

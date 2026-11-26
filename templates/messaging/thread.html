@@ -12,7 +12,7 @@
     <p class="truncate text-xs text-muted">{% if is_owner %}{% translate "Interested in your listing" %}{% else %}{% if other.is_agent %}{% translate "Agent" %}{% else %}{% translate "Listing owner" %}{% endif %}{% endif %}</p>
   </div>
   <a href="{{ thread.listing.get_absolute_url }}" class="hidden max-w-[280px] items-center gap-2.5 rounded-brand-sm border hairline p-1.5 pr-3 hover:border-stone sm:flex">
-    <span class="h-10 w-12 shrink-0 overflow-hidden rounded-[6px] bg-sand">{% with cover=thread.listing.cover %}{% if cover %}<img src="{{ cover.image.url }}" alt="" class="h-full w-full object-cover" width="48" height="40">{% endif %}{% endwith %}</span>
+    <span class="h-10 w-12 shrink-0 overflow-hidden rounded-[6px] bg-sand">{% with cover=thread.listing.cover %}{% if cover %}<img src="{{ cover.thumb_url }}" alt="" class="h-full w-full object-cover" width="48" height="40">{% endif %}{% endwith %}</span>
     <span class="min-w-0 leading-tight">
       <span class="block truncate text-sm font-semibold">{{ thread.listing.title }}</span>
       <span class="block text-xs text-muted">{{ thread.listing.price|money }} {{ thread.listing|price_suffix }}</span>

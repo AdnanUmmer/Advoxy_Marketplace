@@ -18,6 +18,7 @@
     {% endif %}
 
     {% if page.object_list %}
+    <h2 class="sr-only">{% translate "Results" %}</h2>
     <div class="mt-5 space-y-4">
       {% for listing in page.object_list %}{% include "partials/listing_row.html" with listing=listing %}{% endfor %}
     </div>

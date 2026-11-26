@@ -191,7 +191,7 @@
     @apply flex items-center gap-3 rounded-brand-sm px-3 py-2 text-[0.92rem] font-medium text-muted transition-colors hover:bg-sand/60 hover:text-ink;
   }
   .admin-nav-link.is-active { @apply bg-sand text-ink; }
-  .admin-count { @apply ml-auto rounded-full bg-accent px-2 py-0.5 text-[0.7rem] font-bold text-white; }
+  .admin-count { @apply ml-auto rounded-full bg-accent px-2 py-0.5 text-[0.7rem] font-bold text-paper; }
   .stat-tile { @apply rounded-brand border border-sand bg-surface p-5; }
   .stat-label { @apply text-xs font-semibold uppercase tracking-wider text-muted; }
   .stat-value { @apply mt-2 text-[1.9rem] font-extrabold leading-none tracking-tight text-ink; }
@@ -204,5 +204,15 @@
   .data-table tbody tr.is-selected td { background: color-mix(in srgb, var(--brand-primary) 9%, transparent); }
   .chart-bar { @apply flex-1 rounded-t-[4px] bg-primary transition-opacity; min-height: 2px; }
   .chart-col:hover .chart-bar, .chart-col:focus-visible .chart-bar { opacity: 0.8; }
+}
+
+/* Respect "reduce motion" system settings (accessibility pass, milestone 8). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 

@@ -7,7 +7,7 @@
   <div class="relative aspect-[4/3] overflow-hidden bg-sand sm:aspect-auto sm:min-h-[230px]">
     <a href="{{ listing.get_absolute_url }}" class="block h-full" tabindex="-1" aria-hidden="true">
       {% for photo in photos|slice:":6" %}
-        <img src="{{ photo.image.url }}" alt="" width="640" height="480" class="absolute inset-0 h-full w-full object-cover"
+        <img src="{{ photo.thumb_url }}" alt="" width="640" height="480" loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-cover"
              {% if not forloop.first %}loading="lazy" x-cloak x-show="i === {{ forloop.counter0 }}"{% else %}x-show="i === 0"{% endif %}>
       {% endfor %}
     </a>

@@ -50,7 +50,7 @@
         <button type="button" class="admin-nav-link w-full"
                 @click="theme = theme === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', theme); try { localStorage.setItem('advoxy.adminTheme', theme) } catch (e) {}">
           <span x-text="theme === 'dark' ? '☀' : '☾'" aria-hidden="true" class="w-4 text-center"></span>
-          <span x-text="theme === 'dark' ? '{% translate "Light mode" %}' : '{% translate "Dark mode" %}'"></span>
+          <span x-text="theme === 'dark' ? '{% translate "Light mode" %}' : '{% translate "Dark mode" %}'">{% translate "Switch theme" %}</span>
         </button>
         <a class="admin-nav-link" href="{% url 'core:home' %}">{% include "partials/icon.html" with name="expand" %}{% translate "View site" %}</a>
         {% if user.is_superuser %}<a class="admin-nav-link" href="{% url 'admin:index' %}">{% include "partials/icon.html" with name="list" %}{% translate "Database admin" %}</a>{% endif %}

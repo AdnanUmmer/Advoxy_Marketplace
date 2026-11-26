@@ -37,10 +37,10 @@
           {% with photos=l.photos.all %}
           {% if photos %}
           <a href="{{ photos.0.image.url }}" target="_blank" rel="noopener" class="block aspect-[4/3] overflow-hidden">
-            <img src="{{ photos.0.image.url }}" alt="{{ photos.0.alt_text }}" class="h-full w-full object-cover" loading="lazy" width="340" height="255"></a>
+            <img src="{{ photos.0.thumb_url }}" alt="{{ photos.0.alt_text }}" class="h-full w-full object-cover" loading="lazy" width="340" height="255"></a>
           {% if photos|length > 1 %}
           <div class="flex gap-0.5 overflow-x-auto p-0.5">
-            {% for p in photos|slice:"1:8" %}<a href="{{ p.image.url }}" target="_blank" rel="noopener" class="block h-14 w-20 shrink-0 overflow-hidden"><img src="{{ p.image.url }}" alt="{{ p.alt_text }}" class="h-full w-full object-cover" loading="lazy" width="80" height="56"></a>{% endfor %}
+            {% for p in photos|slice:"1:8" %}<a href="{{ p.image.url }}" target="_blank" rel="noopener" class="block h-14 w-20 shrink-0 overflow-hidden"><img src="{{ p.thumb_url }}" alt="{{ p.alt_text }}" class="h-full w-full object-cover" loading="lazy" width="80" height="56"></a>{% endfor %}
           </div>
           {% endif %}
           {% else %}

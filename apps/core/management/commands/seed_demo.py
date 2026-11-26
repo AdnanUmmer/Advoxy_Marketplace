@@ -177,6 +177,27 @@ class Command(BaseCommand):
             pool["interior"].append(name)
         return pool
 
+    def _pool_thumbnail(self, name):
+        """One shared thumbnail per pool image (made once, reused by every listing that uses it)."""
+        cache = self.__dict__.setdefault("_thumbs", {})
+        if name not in cache:
+            thumb = f"seed/thumbs/{Path(name).stem}.jpg"
+            path = Path(settings.MEDIA_ROOT) / thumb
+            if not path.exists():
+                from io import BytesIO
+
+                from PIL import Image
+
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with Image.open(Path(settings.MEDIA_ROOT) / name) as img:
+                    img = img.convert("RGB")
+                    img.thumbnail((ListingPhoto.THUMB_EDGE, ListingPhoto.THUMB_EDGE), Image.LANCZOS)
+                    buf = BytesIO()
+                    img.save(buf, "JPEG", quality=78, optimize=True, progressive=True)
+                path.write_bytes(buf.getvalue())
+            cache[name] = thumb
+        return cache[name]
+
     def _amenities(self):
         return [Amenity.objects.get_or_create(slug=slugify(n), defaults={"name": n})[0] for n in AMENITIES]
 
@@ -297,6 +318,7 @@ class Command(BaseCommand):
                 for pos, name in enumerate(photos):
                     photo = ListingPhoto(listing=listing, position=pos, alt_text=f"{title}, photo {pos + 1}")
                     photo.image.name = name
+                    photo.thumbnail.name = self._pool_thumbnail(name)
                     photo.save()
                 created += 1
         return created
