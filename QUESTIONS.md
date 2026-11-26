@@ -96,3 +96,9 @@ Done, see Q6. The home page hero image is a brand setting (`BRAND["hero_image"]`
 - **Directory order:** verified first, then the most live listings. Suspended accounts are hidden.
 - **Agency owners can't edit their agents' listings** yet; tell me if they should.
 
+## Q22. Google sign-in defaults (added on request after milestone 7)
+- **Linking by email:** a Google sign-in with the same (Google-verified) email as an existing account signs into that account and links it. If that account had never verified its email, its password is switched off (someone else may have registered the address); the owner can set a new one with "Forgot your password?".
+- **New people** choose their roles and accept the terms on one short page; no password is needed (they can add one later via password reset).
+- **Staff accounts** can't use Google; they keep the staff sign-in.
+- **No extra library:** the ID token comes straight from Google's token endpoint in exchange for a one-time code plus PKCE, so its claims are checked without downloading Google's keys. Tell me if you want full signature checks with the `google-auth` package instead.
+

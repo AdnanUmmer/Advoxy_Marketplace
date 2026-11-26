@@ -19,6 +19,7 @@ def site(request):
         "DEMO_MODE": settings.DEMO_MODE,
         "CURRENCY_CODE": settings.CURRENCY_CODE,
         "CURRENCY_SYMBOL": settings.CURRENCY_SYMBOL,
+        "GOOGLE_SIGNIN": bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET),
         # Evaluated only when a template asks (listing cards' heart buttons).
         "favorite_ids": SimpleLazyObject(lambda: _favorite_ids(user)) if user else frozenset(),
     }

@@ -191,6 +191,10 @@ LISTING_PHOTO_MAX_EDGE = 2000  # px; larger uploads are downscaled
 # Third-party keys (used in later milestones; always from the environment)
 # ---------------------------------------------------------------------------
 MAPBOX_TOKEN = env("MAPBOX_TOKEN", default="")
+# Sign in with Google: OAuth client from Google Cloud console. The button hides when unset.
+GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", default="")
+GOOGLE_CLIENT_SECRET = env("GOOGLE_CLIENT_SECRET", default="")
+
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
 STRIPE_PUBLISHABLE_KEY = env("STRIPE_PUBLISHABLE_KEY", default="")
 STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET", default="")

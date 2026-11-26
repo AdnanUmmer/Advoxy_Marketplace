@@ -237,6 +237,26 @@ def private_storage():
     return PrivateStorage()
 
 
+class SocialAccount(models.Model):
+    """A sign-in identity from an outside provider (Google) linked to a user."""
+
+    GOOGLE = "google"
+    PROVIDERS = [(GOOGLE, "Google")]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="social_accounts")
+    provider = models.CharField(max_length=20, choices=PROVIDERS)
+    uid = models.CharField(_("provider user id"), max_length=255)
+    email = models.EmailField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_login_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["provider", "uid"], name="unique_social_identity")]
+
+    def __str__(self):
+        return f"{self.get_provider_display()}: {self.email}"
+
+
 class VerificationDocument(models.Model):
     """License document uploaded by an agent or agency for admin review."""
 

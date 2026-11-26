@@ -1,7 +1,7 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
-from . import views
+from . import google, views
 
 app_name = "accounts"
 
@@ -16,6 +16,9 @@ urlpatterns = [
     path("password/reset/sent/", views.PasswordResetDoneView.as_view(), name="password_reset_done"),
     path("password/reset/<uidb64>/<token>/", views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
     path("password/reset/complete/", views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
+    path("google/", google.start, name="google_start"),
+    path("google/callback/", google.callback, name="google_callback"),
+    path("google/finish/", google.finish, name="google_finish"),
     path("dashboard/", views.dashboard, name="dashboard"),
     path("profile/", views.profile_edit, name="profile"),
     path("verification/upload/", views.verification_upload, name="verification_upload"),

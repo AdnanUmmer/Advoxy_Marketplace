@@ -58,6 +58,16 @@ stripe listen --forward-to localhost:8000/billing/webhook/stripe/
 
 Then copy the printed `whsec_…` secret into `STRIPE_WEBHOOK_SECRET`. Production webhook setup is in QUESTIONS.md (Q20).
 
+### Sign in with Google (optional)
+
+The Google button appears on the sign-in and sign-up pages once both keys are set:
+
+1. In [Google Cloud console](https://console.cloud.google.com/apis/credentials), create a project, set up the **OAuth consent screen** (External, app name, support email, scopes `openid`, `email`, `profile`).
+2. **Create credentials > OAuth client ID > Web application**. Add the authorized redirect URIs `http://localhost:8001/accounts/google/callback/` (local) and `https://YOUR-DOMAIN/accounts/google/callback/` (production).
+3. Put the client ID and secret in `.env` as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, then restart the server.
+
+People who sign in with Google for the first time pick their roles and accept the terms; their email counts as verified. Google sign-ins link to an existing account with the same email. Staff accounts always use the staff sign-in.
+
 ## Configuration
 
 | What | Where |

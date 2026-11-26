@@ -4,7 +4,7 @@ The staff-facing admin dashboard is a custom app (milestone 5)."""
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import AgencyTeam, AgentProfile, Profile, User, VerificationDocument
+from .models import AgencyTeam, AgentProfile, Profile, SocialAccount, User, VerificationDocument
 
 
 @admin.register(User)
@@ -26,3 +26,4 @@ admin.site.register(Profile)
 admin.site.register(AgencyTeam)
 admin.site.register(AgentProfile)
 admin.site.register(VerificationDocument)
+admin.site.register(SocialAccount)

@@ -98,6 +98,10 @@ Payments run in **Stripe test mode**: use card `4242 4242 4242 4242`, any future
 5. **Joining**: sign in as the independent **agent**, then as the agency invite `agent@demo.example.com`. The agent's dashboard shows the invitation; accepting moves them and their listings under Meridian Homes. **Leave agency** on the dashboard undoes it.
 6. **Edit profile** (dashboard link, `/accounts/profile/`): name, phone, city, bio and photo for everyone; licence, specialities and experience for agents; name, logo, description and contact for agencies. Photos are re-encoded so location data is removed.
 
+## Sign in with Google
+
+Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (README, "Sign in with Google") and restart. **Sign in with Google** on `/accounts/login/` or **Sign up with Google** on `/accounts/signup/`. A new Google user lands on "Finish signing up" to choose roles; an existing email is linked and signed straight in.
+
 ## Recorded walkthrough
 
 A scripted shot list for the recorded walkthrough is added in milestone 8 (see QUESTIONS.md, Q7).
